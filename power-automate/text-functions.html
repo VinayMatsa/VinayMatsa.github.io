@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text functions: split, substring, replace | Vinay Matsa</title>
+<meta name="description" content="Cut, search, clean and rebuild text: email addresses, invoice numbers, names and lists.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Text functions: split, substring, replace">
+<meta property="og:description" content="Cut, search, clean and rebuild text: email addresses, invoice numbers, names and lists.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 2</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 2 · Working with data · 5 of 7</li>
+      </ul>
+      <h1>Text functions: split, substring, replace</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Text arrives messy: lists in one cell, codes with parts you need, extra spaces, inconsistent capitals. Six functions handle most of it.</p>
+
+<h2 id="results">All results in one view</h2>
+<figure class="shot"><img src="../assets/img/pa/l2-text-results.webp" alt="Results JSON: Split into array Contoso, Fabrikam, Northwind; User name alex.johnson; Domain contoso.com; Invoice year 2026; Invoice number 0042; Replace text Order 101 is on time; Clean and upper CONTOSO LTD; Capitalise name Alex" width="514" height="264" loading="lazy">
+<figcaption>Each line is one function applied to sample text.</figcaption></figure>
+
+<h2 id="split">split: text into a list</h2>
+<pre><code>first(split(&#x27;alex.johnson@contoso.com&#x27;, &#x27;@&#x27;))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>split(text, &#x27;@&#x27;)</code></td><td>Cuts the text at every @, giving <em>["alex.johnson", "contoso.com"]</em>.</td></tr><tr><td><code>first(...)</code></td><td>The part before the @: <em>alex.johnson</em>. Use <code>last()</code> for the domain.</td></tr></tbody></table></div>
+<p>The same idea turns <em>Contoso; Fabrikam; Northwind</em> into a three-item list with <code>split(text, '; ')</code>. Include the space in the separator, or every item after the first starts with one.</p>
+
+<h2 id="parts">Taking part of the text</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody>
+<tr><td><code>substring('INV-2026-0042', 4, 4)</code></td><td>2026: start at position 4, take 4 characters</td></tr>
+<tr><td><code>slice('INV-2026-0042', -4)</code></td><td>0042: the last 4 characters</td></tr>
+<tr><td><code>indexOf('INV-2026-0042', '-')</code></td><td>3: where the first dash is</td></tr>
+<tr><td><code>replace('Order 101 is late', 'late', 'on time')</code></td><td>Order 101 is on time</td></tr>
+<tr><td><code>toUpper(trim('   contoso ltd  '))</code></td><td>CONTOSO LTD: spaces removed, then capitals</td></tr>
+</tbody></table></div>
+<div class="callout"><strong>Tip:</strong> <code>substring</code> fails if you ask for more characters than exist. <code>slice</code> just stops at the end, which makes it safer for text of unknown length.</div>
+
+<h2 id="capitalise">Capitalise a name</h2>
+<pre><code>concat(toUpper(substring(&#x27;alex&#x27;, 0, 1)), substring(&#x27;alex&#x27;, 1))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>substring(&#x27;alex&#x27;, 0, 1)</code></td><td>The first letter: <em>a</em>.</td></tr><tr><td><code>toUpper(...)</code></td><td>Made capital: <em>A</em>.</td></tr><tr><td><code>substring(&#x27;alex&#x27;, 1)</code></td><td>Everything from position 1: <em>lex</em>.</td></tr><tr><td><code>concat(...)</code></td><td>Joined back together: <em>Alex</em>.</td></tr></tbody></table></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>String</strong>: another word for text.</p>
+<p><strong>Position</strong>: characters are counted from 0. In <em>INV-2026</em>, I is 0 and the dash is 3.</p>
+<p><strong>Case-sensitive</strong>: <code>replace</code> and <code>indexOf</code> treat <em>Late</em> and <em>late</em> as different. Use <code>toLower()</code> on both sides when case should not matter.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Add a Compose <em>Email</em> with <em>alex.johnson@contoso.com</em>, then two Compose actions with <code>first(split(...))</code> and <code>last(split(...))</code>.</li><li>Add Compose actions for the invoice examples using <code>substring()</code> and <code>slice()</code>.</li><li>Add <code>replace()</code>, <code>trim()</code> + <code>toUpper()</code>, and the capitalise formula.</li><li>Test. Then change the email to one without an @ and see what <code>last(split())</code> returns (the whole text), and think about how you would guard against it.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Counting positions from 1. <code>substring(text, 1, 3)</code> skips the first character.</li>
+<li>Using <code>substring</code> with a fixed length on text that can be shorter. Check <code>length()</code> first or use <code>slice</code>.</li>
+<li>Splitting on <code>','</code> when the data has <code>', '</code>. Every item but the first keeps a leading space; wrap with <code>trim()</code> in a Select.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (string functions)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/expression-cookbook">Expression cookbook for cloud flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="dates-and-time-zones.html">← Dates, times and time zones</a><a href="handling-nulls.html">Handling nulls: coalesce, empty and ? →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#results">All results in one view</a></li><li><a href="#split">split: text into a list</a></li><li><a href="#parts">Taking part of the text</a></li><li><a href="#capitalise">Capitalise a name</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

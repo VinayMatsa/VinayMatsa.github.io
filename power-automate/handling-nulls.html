@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handling nulls: coalesce, empty and ? | Vinay Matsa</title>
+<meta name="description" content="Missing and empty values are the most common cause of failed runs. Three tools stop them.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Handling nulls: coalesce, empty and ?">
+<meta property="og:description" content="Missing and empty values are the most common cause of failed runs. Three tools stop them.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 2</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 2 · Working with data · 6 of 7</li>
+      </ul>
+      <h1>Handling nulls: coalesce, empty and ?</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Real data has gaps: a customer without a phone number, a form field left blank, a column that does not exist on older rows. A flow that assumes every value is there will fail on the first gap. This article shows the failure, then the three tools that prevent it.</p>
+
+<h2 id="failure">What the failure looks like</h2>
+<figure class="shot"><img src="../assets/img/pa/l2-null-failed-card.webp" alt="A failed action named Without question mark with the error InvalidTemplate: the expression outputs(&#x27;Customer&#x27;)[&#x27;email&#x27;][&#x27;domain&#x27;] cannot be evaluated because property &#x27;email&#x27; doesn&#x27;t exist, available properties are &#x27;name, phone, address&#x27;" width="400" height="395" loading="lazy">
+<figcaption>The customer record has no email field, so <code>outputs('Customer')['email']</code> stops the whole run.</figcaption></figure>
+<p>The message is helpful once you know how to read it: it names the expression, the missing property (<em>email</em>) and the fields that <em>do</em> exist (<em>name, phone, address</em>).</p>
+
+<h2 id="tools">The three tools</h2>
+<figure class="shot"><img src="../assets/img/pa/l2-nulls-results.webp" alt="Results JSON: Phone or default No phone on file; Is phone empty true; Missing field safely Email missing; Nested field safely No ZIP code" width="514" height="155" loading="lazy">
+<figcaption>The same record, read safely four ways. Every step succeeded.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Tool</th><th>Use it to</th></tr></thead><tbody>
+<tr><td><code>?['field']</code></td><td>Read a field that might not exist. Returns null instead of failing.</td></tr>
+<tr><td><code>coalesce(a, b, ...)</code></td><td>Return the first value that is not null: a default for missing data.</td></tr>
+<tr><td><code>empty(x)</code></td><td>Test for null, empty text <code>''</code>, an empty list or an empty object, all at once.</td></tr>
+</tbody></table></div>
+
+<pre><code>coalesce(outputs(&#x27;Customer&#x27;)?[&#x27;address&#x27;]?[&#x27;zip&#x27;], &#x27;No ZIP code&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[&#x27;address&#x27;]</code></td><td>Read address safely. It exists here.</td></tr><tr><td><code>?[&#x27;zip&#x27;]</code></td><td>Read zip safely. It does not exist, so this returns null instead of failing.</td></tr><tr><td><code>coalesce(..., &#x27;No ZIP code&#x27;)</code></td><td>Null, so the fallback text is used.</td></tr></tbody></table></div>
+<div class="callout"><strong>Rule:</strong> put a <code>?</code> before every <code>['field']</code> that reads data you did not create yourself. It costs nothing and removes a whole class of failures.</div>
+
+<h2 id="null-vs-empty">Null is not the same as empty</h2>
+<p>A phone field set to <code>null</code> and a phone field set to <code>''</code> look the same in an email, but <code>coalesce</code> only replaces null. If the source can send either, test with <code>empty()</code>:</p>
+<pre><code>if(empty(outputs('Customer')?['phone']), 'No phone on file', outputs('Customer')?['phone'])</code></pre>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Null</strong>: "no value at all". Different from 0, from <code>false</code> and from empty text.</p>
+<p><strong>InvalidTemplate</strong>: the error code for an expression that could not be calculated. Missing fields are its most common cause.</p>
+<p><strong>Fallback / default</strong>: the value you use when the real one is missing.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Add a Compose <em>Customer</em>: <code>{"name":"Contoso","phone":null,"address":{"city":"Seattle"}}</code>.</li><li>Add <code>coalesce(outputs('Customer')?['phone'], 'No phone on file')</code> and <code>empty(outputs('Customer')?['phone'])</code>.</li><li>Add the nested ZIP example above.</li><li>Add one more Compose <em>without</em> question marks: <code>outputs('Customer')['email']['domain']</code>.</li><li>Test. The last step fails with the error shown above. Add the <code>?</code> marks and test again: it succeeds and returns null.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Adding <code>?</code> only to the last field. <code>outputs('x')['a']?['b']</code> still fails if <em>a</em> is missing; every step needs it.</li>
+<li>Using <code>coalesce</code> for empty text. It only skips null; use <code>empty()</code> with <code>if()</code>.</li>
+<li>Hiding real problems: a default value is right for optional data, but a missing required value (an order without an id) should fail loudly or be reported.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference (ExpressionEvaluationFailed)</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (coalesce, empty, if)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/troubleshoot-flow-errors">Troubleshoot cloud flow errors</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="text-functions.html">← Text functions: split, substring, replace</a><a href="odata-filter-queries.html">OData filter queries →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#failure">What the failure looks like</a></li><li><a href="#tools">The three tools</a></li><li><a href="#null-vs-empty">Null is not the same as empty</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

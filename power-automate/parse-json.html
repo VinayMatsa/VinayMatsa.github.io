@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parse JSON and schemas | Vinay Matsa</title>
+<meta name="description" content="Turn JSON text into named fields you can pick from dynamic content, and know when you don't need it.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Parse JSON and schemas">
+<meta property="og:description" content="Turn JSON text into named fields you can pick from dynamic content, and know when you don't need it.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 2</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 2 · Working with data · 2 of 7</li>
+      </ul>
+      <h1>Parse JSON and schemas</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Data often arrives as JSON <em>text</em>: from an HTTP call, a Copilot Studio agent, a text column or a file. Power Automate cannot offer fields from text in the dynamic content list until it knows the shape. <strong>Parse JSON</strong> reads the text against a <strong>schema</strong> (a description of the shape) and gives you every field by name.</p>
+
+<h2 id="the-flow">The demo flow</h2>
+<figure class="shot"><img src="../assets/img/pa/l2-parse-json-inputs.webp" alt="Parse JSON run details: Content is a JSON text with a customer object and an items list, and the Schema table starts with type object and properties.customer.type object" width="505" height="425" loading="lazy">
+<figcaption>Content is the JSON text. Schema describes it: an object with a customer object and an items list.</figcaption></figure>
+<pre><code>{"customer":{"name":"Contoso","city":"Seattle"},
+ "items":[{"sku":"LAP-01","qty":2},{"sku":"MOU-07","qty":5}]}</code></pre>
+
+<h2 id="read">Reading the parsed fields</h2>
+<figure class="shot"><img src="../assets/img/pa/l2-customer-city.webp" alt="Customer city output: Seattle" width="505" height="240" loading="lazy">
+<figcaption><code>body('Parse_JSON')?['customer']?['city']</code> returns Seattle.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l2-first-sku.webp" alt="First item SKU output: LAP-01" width="505" height="240" loading="lazy">
+<figcaption><code>first(body('Parse_JSON')?['items'])?['sku']</code> returns LAP-01.</figcaption></figure>
+<pre><code>first(body(&#x27;Parse_JSON&#x27;)?[&#x27;items&#x27;])?[&#x27;sku&#x27;]</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>body(&#x27;Parse_JSON&#x27;)</code></td><td>The parsed object.</td></tr><tr><td><code>?[&#x27;items&#x27;]</code></td><td>The items list inside it.</td></tr><tr><td><code>first(...)</code></td><td>The first item of the list.</td></tr><tr><td><code>?[&#x27;sku&#x27;]</code></td><td>The sku field of that item: <em>LAP-01</em>.</td></tr></tbody></table></div>
+
+<h2 id="schema">Getting the schema</h2>
+<p>You rarely write a schema by hand. In Parse JSON select <strong>Use sample payload to generate schema</strong>, paste a real example, and Power Automate writes it. Then review two things:</p>
+<ul>
+<li><strong>required</strong>: the list of fields that must be present. If a real message is missing one, Parse JSON fails. Remove fields that are sometimes absent.</li>
+<li><strong>Nullable fields</strong>: a field that can be empty should allow null, for example <code>"type": ["string", "null"]</code>. Otherwise a null value fails validation.</li>
+</ul>
+
+<h2 id="without">When you don't need Parse JSON</h2>
+<p>The <code>json()</code> function converts text to an object inside any expression. The demo's last step returns <em>Contoso</em> with no Parse JSON at all:</p>
+<pre><code>json(outputs('Response_text'))?['customer']?['name']</code></pre>
+<p>Use Parse JSON when you want fields in the dynamic content list, or want the shape validated. Use <code>json()</code> for a one-off value in an expression.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>JSON text vs JSON object</strong>: the same characters can be plain text (a string) or a real object. Only an object lets you read fields with <code>?['name']</code>.</p>
+<p><strong>Schema</strong>: a description of the expected shape: which fields exist and what type each one is.</p>
+<p><strong>body('Parse_JSON')</strong>: the parsed result of the action named Parse JSON.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Add a Compose named <em>Response text</em> and paste the JSON above as plain text.</li><li>Add <strong>Parse JSON</strong>. Content: Outputs of Response text.</li><li>Select <strong>Use sample payload to generate schema</strong>, paste the same JSON and select Done.</li><li>Add a Compose with the dynamic content <em>city</em>; it appears under Parse JSON once the schema exists.</li><li>Add a Compose with <code>first(body('Parse_JSON')?['items'])?['sku']</code>.</li><li>Test the flow. Then delete <code>city</code> from the text, test again, and see how the schema reacts (it only fails if city is in <em>required</em>).</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Generating the schema from one sample and never checking <em>required</em>. The flow then fails the first time a field is missing.</li>
+<li>Parsing something that is already an object (such as the body of most connector actions). You can read its fields directly.</li>
+<li>Selecting an array field from dynamic content and getting a surprise loop. Power Automate wraps the step in Apply to each when you pick a field inside a list.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/data-operations">Use data operations (includes Parse JSON)</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (json, first)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="select-filter-join.html">← Select, Filter array and Join</a><a href="arrays-and-objects.html">Arrays and objects: first, last, union, intersection →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#the-flow">The demo flow</a></li><li><a href="#read">Reading the parsed fields</a></li><li><a href="#schema">Getting the schema</a></li><li><a href="#without">When you don't need Parse JSON</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

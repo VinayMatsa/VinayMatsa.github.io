@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Select, Filter array and Join | Vinay Matsa</title>
+<meta name="description" content="Reshape a list without a loop: keep the rows you want, keep the columns you want, then turn it into text.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Select, Filter array and Join">
+<meta property="og:description" content="Reshape a list without a loop: keep the rows you want, keep the columns you want, then turn it into text.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 2</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 2 · Working with data · 1 of 7</li>
+      </ul>
+      <h1>Select, Filter array and Join</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Beginners loop over a list with <strong>Apply to each</strong> to do almost anything. Three data operations do most of that work in one step each, and much faster: <strong>Filter array</strong> keeps the rows you want, <strong>Select</strong> keeps or renames the columns you want, and <strong>Join</strong> turns a list into one line of text.</p>
+
+<h2 id="the-flow">The demo flow</h2>
+<figure class="shot"><img src="../assets/img/pa/l2-select-canvas.webp" alt="A run of the flow: Orders, Filter open orders, Select columns, Select as text, Join with comma and Create HTML table, all succeeded" width="400" height="416" loading="lazy">
+<figcaption>Six steps, no loop. Each step takes the previous step's list and reshapes it.</figcaption></figure>
+<p>The starting list has five orders. Each has an <code>id</code>, <code>customer</code>, <code>amount</code> and <code>status</code> (Open or Closed).</p>
+
+<h2 id="filter">Filter array: keep the rows you want</h2>
+<figure class="shot"><img src="../assets/img/pa/l2-filter-output.webp" alt="Raw output of Filter open orders: three orders, 101 Contoso, 103 Northwind and 104 Tailspin, all with status Open" width="514" height="370" loading="lazy">
+<figcaption>Five orders go in; the three with status Open come out. Use Show raw outputs to see the result as JSON.</figcaption></figure>
+<pre><code>@equals(item()?[&#x27;status&#x27;], &#x27;Open&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>item()</code></td><td>The row being checked. Filter array tests every row, one at a time.</td></tr><tr><td><code>?[&#x27;status&#x27;]</code></td><td>Reads the status field of that row.</td></tr><tr><td><code>equals(..., &#x27;Open&#x27;)</code></td><td>True keeps the row; false drops it. Text comparison is case-sensitive.</td></tr></tbody></table></div>
+<p>In the designer you can build the same rule with the three boxes (value, operator, value). Switch to <strong>Edit in advanced mode</strong> when you need <code>and</code> / <code>or</code>.</p>
+
+<h2 id="select">Select: keep or rename the columns</h2>
+<figure class="shot"><img src="../assets/img/pa/l2-select-output.webp" alt="Raw output of Select columns: three objects with only Order, Customer and Amount" width="514" height="336" loading="lazy">
+<figcaption>Select maps every row to a new shape. Here status is dropped and id is renamed to Order.</figcaption></figure>
+<p>Select has two modes. In <strong>key/value mode</strong> each row becomes an object with the keys you type. Switch to <strong>text mode</strong> (the small toggle on the Map box) and each row becomes one value instead, which is what Join needs:</p>
+<pre><code>@concat(item()?[&#x27;customer&#x27;], &#x27; (&#x27;, string(item()?[&#x27;amount&#x27;]), &#x27;)&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>item()?[&#x27;customer&#x27;]</code></td><td>The customer name of the current row.</td></tr><tr><td><code>string(item()?[&#x27;amount&#x27;])</code></td><td>The amount as text, so it can be joined.</td></tr><tr><td><code>concat(...)</code></td><td>Builds one line per row, for example <em>Contoso (250)</em>.</td></tr></tbody></table></div>
+
+<h2 id="join">Join: a list into one line of text</h2>
+<figure class="shot"><img src="../assets/img/pa/l2-join-output.webp" alt="Join with comma: input is a three-item list, the Join with value is a comma and space, and the output is Contoso (250), Northwind (80), Tailspin (430)" width="505" height="425" loading="lazy">
+<figcaption>Join puts the separator between items, never after the last one.</figcaption></figure>
+<p>The last step, <strong>Create HTML table</strong>, takes the Select output and makes an HTML table you can drop into an email body. It uses the keys (Order, Customer, Amount) as column headers.</p>
+<div class="callout"><strong>Tip:</strong> Filter, then Select, then Join or Create HTML table is one of the most useful patterns in Power Automate. It replaces a loop with an append-to-string variable, and runs in a fraction of the time.</div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Array</strong>: a list. In JSON it is wrapped in square brackets <code>[ ]</code>.</p>
+<p><strong>Row and column</strong>: when a list holds objects, each object is a row and each field (id, customer) is a column.</p>
+<p><strong>item()</strong>: inside Filter array and Select, the row currently being processed. Outside them it has no meaning.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Create an instant flow and add a Compose named <em>Orders</em>. Paste a JSON array of five orders with id, customer, amount and status.</li><li>Add <strong>Filter array</strong> (Data Operation). From: <em>Outputs</em> of Orders. Condition: <code>item()?['status']</code> is equal to <em>Open</em>.</li><li>Add <strong>Select</strong>. From: <em>Body</em> of Filter array. Map three keys: Order = <code>item()?['id']</code>, Customer = <code>item()?['customer']</code>, Amount = <code>item()?['amount']</code>.</li><li>Add a second Select, switch the Map to text mode and enter the concat expression above.</li><li>Add <strong>Join</strong>. From: the second Select's Body. Join with: a comma and a space.</li><li>Add <strong>Create HTML table</strong>. From: the first Select's Body. Columns: Automatic.</li><li>Test, then open each step and use <strong>Show raw outputs</strong> to see the list change shape.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Using <code>items('Apply_to_each')</code> inside Filter array or Select. These actions use <code>item()</code>, without the s and without a name.</li>
+<li>Filtering a list that came from a connector with Filter array when the connector itself can filter. Filtering at the source (see the OData article) moves less data.</li>
+<li>Expecting Join to accept a list of objects. It needs a list of simple values, so Select in text mode first.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/data-operations">Use data operations</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/use-data-operations">Work with data operations (guidance)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/expression-cookbook">Expression cookbook for cloud flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="./">← All Power Automate topics</a><a href="parse-json.html">Parse JSON and schemas →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#the-flow">The demo flow</a></li><li><a href="#filter">Filter array: keep the rows you want</a></li><li><a href="#select">Select: keep or rename the columns</a></li><li><a href="#join">Join: a list into one line of text</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

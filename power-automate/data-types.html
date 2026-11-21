@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data types and conversions | Vinay Matsa</title>
+<meta name="description" content="Text, numbers, yes/no, arrays and objects: what each looks like and how to convert between them.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Data types and conversions">
+<meta property="og:description" content="Text, numbers, yes/no, arrays and objects: what each looks like and how to convert between them.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 1</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 1 · Foundations · 4 of 7</li>
+      </ul>
+      <h1>Data types and conversions</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Every value in a flow has a type. Most errors that beginners hit, such as <em>"expected Integer but got String"</em>, are type errors. Learn the six types and the handful of functions that convert between them, and these errors become easy to fix.</p>
+
+<h2 id="six-types">The six types, with examples</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Type</th><th>Example value</th><th>Looks like</th></tr></thead><tbody>
+<tr><td>String (text)</td><td>Product</td><td><code>"Laptop"</code></td></tr>
+<tr><td>Integer</td><td>Quantity</td><td><code>3</code></td></tr>
+<tr><td>Float (decimal)</td><td>Unit price</td><td><code>49.99</code></td></tr>
+<tr><td>Boolean</td><td>In stock</td><td><code>true</code></td></tr>
+<tr><td>Array (list)</td><td>Tags</td><td><code>["hardware","office"]</code></td></tr>
+<tr><td>Object (record)</td><td>Order</td><td><code>{"id":101,"customer":"Contoso"}</code></td></tr>
+</tbody></table></div>
+
+<h2 id="convert">Converting between types</h2>
+<figure class="shot"><img src="../assets/img/pa/order-as-text.webp" alt="Run results showing the Order object converted to the text {&quot;id&quot;:101,&quot;customer&quot;:&quot;Contoso&quot;}" width="900" height="401" loading="lazy">
+<figcaption><code>string(variables('Order'))</code> turns an object into JSON text, for example to put in an email.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Function</th><th>Does</th></tr></thead><tbody>
+<tr><td><code>string(x)</code></td><td>Any value to text</td></tr>
+<tr><td><code>int('3')</code> / <code>float('49.99')</code></td><td>Text to a number</td></tr>
+<tr><td><code>bool('true')</code></td><td>Text to yes/no</td></tr>
+<tr><td><code>json('{"id":1}')</code></td><td>JSON text back to an object or array</td></tr>
+<tr><td><code>createArray(1, 2, 3)</code></td><td>Builds an array from values</td></tr>
+<tr><td><code>base64(x)</code> / <code>base64ToString(x)</code></td><td>Text to Base64 and back; used for file content</td></tr>
+</tbody></table></div>
+
+<h2 id="read-object">Reading a field from an object</h2>
+<pre><code>variables(&#x27;Order&#x27;)?[&#x27;customer&#x27;]</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>variables(&#x27;Order&#x27;)</code></td><td>The whole object: <code>{"id":101,"customer":"Contoso"}</code>.</td></tr><tr><td><code>?[&#x27;customer&#x27;]</code></td><td>Reads one field by name, returning <em>Contoso</em>. Returns null instead of failing if the field is missing.</td></tr></tbody></table></div>
+<p>Maths works the same way: <code>mul(variables('Quantity'), variables('Unit price'))</code> multiplies 3 by 49.99. Decimal maths can show tiny rounding extras, so format money for display with <code>formatNumber(value, 'N2')</code>.</p>
+
+<h2 id="base64">Base64: why files look strange</h2>
+<figure class="shot"><img src="../assets/img/pa/text-to-base64.webp" alt="Run results showing Hello Contoso converted to the Base64 text SGVsbG8gQ29udG9zbw==" width="900" height="401" loading="lazy">
+<figcaption><code>base64('Hello Contoso')</code> returns <code>SGVsbG8gQ29udG9zbw==</code>. File content often travels this way.</figcaption></figure>
+<p>When an action returns file content, it is usually wrapped as an object with <code>$content-type</code> and <code>$content</code> (Base64). You rarely decode it yourself; pass it straight to the action that saves or sends the file.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>JSON</strong>: the text format flows use to show data. Curly brackets <code>{ }</code> hold an object, square brackets <code>[ ]</code> hold an array, and text is in double quotes.</p>
+<p><strong>Null</strong>: "no value at all". It is different from an empty string <code>''</code>. Use <code>empty()</code> to test for both.</p>
+<p><strong>Why types matter</strong>: a number stored as text sorts as text ("10" comes before "9") and cannot be added. Convert first.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Create an instant flow named <em>Data Types</em>.</li><li>Add six <strong>Initialize variable</strong> actions: Product (String, Laptop), Quantity (Integer, 3), Unit price (Float, 49.99), In stock (Boolean, true), Tags (Array, <code>["hardware","office"]</code>), Order (Object, <code>{"id":101,"customer":"Contoso"}</code>).</li><li>Add Compose <em>Order total</em>: <code>mul(variables('Quantity'), variables('Unit price'))</code>.</li><li>Add Compose <em>Order as text</em>: <code>string(variables('Order'))</code>.</li><li>Add Compose <em>Customer</em>: <code>variables('Order')?['customer']</code>.</li><li>Add Compose <em>Text to Base64</em>: <code>base64('Hello Contoso')</code>, then <em>Back to text</em>: <code>base64ToString(outputs('Text_to_Base64'))</code>.</li><li>Test the flow and open each Compose card to compare the values.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Comparing a number with text in a condition, for example <code>'10'</code> greater than <code>9</code>. Convert with <code>int()</code> first.</li>
+<li>Calling <code>json()</code> on a value that is already an object. It only accepts text.</li>
+<li>Choosing the wrong variable type at Initialize. The type cannot change later in the run.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (conversion functions)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-variable-store-values">Store and manage values in variables</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="dynamic-content-and-expressions.html">← Dynamic content and expressions</a><a href="variables-vs-compose.html">Variables vs Compose →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#six-types">The six types, with examples</a></li><li><a href="#convert">Converting between types</a></li><li><a href="#read-object">Reading a field from an object</a></li><li><a href="#base64">Base64: why files look strange</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

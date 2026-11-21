@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your first flow: trigger, actions and a test run | Vinay Matsa</title>
+<meta name="description" content="Build an instant flow that greets a person by name, run it, and read the result.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Your first flow: trigger, actions and a test run">
+<meta property="og:description" content="Build an instant flow that greets a person by name, run it, and read the result.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 1</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 1 · Foundations · 2 of 7</li>
+      </ul>
+      <h1>Your first flow: trigger, actions and a test run</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>The quickest way to understand flows is to build one. This flow asks for a name, builds a greeting with today's date, and counts the letters in the name. It needs no connections, so you can build it in any environment.</p>
+
+<h2 id="the-flow">The finished flow</h2>
+<figure class="shot"><img src="../assets/img/pa/designer-canvas.webp" alt="The flow designer showing three cards: Manually trigger a flow, Greeting and Name length" width="976" height="328" loading="lazy">
+<figcaption>Three cards: one trigger and two Compose actions.</figcaption></figure>
+<p>The trigger has one text input, <code>Name</code>. Both actions are <strong>Compose</strong>, which simply works out a value and shows it. That makes Compose perfect for learning: you see the result of every formula in the run.</p>
+
+<h2 id="the-formula">The greeting formula</h2>
+<pre><code>concat(&#x27;Hello, &#x27;, triggerBody()?[&#x27;text&#x27;], &#x27;! Today is &#x27;, formatDateTime(utcNow(), &#x27;dddd, dd MMMM yyyy&#x27;), &#x27;.&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>concat(...)</code></td><td>Joins all the pieces inside it into one piece of text.</td></tr><tr><td><code>&#x27;Hello, &#x27;</code></td><td>Fixed text. Text in expressions goes in single quotes.</td></tr><tr><td><code>triggerBody()?[&#x27;text&#x27;]</code></td><td>The value typed into the trigger's first text input. <code>?</code> returns empty instead of failing if it is missing.</td></tr><tr><td><code>utcNow()</code></td><td>The current date and time, in UTC.</td></tr><tr><td><code>formatDateTime(..., &#x27;dddd, dd MMMM yyyy&#x27;)</code></td><td>Turns a date into readable text: <code>dddd</code> = day name, <code>dd</code> = day, <code>MMMM</code> = month name, <code>yyyy</code> = year.</td></tr></tbody></table></div>
+<p>The second action is simpler: <code>length(triggerBody()?['text'])</code> counts the characters in the name.</p>
+
+<h2 id="run-it">Run it</h2>
+<figure class="shot"><img src="../assets/img/pa/run-flow-panel.webp" alt="The Run flow panel asking for a Name, with Alex typed in" width="340" height="486" loading="lazy">
+<figcaption>Run the flow and type a name. The input label comes from the trigger.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/greeting-output.webp" alt="Run results for the Greeting action showing: Hello, Alex! Today is Saturday, 21 November 2026." width="900" height="401" loading="lazy">
+<figcaption>Select a card in the run to see what it produced.</figcaption></figure>
+<div class="callout"><strong>Tip:</strong> the trigger input is called <code>text</code> internally even though you labelled it Name. A second text input would be <code>text_1</code>. Pick inputs from the dynamic content list rather than typing these names.</div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Instant flow</strong>: a flow you start yourself. It can ask for inputs (text, number, yes/no, file, date) when you run it.</p>
+<p><strong>Compose</strong>: an action that holds one value. Think of it as a calculator display: you give it a formula, it shows the answer.</p>
+<p><strong>Expression</strong>: a formula written in Power Automate's function language, like <code>concat()</code> or <code>length()</code>. The next article covers expressions in detail.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Create an <strong>Instant cloud flow</strong> named <em>My First Flow</em> with the trigger <strong>Manually trigger a flow</strong>.</li><li>Select the trigger, choose <strong>Add an input</strong> &gt; <strong>Text</strong>, and label it <em>Name</em>.</li><li>Select <strong>+</strong> under the trigger, search for <em>Compose</em> and add it. Rename it <em>Greeting</em> (card menu &gt; Rename).</li><li>Click in <strong>Inputs</strong>, select the <strong>fx</strong> icon, paste the greeting formula above and select <strong>Add</strong>.</li><li>Add a second Compose named <em>Name length</em> with the expression <code>length(triggerBody()?['text'])</code>.</li><li>Select <strong>Save</strong> (or <strong>Publish</strong> in the newest designer), then <strong>Test</strong> &gt; <strong>Manually</strong> &gt; <strong>Test</strong>.</li><li>Type a name such as <em>Alex</em> and select <strong>Run flow</strong>, then <strong>Done</strong>.</li><li>Open the run and select each card to see its result.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Typing the formula straight into the Inputs box without the <strong>fx</strong> editor. It is then saved as plain text and never calculated.</li>
+<li>Using double quotes for text. Expressions only accept single quotes: <code>'Hello'</code>.</li>
+<li>Expecting local time from <code>utcNow()</code>. It is UTC; convert it with <code>convertFromUtc()</code> when the time of day matters.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/create-cloud-flow-without-copilot">Create your first cloud flow without Copilot</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/flows-designer">Explore the cloud flows designer</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="what-is-power-automate.html">← What is Power Automate? The types of flows</a><a href="dynamic-content-and-expressions.html">Dynamic content and expressions →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#the-flow">The finished flow</a></li><li><a href="#the-formula">The greeting formula</a></li><li><a href="#run-it">Run it</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

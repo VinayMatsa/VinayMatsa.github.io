@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Run history and basic debugging | Vinay Matsa</title>
+<meta name="description" content="Find a run, open it, read each step's inputs and outputs, and fix the first failure.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Run history and basic debugging">
+<meta property="og:description" content="Find a run, open it, read each step's inputs and outputs, and fix the first failure.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 1</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 1 · Foundations · 7 of 7</li>
+      </ul>
+      <h1>Run history and basic debugging</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Every time a flow runs, Power Automate records what each step received and returned. That record is your main debugging tool. Most problems are solved by opening the run and reading the inputs of the first step that went wrong.</p>
+
+<h2 id="find">Find the run</h2>
+<figure class="shot"><img src="../assets/img/pa/run-history.webp" alt="The 28-day run history table with Start, Duration and Status columns and one Succeeded run" width="768" height="175" loading="lazy">
+<figcaption>The flow's details page lists runs from the last 28 days. Select the start time to open one.</figcaption></figure>
+<p>Older runs are removed after 28 days. If you need a longer audit trail, write key results to a log list or table yourself.</p>
+
+<h2 id="read">Read the run</h2>
+<figure class="shot"><img src="../assets/img/pa/first-flow-run-view.webp" alt="Run view with three steps, each marked with a green tick and a duration of 0 seconds" width="460" height="310" loading="lazy">
+<figcaption>Each card shows a status icon and duration: green tick succeeded, red cross failed, grey minus skipped.</figcaption></figure>
+<ol>
+<li>Start at the top and find the <strong>first</strong> red card. Later failures are usually just knock-on effects.</li>
+<li>Select it and read <strong>Inputs</strong>: they show the exact values the step received after all expressions were worked out.</li>
+<li>Read the error message under <strong>Outputs</strong>. It normally names the field or type that was wrong.</li>
+<li>Fix the step in the designer, then use <strong>Resubmit</strong> to rerun with the same trigger data.</li>
+</ol>
+<div class="callout"><strong>Tip:</strong> add a temporary Compose before a failing step and put the value you suspect in it. The run shows you exactly what that value was.</div>
+
+<h2 id="errors">Errors you will meet first</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Message contains</th><th>Usually means</th></tr></thead><tbody>
+<tr><td><code>InvalidTemplate</code></td><td>An expression failed: wrong type, missing field, or a function given null</td></tr>
+<tr><td><code>cannot be evaluated because property ... doesn't exist</code></td><td>Use <code>?['field']</code> instead of <code>['field']</code>, or check the field name</td></tr>
+<tr><td><code>Unauthorized</code> / 401 / 403</td><td>The connection lacks permission or needs to be signed in again</td></tr>
+<tr><td><code>429</code> / throttled</td><td>Too many requests; the action retries on its own, so check retry settings before changing logic</td></tr>
+</tbody></table></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Run</strong>: one execution of the flow. Statuses are Succeeded, Failed, Cancelled and Running.</p>
+<p><strong>Inputs and Outputs</strong>: what a step received and what it returned. <strong>Show raw inputs</strong> displays the full JSON.</p>
+<p><strong>Resubmit</strong>: runs the flow again with the same trigger data, after you have fixed it.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Open your first flow and change the Name length expression to <code>length(triggerBody()['missing'])</code> (no question mark, wrong field).</li><li>Save and test. The run fails.</li><li>Open the run from the 28-day run history and select the red card. Read the error: the property does not exist.</li><li>Correct the expression back to <code>length(triggerBody()?['text'])</code> and save.</li><li>Return to the failed run and select <strong>Resubmit</strong>. The new run succeeds.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Fixing the last red step instead of the first one.</li>
+<li>Rebuilding the flow when only a connection expired. Check the connection first.</li>
+<li>Leaving debug Compose actions with sensitive data in production. Remove them, or turn on <strong>Secure inputs/outputs</strong> in the action's settings.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/fix-flow-failures">Troubleshoot a cloud flow</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/troubleshoot-flow-errors">Troubleshoot cloud flow errors</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="conditions-switch-loops.html">← Conditions, Switch and loops</a><a href="./">Back to all topics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#find">Find the run</a></li><li><a href="#read">Read the run</a></li><li><a href="#errors">Errors you will meet first</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

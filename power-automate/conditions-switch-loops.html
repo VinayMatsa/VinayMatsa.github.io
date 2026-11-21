@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conditions, Switch and loops | Vinay Matsa</title>
+<meta name="description" content="Make decisions in a flow: yes/no with Condition, many options with Switch, repeat with Apply to each.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Conditions, Switch and loops">
+<meta property="og:description" content="Make decisions in a flow: yes/no with Condition, many options with Switch, repeat with Apply to each.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 1</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 1 · Foundations · 6 of 7</li>
+      </ul>
+      <h1>Conditions, Switch and loops</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Real processes branch. An order over a limit needs approval; each region has its own team. Power Automate gives you three building blocks for this: <strong>Condition</strong> for a yes/no question, <strong>Switch</strong> for one value with several possible answers, and <strong>Apply to each</strong> to repeat the decision for every item in a list.</p>
+
+<h2 id="data">The sample data</h2>
+<pre><code>[
+  { "id": 1, "amount": 250,  "region": "North" },
+  { "id": 2, "amount": 1200, "region": "South" },
+  { "id": 3, "amount": 80,   "region": "East"  }
+]</code></pre>
+<p>For each order the flow asks two questions: is the amount over 1,000 (needs approval), and which team handles the region?</p>
+
+<h2 id="condition">Condition: two branches</h2>
+<figure class="shot"><img src="../assets/img/pa/condition-branches.webp" alt="Run view of the loop at iteration 1 of 3: the Condition amount over 1000 card with True and False branches; Auto approved ran and Needs approval was skipped" width="705" height="381" loading="lazy">
+<figcaption>Order 1 (250) is not over 1,000, so the False branch ran. A grey minus sign marks a skipped action.</figcaption></figure>
+<p>Inside the loop, the condition compares <code>items('Apply_to_each_order')?['amount']</code> with 1000 using <strong>is greater than</strong>.</p>
+
+<h2 id="switch">Switch: one value, many cases</h2>
+<figure class="shot"><img src="../assets/img/pa/switch-cases.webp" alt="Switch on region with cases North, South and Default; the North team action succeeded and the others were skipped" width="730" height="416" loading="lazy">
+<figcaption>Switch checks one value against each case. Order 1 is in the North, so only that case ran. Anything unmatched falls into Default.</figcaption></figure>
+<p>Switch only matches exact values (text or numbers). For ranges like <em>over 1,000</em>, use a Condition.</p>
+
+<h2 id="result">The result</h2>
+<figure class="shot"><img src="../assets/img/pa/summary-result.webp" alt="Result showing three lines: Order 1: auto-approved, Order 2: needs approval, Order 3: auto-approved" width="630" height="390" loading="lazy">
+<figcaption>Each pass appended one line to an array variable. Order 2 (1,200) is the only one that needs approval.</figcaption></figure>
+<pre><code>concat(&#x27;Order &#x27;, string(items(&#x27;Apply_to_each_order&#x27;)?[&#x27;id&#x27;]), &#x27;: needs approval&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>items(&#x27;Apply_to_each_order&#x27;)</code></td><td>The order the loop is currently processing.</td></tr><tr><td><code>?[&#x27;id&#x27;]</code></td><td>Its id: 1, 2 or 3.</td></tr><tr><td><code>string(...)</code></td><td>Turns the number into text for joining.</td></tr><tr><td><code>concat(...)</code></td><td>Builds the line, for example <em>Order 2: needs approval</em>.</td></tr></tbody></table></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Branch</strong>: a path the flow can take. Only one branch of a Condition runs per decision.</p>
+<p><strong>Iteration</strong>: one pass of a loop. In the run view the counter (1 of 3) lets you inspect each pass separately.</p>
+<p><strong>Default case</strong>: the Switch branch that runs when no case matches. Always use it, even just to log an unexpected value.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Create an instant flow named <em>Conditions and loops</em>.</li><li>Initialize an Array variable <em>Orders</em> with the sample data above, and an empty Array variable <em>Summary</em> (<code>[]</code>).</li><li>Add <strong>Apply to each</strong> named <em>Apply to each order</em> over <code>variables('Orders')</code>.</li><li>Inside it, add a <strong>Condition</strong>: left <code>items('Apply_to_each_order')?['amount']</code>, operator <em>is greater than</em>, right <code>1000</code>.</li><li>In True, add <strong>Append to array variable</strong> (Summary) with the needs-approval concat; in False, the same with <em>auto-approved</em>.</li><li>Below the Condition, still inside the loop, add a <strong>Switch</strong> on <code>items('Apply_to_each_order')?['region']</code> with cases North and South, each with a Compose naming the team. Put <em>Central team handles other regions</em> in Default.</li><li>After the loop, add a Compose <em>Result</em> with <code>variables('Summary')</code>.</li><li>Test, then step through iterations 1, 2 and 3 to see different branches light up.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Comparing text with a number: if <em>amount</em> arrives as text, <code>'250' &gt; 1000</code> does not behave as expected. Wrap it in <code>int()</code>.</li>
+<li>Switch case values are case-sensitive: <em>north</em> does not match <em>North</em>. Normalise with <code>toLower()</code> if the source is inconsistent.</li>
+<li>Loops inside loops multiply quickly: 500 × 500 is 250,000 actions. Filter first with <strong>Filter array</strong>.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/add-condition">Add a condition to a cloud flow</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/use-expressions-in-conditions">Use expressions in conditions</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/apply-to-each">Use the Apply to each action</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="variables-vs-compose.html">← Variables vs Compose</a><a href="run-history-and-debugging.html">Run history and basic debugging →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#data">The sample data</a></li><li><a href="#condition">Condition: two branches</a></li><li><a href="#switch">Switch: one value, many cases</a></li><li><a href="#result">The result</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

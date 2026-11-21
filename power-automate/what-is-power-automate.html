@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is Power Automate? The types of flows | Vinay Matsa</title>
+<meta name="description" content="What Power Automate does, the three kinds of cloud flow, and how to pick the right one.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="What is Power Automate? The types of flows">
+<meta property="og:description" content="What Power Automate does, the three kinds of cloud flow, and how to pick the right one.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 1</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 1 · Foundations · 1 of 7</li>
+      </ul>
+      <h1>What is Power Automate? The types of flows</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Power Automate runs small programs, called <strong>flows</strong>, that do routine work for you: copy data between apps, send a reminder, ask a manager for approval. You build a flow by placing steps on a canvas instead of writing code.</p>
+<p>The first decision for every flow is <em>what starts it</em>. That choice decides which kind of flow you create.</p>
+
+<h2 id="three-ways">Three ways a cloud flow starts</h2>
+<figure class="shot"><img src="../assets/img/pa/flow-types.webp" alt="The Create page in Power Automate with tiles for automated, instant and scheduled cloud flows, describe it to design it, desktop flow and process mining" width="1250" height="285" loading="lazy">
+<figcaption>The Create page. The first three tiles are the three kinds of cloud flow.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Kind</th><th>Starts when</th><th>Typical use</th></tr></thead><tbody>
+<tr><td>Automated</td><td>Something happens in another app, such as a new email or a new row in a list</td><td>Tell the team when a request is submitted</td></tr>
+<tr><td>Instant</td><td>A person presses a button, in the portal, the mobile app, Teams or a Power App</td><td>Send a report on demand</td></tr>
+<tr><td>Scheduled</td><td>A clock: every hour, each Monday at 9 AM</td><td>Daily clean-up or a weekly summary</td></tr>
+</tbody></table></div>
+
+<h2 id="other-tiles">The other tiles</h2>
+<ul>
+<li><strong>Describe it to design it</strong>: you write what you want in plain words and Copilot drafts the flow. You still check every step.</li>
+<li><strong>Desktop flow</strong>: automates clicks and typing in desktop apps and websites that have no API (robotic process automation).</li>
+<li><strong>Process mining</strong>: analyses how a process really runs, to find where automation would help.</li>
+</ul>
+<div class="callout"><strong>Rule of thumb:</strong> if a connector exists for the app, use a cloud flow. Reach for a desktop flow only when there is no API to call.</div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Trigger</strong>: the single step at the top of a flow that starts it. Every flow has exactly one.</p>
+<p><strong>Action</strong>: any step after the trigger. Actions do the work: send an email, create a row, compose some text.</p>
+<p><strong>Connector</strong>: a ready-made bridge to an app (Outlook, SharePoint, Dataverse, Teams). It gives you that app's triggers and actions.</p>
+<p><strong>Run</strong>: one execution of a flow, from trigger to last action. Each run is recorded so you can inspect it later.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Go to make.powerautomate.com and sign in with your work or school account.</li><li>Check the environment name at the top right. Practise in a sandbox or developer environment, not production.</li><li>Select <strong>Create</strong> in the left menu.</li><li>Pick <strong>Instant cloud flow</strong> for your first try: it is the easiest to test because you start it yourself.</li><li>Name it, choose <strong>Manually trigger a flow</strong>, and select <strong>Create</strong>. The designer opens. The next article builds from here.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Building in the default environment and later struggling to move the flow. Create flows inside a <strong>solution</strong> from day one.</li>
+<li>Choosing a scheduled flow that checks for changes every few minutes, when an automated trigger would react to the change directly.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/flow-types">What is Power Automate? (types of flows)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/overview-cloud">Overview of cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-cloud-flow-without-copilot">Create your first cloud flow without Copilot</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="./">← All Power Automate topics</a><a href="first-flow.html">Your first flow: trigger, actions and a test run →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#three-ways">Three ways a cloud flow starts</a></li><li><a href="#other-tiles">The other tiles</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

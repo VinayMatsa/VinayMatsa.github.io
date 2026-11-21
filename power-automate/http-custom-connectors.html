@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTTP requests and custom connectors | Vinay Matsa</title>
+<meta name="description" content="Call any web API from a flow with the HTTP action, and when to turn that call into a custom connector.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTP requests and custom connectors">
+<meta property="og:description" content="Call any web API from a flow with the HTTP action, and when to turn that call into a custom connector.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 3</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 3 · Triggers and connectors · 7 of 7</li>
+      </ul>
+      <h1>HTTP requests and custom connectors</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>More than a thousand connectors exist, but sooner or later you need a service that has none: an internal API, a partner system, a public data service. The <strong>HTTP</strong> action calls any web API directly. A <strong>custom connector</strong> wraps the same API so makers can use it like any other connector.</p>
+
+<h2 id="flow">The demo flow</h2>
+<figure class="shot"><img src="../assets/img/pa/l3-http-canvas.webp" alt="Run of the flow: HTTP GET repository, Status code and Repository summary, all succeeded" width="400" height="285" loading="lazy">
+<figcaption>One HTTP call to a public API, then two Compose steps to read the response.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l3-http-inputs.webp" alt="HTTP action inputs: URI https://api.github.com/repos/microsoft/PowerPlatformConnectors, Method GET, headers User-Agent PowerAutomateDemo and Accept application/json" width="505" height="445" loading="lazy">
+<figcaption>The request: a URL, a method and two headers. This public endpoint needs no authentication.</figcaption></figure>
+
+<h2 id="response">Reading the response</h2>
+<figure class="shot"><img src="../assets/img/pa/l3-http-output.webp" alt="Repository summary: name microsoft/PowerPlatformConnectors, description, stars 1303, language C#" width="514" height="140" loading="lazy">
+<figcaption>The response body is JSON, so fields are read with body('HTTP')?['field'], exactly like Level 2.</figcaption></figure>
+<pre><code>body(&#x27;HTTP_GET_repository&#x27;)?[&#x27;stargazers_count&#x27;]</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>body(&#x27;HTTP_GET_repository&#x27;)</code></td><td>The JSON the API returned.</td></tr><tr><td><code>?[&#x27;stargazers_count&#x27;]</code></td><td>One field from it. Use Parse JSON if you want the fields in dynamic content.</td></tr></tbody></table></div>
+<p><code>outputs('HTTP_GET_repository')?['statusCode']</code> returns the HTTP status: 200 means success, 4xx means the request was wrong (401 not signed in, 404 not found), 5xx means the server failed.</p>
+
+<h2 id="auth">Authentication</h2>
+<p>Most APIs need credentials. The HTTP action supports Basic, Client certificate, Microsoft Entra ID OAuth (Active Directory OAuth) and Managed identity, or an API key in a header. Never type secrets into the action itself: keep them in an environment variable backed by Azure Key Vault, and turn on <strong>Secure inputs</strong> and <strong>Secure outputs</strong> in the action's settings so they don't appear in run history.</p>
+
+<h2 id="custom">When to build a custom connector</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>HTTP action</th><th>Custom connector</th></tr></thead><tbody>
+<tr><td>One or two calls in one flow</td><td>The same API used in many flows, apps or agents</td></tr>
+<tr><td>You manage the URL, headers and auth in each flow</td><td>Defined once: host, auth, actions and their inputs</td></tr>
+<tr><td>Raw JSON in, raw JSON out</td><td>Friendly action names and fields in dynamic content</td></tr>
+<tr><td>Premium connector</td><td>Premium, and can be classified in data policies on its own</td></tr>
+</tbody></table></div>
+<p>A custom connector is built from an OpenAPI (Swagger) definition, a Postman collection, or from blank in the wizard, inside a solution so it moves between environments with your flows.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>API</strong>: a web address a program calls to get or change data, instead of a person using a web page.</p>
+<p><strong>Method</strong>: GET reads, POST creates, PATCH/PUT updates, DELETE removes.</p>
+<p><strong>Header</strong>: extra information sent with the request, such as the format you accept or your API key.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Create an instant flow and add <strong>HTTP</strong> (premium).</li><li>Method GET, URI <code>https://api.github.com/repos/microsoft/PowerPlatformConnectors</code>, header <code>User-Agent</code> = any name.</li><li>Add a Compose with <code>outputs('HTTP')?['statusCode']</code>.</li><li>Add a Compose that builds an object from <code>body('HTTP')?['full_name']</code>, <code>?['stargazers_count']</code> and <code>?['language']</code>.</li><li>Test, then change the URI to a repository that does not exist and look at the 404 status and error body.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Secrets typed into headers. They show up in run history for anyone who can see it.</li>
+<li>Ignoring the status code. A 404 or 500 can still return a body; check the status before using it, or configure run after (Level 4).</li>
+<li>Calling an API in a tight loop. Most APIs limit requests per minute; batch calls or add a delay.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/connectors/custom-connectors/">Custom connectors overview</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/custom-connectors/define-blank">Create a custom connector from scratch</a></li><li><a href="https://learn.microsoft.com/en-us/training/modules/http-connectors/">Overview of HTTP connectors in Power Automate (training)</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="approvals.html">← Approvals</a><a href="./">Back to all topics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#flow">The demo flow</a></li><li><a href="#response">Reading the response</a></li><li><a href="#auth">Authentication</a></li><li><a href="#custom">When to build a custom connector</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

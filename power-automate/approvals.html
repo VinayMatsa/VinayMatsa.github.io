@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approvals | Vinay Matsa</title>
+<meta name="description" content="Pause a flow until a person approves or rejects, and the policy check that can stop it before it starts.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Approvals">
+<meta property="og:description" content="Pause a flow until a person approves or rejects, and the policy check that can stop it before it starts.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 3</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 3 · Triggers and connectors · 6 of 7</li>
+      </ul>
+      <h1>Approvals</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>The <strong>Approvals</strong> connector adds a human decision to a flow. <strong>Start and wait for an approval</strong> sends a request (by email, in Teams and in the Approvals centre), pauses the flow, and continues when the approver responds, with their decision and comments as outputs.</p>
+
+<h2 id="design">The approval step</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Setting</th><th>Demo value</th></tr></thead><tbody>
+<tr><td>Approval type</td><td>Approve/Reject - First to respond</td></tr>
+<tr><td>Title</td><td>Contoso: approve New laptop for design team (1,450)</td></tr>
+<tr><td>Assigned to</td><td>The approver's email address</td></tr>
+<tr><td>Details</td><td>Requested by the Design team. Priority: High.</td></tr>
+</tbody></table></div>
+<p>After it, read the result:</p>
+<pre><code>body(&#x27;Start_and_wait_for_an_approval&#x27;)?[&#x27;outcome&#x27;]</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>body(&#x27;Start_and_wait_for_an_approval&#x27;)</code></td><td>The approval's result once someone responds.</td></tr><tr><td><code>?[&#x27;outcome&#x27;]</code></td><td><em>Approve</em> or <em>Reject</em> for the basic types. Use it in a Condition.</td></tr></tbody></table></div>
+<pre><code>coalesce(first(body('Start_and_wait_for_an_approval')?['responses'])?['comments'], 'No comment')</code></pre>
+<p>That second expression reads the first approver's comment, with a fallback when none was given (the Level 2 null-handling pattern).</p>
+
+<h2 id="types">Approval types</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Type</th><th>Finishes when</th></tr></thead><tbody>
+<tr><td>Approve/Reject - First to respond</td><td>Any one approver responds</td></tr>
+<tr><td>Approve/Reject - Everyone must approve</td><td>All approve, or anyone rejects</td></tr>
+<tr><td>Custom responses</td><td>You define the buttons (for example Approve, Reject, Need more info)</td></tr>
+<tr><td>Sequential approval</td><td>Each approver in turn</td></tr>
+</tbody></table></div>
+
+<h2 id="blocked">When a policy blocks it</h2>
+<p>In the demo environment the flow could not even be turned on:</p>
+<figure class="shot"><img src="../assets/img/pa/l3-dlp-error.webp" alt="Error banner: Admin data policy &#x27;Advanced Connector Policy&#x27; restricts use of these apis: /providers/Microsoft.PowerApps/apis/shared_approvals." width="770" height="30" loading="lazy">
+<figcaption>The real message from the demo environment. The flow saved but would not turn on.</figcaption></figure>
+<p>This is a <strong>data policy</strong> set by an administrator. This one is an <em>advanced connector policy</em>: it blocks every connector that is not on an allow list, so a connector that works in one environment can be refused in another. Nothing in the flow is wrong; the fix is a conversation with the Power Platform admin, who can allow the connector for the environment. Level 6 covers data policies in depth.</p>
+<div class="callout"><strong>Before you build:</strong> check which connectors your target environment allows. Discovering a blocked connector after the build costs far more than asking first.</div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Approvals centre</strong>: the Approvals page in Power Automate (and the Approvals app in Teams) where people see and answer requests.</p>
+<p><strong>Wait</strong>: the flow pauses for up to 30 days. If nobody responds, the run times out and fails, so plan a reminder or escalation.</p>
+<p><strong>Data policy (DLP)</strong>: an admin rule about which connectors can be used, and which can be used together.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Create an instant flow and add <strong>Start and wait for an approval</strong> (Approvals).</li><li>Choose <em>Approve/Reject - First to respond</em>, enter a Title, your own email in Assigned to, and some Details.</li><li>Add a <strong>Condition</strong>: <code>outcome</code> is equal to <code>Approve</code>.</li><li>In each branch add a Compose (or a Teams message) saying what happened.</li><li>Save and turn the flow on. If you see an Admin data policy message, ask your admin which connectors are allowed in that environment.</li><li>Test, then approve from the email, Teams or the Approvals page, and watch the run continue.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>No plan for no response. Add a parallel branch with a Delay and a reminder, or set the action's timeout in its settings.</li>
+<li>Assigning to a person by name in text. Use email addresses, separated by semicolons.</li>
+<li>Not saving the decision anywhere. Write the outcome and comments back to the list or table so there's a record.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/get-started-approvals">Get started with Power Automate approvals</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/modern-approvals">Create and test an approval workflow</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/advanced-connector-policies">Advanced connector policies</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="adaptive-cards.html">← Adaptive Cards in Teams</a><a href="http-custom-connectors.html">HTTP requests and custom connectors →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#design">The approval step</a></li><li><a href="#types">Approval types</a></li><li><a href="#blocked">When a policy blocks it</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

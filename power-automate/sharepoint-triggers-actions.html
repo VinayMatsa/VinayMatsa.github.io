@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SharePoint triggers and actions | Vinay Matsa</title>
+<meta name="description" content="Read, filter and create SharePoint list items from a flow, and know which trigger to start from.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SharePoint triggers and actions">
+<meta property="og:description" content="Read, filter and create SharePoint list items from a flow, and know which trigger to start from.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 3</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 3 · Triggers and connectors · 1 of 7</li>
+      </ul>
+      <h1>SharePoint triggers and actions</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>SharePoint lists are where many teams keep requests, trackers and registers, so they are often the first thing people automate. The SharePoint connector gives you <strong>triggers</strong> that start a flow when items change, and <strong>actions</strong> to read, create and update items.</p>
+
+<h2 id="list">The demo list</h2>
+<p>A list called <em>Website Demo Requests</em> with five columns: Title, <strong>Status</strong> (choice: New, Approved, Rejected), <strong>Priority</strong> (choice), <strong>Amount</strong> (number) and <strong>Department</strong> (text). The flow reads the new requests, lists them, and adds one more.</p>
+<figure class="shot"><img src="../assets/img/pa/l3-sp-canvas.webp" alt="Run of the flow: Get new requests, Requests as text, Create a request and New item ID, all succeeded" width="400" height="345" loading="lazy">
+<figcaption>Get items, reshape with Select, then Create item. Each SharePoint step took well under a second.</figcaption></figure>
+
+<h2 id="get-items">Get items with a filter</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Setting</th><th>Demo value</th><th>Why</th></tr></thead><tbody>
+<tr><td>Filter Query</td><td><code>Status eq 'New'</code></td><td>Only new requests come back from SharePoint</td></tr>
+<tr><td>Order By</td><td><code>Amount desc</code></td><td>Largest first</td></tr>
+<tr><td>Top Count</td><td><code>10</code></td><td>Never more than 10 rows</td></tr>
+</tbody></table></div>
+<figure class="shot"><img src="../assets/img/pa/l3-sp-requests.webp" alt="Requests as text output: Monitor arms (x6) - IT - 540 and Whiteboard markers - Facilities - 40" width="514" height="140" loading="lazy">
+<figcaption>Two of the seven requests were New. The filter ran in SharePoint, so only those two came back.</figcaption></figure>
+<p>Filter and order use the column's <strong>internal name</strong>, which can differ from what you see. A column created as <em>Request Status</em> is often <code>Request_x0020_Status</code> internally. Check it in the list settings (the address of the column's edit page ends with <code>Field=</code> and the internal name).</p>
+
+<h2 id="create">Create item</h2>
+<figure class="shot"><img src="../assets/img/pa/l3-sp-newid.webp" alt="New item ID output: 8" width="505" height="260" loading="lazy">
+<figcaption>Create item returns the whole new item, including its ID. Keep the ID if a later step needs to update it.</figcaption></figure>
+<p>Choice columns need the choice value (<code>New</code>), and person columns need an email or claims value. In the designer both appear as drop-downs.</p>
+
+<h2 id="triggers">Which trigger?</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Trigger</th><th>Fires when</th></tr></thead><tbody>
+<tr><td>When an item is created</td><td>A new item is added</td></tr>
+<tr><td>When an item is created or modified</td><td>Any add or edit. Pair it with a trigger condition (next articles) so it only runs when it matters</td></tr>
+<tr><td>When an item or a file is deleted</td><td>An item is removed</td></tr>
+<tr><td>For a selected item</td><td>A user starts the flow from the list's Automate menu</td></tr>
+</tbody></table></div>
+<div class="callout"><strong>Good to know:</strong> SharePoint triggers check the list on a schedule (polling), so a run can start a minute or so after the change. Dataverse triggers, covered next, are pushed instantly.</div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Site address and list</strong>: every SharePoint step needs both. Pick them from the drop-downs, or put them in environment variables so the flow can move between sites.</p>
+<p><strong>Internal name</strong>: the fixed technical name of a column, set when the column is created. Renaming a column changes only its display name.</p>
+<p><strong>OData filter</strong>: the same query syntax as the Level 2 OData article: <code>eq</code>, <code>ne</code>, <code>gt</code>, <code>and</code>, <code>or</code>.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Create a list with Title, Status (choice), Priority (choice), Amount (number) and Department (text), and add a few rows.</li><li>Create an instant flow. Add <strong>Get items</strong> (SharePoint), choose the site and list, and open <strong>Show all</strong>.</li><li>Set Filter Query <code>Status eq 'New'</code>, Order By <code>Amount desc</code>, Top Count 10.</li><li>Add a <strong>Select</strong> in text mode over <em>value</em>: <code>concat(item()?['Title'], ' - ', string(item()?['Amount']))</code>.</li><li>Add <strong>Create item</strong> for the same list and fill Title, Status, Amount.</li><li>Add a Compose with the <em>ID</em> from Create item. Test and check the list: the new row is there.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Get items with no filter on a big list, then a Condition inside a loop. Filter in SharePoint instead.</li>
+<li>Expecting every item: Get items returns one page by default. Set Top Count, or turn on Pagination in the action's settings for larger lists.</li>
+<li>Filtering by display name. Use the internal name.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/sharepoint/dev/business-apps/power-automate/sharepoint-connector-actions-triggers">Microsoft SharePoint connector in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/odata-filters">Filter and copy data</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="./">← All Power Automate topics</a><a href="dataverse-triggers.html">Dataverse triggers and row actions →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#list">The demo list</a></li><li><a href="#get-items">Get items with a filter</a></li><li><a href="#create">Create item</a></li><li><a href="#triggers">Which trigger?</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

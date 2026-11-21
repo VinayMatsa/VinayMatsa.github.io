@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adaptive Cards in Teams | Vinay Matsa</title>
+<meta name="description" content="Post a structured card instead of plain text: title, facts and a button, built from JSON.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Adaptive Cards in Teams">
+<meta property="og:description" content="Post a structured card instead of plain text: title, facts and a button, built from JSON.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 3</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 3 · Triggers and connectors · 5 of 7</li>
+      </ul>
+      <h1>Adaptive Cards in Teams</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>An <strong>Adaptive Card</strong> is a small layout described in JSON: headings, a table of facts, images and buttons. Teams draws it the same way on desktop and phone. It turns a wall of text into something people can scan in two seconds.</p>
+
+<h2 id="card">The card</h2>
+<figure class="shot"><img src="../assets/img/pa/l3-adaptive-card.webp" alt="An Adaptive Card in Teams: New purchase request, Contoso Design team, facts Item, Amount, Priority, Requested, and an Open the request button" width="520" height="276" loading="lazy">
+<figcaption>Posted by the Flow bot with <strong>Post card in a chat or channel</strong>.</figcaption></figure>
+
+<h2 id="json">The JSON behind it</h2>
+<pre><code>{
+  "type": "AdaptiveCard",
+  "version": "1.4",
+  "body": [
+    { "type": "TextBlock", "text": "New purchase request", "weight": "Bolder", "size": "Large" },
+    { "type": "TextBlock", "text": "Contoso Design team", "isSubtle": true, "spacing": "None" },
+    { "type": "FactSet", "facts": [
+        { "title": "Item", "value": "New laptop for design team" },
+        { "title": "Amount", "value": "1,450" },
+        { "title": "Priority", "value": "High" }
+    ] }
+  ],
+  "actions": [
+    { "type": "Action.OpenUrl", "title": "Open the request", "url": "https://..." }
+  ]
+}</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Element</th><th>Draws</th></tr></thead><tbody>
+<tr><td><code>TextBlock</code></td><td>A line of text. <code>weight</code>, <code>size</code> and <code>isSubtle</code> style it.</td></tr>
+<tr><td><code>FactSet</code></td><td>A two-column list of labels and values.</td></tr>
+<tr><td><code>Action.OpenUrl</code></td><td>A button that opens a link.</td></tr>
+<tr><td><code>version</code></td><td>The card schema version. 1.4 works in Teams today.</td></tr>
+</tbody></table></div>
+
+<h2 id="dynamic">Putting flow data in the card</h2>
+<p>Replace fixed values with dynamic content or expressions, exactly as in any other text box. The card text is JSON, so the value must stay inside the quotes:</p>
+<pre><code>{ "title": "Amount", "value": "@{formatNumber(triggerOutputs()?['body/Amount'], 'N0')}" }</code></pre>
+<div class="callout"><strong>Design first:</strong> build and preview the card in the Adaptive Card Designer (adaptivecards.io/designer), then paste the JSON into the flow and swap in the dynamic values.</div>
+
+<h2 id="buttons">Buttons that collect answers</h2>
+<p>A card posted to a user as the Flow bot only supports link buttons (<code>Action.OpenUrl</code>). To collect an answer (inputs and a Submit button), use <strong>Post adaptive card and wait for a response</strong>. The flow pauses until someone responds, and the response arrives as outputs you can use in a Condition. For straightforward yes/no sign-off, the Approvals connector (next article) is usually simpler.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>JSON</strong>: the card is plain text in JSON format, so one missing comma or quote breaks it. Paste it into a JSON validator if the action fails.</p>
+<p><strong>Schema version</strong>: newer features need a higher <code>version</code>. If something doesn't render, try a lower version.</p>
+<p><strong>Message card vs Adaptive Card</strong>: the old "MessageCard" format from Office 365 connectors isn't accepted; the card's type must be <code>AdaptiveCard</code>.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Open the Adaptive Card Designer, start from a blank card and add a TextBlock, a FactSet and an Action.OpenUrl.</li><li>Copy the card JSON from the designer's payload editor.</li><li>In an instant flow add <strong>Post card in a chat or channel</strong> (Microsoft Teams). Post as Flow bot, Post in Chat with Flow bot, Recipient your address.</li><li>Paste the JSON into <strong>Adaptive Card</strong>. Test, and check the Workflows chat in Teams.</li><li>Replace one fact's value with dynamic content and test again.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Dynamic text that contains a double quote or line break. It breaks the JSON; clean it with <code>replace()</code> first.</li>
+<li>Using Action.Submit in a card posted with a plain post action. The button does nothing; use the "wait for a response" action instead.</li>
+<li>Building a huge card. Keep it to what someone needs to decide or act; link to the rest.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/overview-adaptive-cards">Overview of adaptive cards for Microsoft Teams</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-adaptive-cards">Create flows that post adaptive cards to Microsoft Teams</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/teams/">Microsoft Teams connector reference</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="outlook-teams-notifications.html">← Outlook and Teams notifications</a><a href="approvals.html">Approvals →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#card">The card</a></li><li><a href="#json">The JSON behind it</a></li><li><a href="#dynamic">Putting flow data in the card</a></li><li><a href="#buttons">Buttons that collect answers</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

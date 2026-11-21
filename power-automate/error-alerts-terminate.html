@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Error alerts and Terminate | Vinay Matsa</title>
+<meta name="description" content="When a flow fails, tell someone with a link to the run, and make the run's status tell the truth.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Error alerts and Terminate">
+<meta property="og:description" content="When a flow fails, tell someone with a link to the run, and make the run's status tell the truth.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 4</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 4 · Reliable flows · 7 of 7</li>
+      </ul>
+      <h1>Error alerts and Terminate</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>The try / catch pattern stops failures from going unnoticed inside the flow. Two more pieces finish the job: an <strong>alert</strong> that reaches a person with a direct link to the failed run, and <strong>Terminate</strong>, which sets the run's final status so monitoring shows it as failed.</p>
+
+<h2 id="flow">The demo flow</h2>
+<figure class="shot"><img src="../assets/img/pa/l4-alert-canvas.webp" alt="Run view: Try failed; Catch shows Terminated; inside Catch, Alert in Teams and Terminate as failed both succeeded" width="400" height="430" loading="lazy">
+<figcaption>Try fails, Catch posts an alert and then terminates the run as Failed.</figcaption></figure>
+
+<h2 id="alert">The alert</h2>
+<figure class="shot"><img src="../assets/img/pa/l4-teams-alert.webp" alt="Teams message from Workflows: Flow failed: Demo – Error alerts and Terminate. Step: Calculate tax. Order 101 has an amount that is not a number. Open the failed run (link)" width="500" height="100" loading="lazy">
+<figcaption>A short message with what failed, why, and one link straight to the run.</figcaption></figure>
+<p>The link is built from the <code>workflow()</code> function, so it works in any environment without changes:</p>
+<pre><code>https://make.powerautomate.com/environments/@{workflow()?['tags']?['environmentName']}/flows/@{workflow()?['name']}/runs/@{workflow()?['run']?['name']}</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>Returns</th></tr></thead><tbody>
+<tr><td><code>workflow()?['tags']?['environmentName']</code></td><td>The environment ID</td></tr>
+<tr><td><code>workflow()?['name']</code></td><td>The flow's ID</td></tr>
+<tr><td><code>workflow()?['run']?['name']</code></td><td>This run's ID</td></tr>
+<tr><td><code>workflow()?['tags']?['flowDisplayName']</code></td><td>The flow's name, for the message text</td></tr>
+</tbody></table></div>
+
+<h2 id="terminate">Terminate</h2>
+<figure class="shot"><img src="../assets/img/pa/l4-terminate.webp" alt="Terminate as failed inputs: Status Failed, Code OrderValidationFailed, Message: Order 101 has an amount that is not a number. The team was alerted in Teams." width="490" height="360" loading="lazy">
+<figcaption>Terminate ends the run immediately with the status, code and message you choose.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l4-alert-history.webp" alt="Run history showing one run with status Failed" width="768" height="165" loading="lazy">
+<figcaption>Because of Terminate, run history shows Failed, not Succeeded, even though Catch handled the error.</figcaption></figure>
+<p>Terminate has three statuses: <strong>Failed</strong> (with your own error code and message), <strong>Cancelled</strong>, and <strong>Succeeded</strong> (end early because there's nothing more to do). Compare this with the try / catch article, where the same failure ended as Succeeded because nothing marked it as failed.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>workflow()</strong>: an expression with details about the current flow and run: IDs, names and environment.</p>
+<p><strong>Run status</strong>: what monitoring, run history and admin reports see. Make it honest.</p>
+<p><strong>Alert fatigue</strong>: people ignore alerts that fire too often. Alert on real failures only, and say what to do.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Build the Try / Catch scopes from the earlier article.</li><li>Inside Catch, add <strong>Post message in a chat or channel</strong> (or Send an email) with the flow name, the failed step and a link using the workflow() expression above.</li><li>After the alert, add <strong>Terminate</strong>: Status Failed, Code a short name such as <em>OrderValidationFailed</em>, Message a sentence a person can understand.</li><li>Make Try fail on purpose and test.</li><li>Check three things: the alert arrived, the link opens the run, and run history shows Failed.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Sending alerts to the flow owner's personal inbox. Use a team channel or shared mailbox so alerts outlive job changes.</li>
+<li>Terminate as Succeeded inside Catch. The failure disappears from every report.</li>
+<li>Putting actions after Terminate. Nothing after it runs.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Employ robust error handling (flow run URL)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/fix-flow-failures">Troubleshoot a cloud flow</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (workflow)</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="child-flows.html">← Child flows</a><a href="./">Back to all topics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#flow">The demo flow</a></li><li><a href="#alert">The alert</a></li><li><a href="#terminate">Terminate</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

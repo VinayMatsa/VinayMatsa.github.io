@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retry policies and timeouts | Vinay Matsa</title>
+<meta name="description" content="Let temporary failures fix themselves with retries, and understand what the action timeout really limits.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Retry policies and timeouts">
+<meta property="og:description" content="Let temporary failures fix themselves with retries, and understand what the action timeout really limits.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 4</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 4 · Reliable flows · 3 of 7</li>
+      </ul>
+      <h1>Retry policies and timeouts</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Many failures are temporary: a service is busy, a network blip, a 429 "too many requests". Power Automate retries these automatically. Knowing the rules lets you make a flow patient where it should be and fast to fail where it shouldn't wait.</p>
+
+<h2 id="demo">The demo</h2>
+<figure class="shot"><img src="../assets/img/pa/l4-retry-canvas.webp" alt="Run view: Call a failing service took 21s and failed with ServiceUnavailable; Call a slow service succeeded in 11s; Handle timeout was skipped" width="400" height="305" loading="lazy">
+<figcaption>The failing call took 21 seconds because it was retried. The slow call took 11 seconds despite a 3-second timeout.</figcaption></figure>
+
+<h2 id="retries">Retries</h2>
+<p>The first HTTP call goes to a test address that always answers <strong>503 Service Unavailable</strong>. Its retry policy is <em>Fixed interval, 3 retries, every 5 seconds</em>.</p>
+<figure class="shot"><img src="../assets/img/pa/l4-retry-summary.webp" alt="Run results banner: 3 retries occurred, ServiceUnavailable, for a GET to a test URL returning status 503" width="490" height="160" loading="lazy">
+<figcaption>One original attempt plus 3 retries, then it gave up.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l4-retry-history.webp" alt="Retry history tab, retry 1 of 3: duration 0.9 seconds, status ServiceUnavailable" width="490" height="420" loading="lazy">
+<figcaption>The Retry history tab lists every attempt with its time and status.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Policy</th><th>Behaviour</th></tr></thead><tbody>
+<tr><td>Default</td><td>Exponential back-off: waits grow longer between attempts</td></tr>
+<tr><td>Exponential interval</td><td>You set the count and the minimum and maximum wait</td></tr>
+<tr><td>Fixed interval</td><td>You set the count and one wait, as in the demo</td></tr>
+<tr><td>None</td><td>Fail immediately; use it when a quick failure is better than waiting</td></tr>
+</tbody></table></div>
+<p>Retries happen only for temporary errors: <strong>408</strong> (timeout), <strong>429</strong> (too many requests), <strong>5xx</strong> (server errors) and connection problems. A <strong>400</strong>, <strong>401</strong> or <strong>404</strong> is never retried, because trying again won't change the answer.</p>
+
+<h2 id="timeout">Timeouts</h2>
+<figure class="shot"><img src="../assets/img/pa/l4-timeout-setting.webp" alt="General settings, Action timeout set to PT3S (ISO-8601 duration)" width="490" height="100" loading="lazy">
+<figcaption>Action timeout uses ISO-8601 durations: PT3S is 3 seconds, PT10M is 10 minutes, P1D is one day.</figcaption></figure>
+<p>The second call asks a test service to wait 10 seconds before answering, with an action timeout of 3 seconds. It still succeeded after 11 seconds. The action timeout limits the total time an action spends on <em>retries and asynchronous (long-running) responses</em>. It doesn't cut off a single request that is still waiting for its answer. Use it for actions that run a long time in the background, such as approvals, waits for a response, or APIs that reply "accepted, check back later".</p>
+<div class="callout"><strong>Practical rule:</strong> to stop waiting on a slow API, ask the API for a shorter server-side timeout, or move the call to a child flow and handle its failure in the parent.</div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Transient error</strong>: a failure that goes away by itself if you try again a little later.</p>
+<p><strong>Back-off</strong>: waiting longer between each retry so a busy service has time to recover.</p>
+<p><strong>ISO-8601 duration</strong>: <code>P</code> starts it, <code>T</code> separates days from time. <code>PT5S</code> = 5 seconds, <code>PT1H</code> = 1 hour, <code>P2D</code> = 2 days.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Add an <strong>HTTP</strong> action calling a test endpoint that returns 503.</li><li>Open <strong>Settings</strong> &gt; <strong>Networking</strong> &gt; <strong>Retry policy</strong>: Fixed interval, Count 3, Interval <code>PT5S</code>.</li><li>Test, open the failed action and look at <strong>Retry history</strong>.</li><li>Change the policy to <em>None</em> and test again: it fails in under a second.</li><li>Add a Compose after it with Run after set to <em>has failed</em> to handle the final failure.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Retrying actions that create records. A retry after a timeout can create a duplicate; make the target check for an existing record first.</li>
+<li>Setting huge retry counts on a flow that runs every minute. Runs pile up while each one waits.</li>
+<li>Expecting the action timeout to cancel a slow synchronous request (see above).</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Employ robust error handling (retry policies)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="configure-run-after.html">← Configure run after</a><a href="concurrency-control.html">Concurrency control →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">The demo</a></li><li><a href="#retries">Retries</a></li><li><a href="#timeout">Timeouts</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

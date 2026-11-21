@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scopes and the try / catch pattern | Vinay Matsa</title>
+<meta name="description" content="Group steps into Try, Catch and Finally scopes so a failure is caught and handled instead of ending the run.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Scopes and the try / catch pattern">
+<meta property="og:description" content="Group steps into Try, Catch and Finally scopes so a failure is caught and handled instead of ending the run.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 4</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 4 · Reliable flows · 1 of 7</li>
+      </ul>
+      <h1>Scopes and the try / catch pattern</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>By default, when one step fails, every step after it is skipped and the run ends as Failed. Nobody is told, and nothing is cleaned up. The <strong>try / catch / finally</strong> pattern fixes that with three <strong>Scope</strong> actions: put the work in <em>Try</em>, the recovery in <em>Catch</em>, and anything that must always happen in <em>Finally</em>.</p>
+
+<h2 id="pattern">The pattern in one picture</h2>
+<figure class="shot"><img src="../assets/img/pa/l4-trycatch-overview.webp" alt="Run view: Try scope failed (ActionFailed), Catch scope succeeded, Finally scope succeeded; small coloured dots above Catch and Finally show their run-after settings" width="400" height="446" loading="lazy">
+<figcaption>Try failed, so Catch ran. Finally ran too. The coloured dots above each scope show which outcomes it runs after.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Scope</th><th>Contains</th><th>Runs after</th></tr></thead><tbody>
+<tr><td>Try</td><td>The real work: Read order, Calculate tax</td><td>The trigger</td></tr>
+<tr><td>Catch</td><td>Find the error, alert, log</td><td>Try <strong>has failed</strong> or <strong>has timed out</strong></td></tr>
+<tr><td>Finally</td><td>Clean-up, a summary, a log entry</td><td>Catch <strong>succeeded, failed, skipped or timed out</strong> (anything)</td></tr>
+</tbody></table></div>
+<p>In the demo, an order arrives with the amount <em>"not a number"</em>. Calculate tax tries <code>int()</code> on it and fails, which fails the Try scope and starts Catch.</p>
+
+<h2 id="error">Finding out what went wrong</h2>
+<p>Inside Catch, <code>result('Try')</code> returns every action in the Try scope with its status and error. Filter it to the failed ones:</p>
+<pre><code>first(body(&#x27;Failed_actions&#x27;))?[&#x27;error&#x27;]?[&#x27;message&#x27;]</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>result(&#x27;Try&#x27;)</code></td><td>Used in a <strong>Filter array</strong> named Failed actions: the list of actions inside Try with their status.</td></tr><tr><td><code>where status equals &#x27;Failed&#x27;</code></td><td>Keeps only the action that failed.</td></tr><tr><td><code>first(...)?[&#x27;error&#x27;]?[&#x27;message&#x27;]</code></td><td>Its error message, ready to put in an alert or log.</td></tr></tbody></table></div>
+<figure class="shot"><img src="../assets/img/pa/l4-trycatch-error.webp" alt="Error message output: Unable to process template language expressions in action &#x27;Calculate_tax&#x27;... The template language function &#x27;int&#x27; was invoked with a parameter that is not valid." width="505" height="300" loading="lazy">
+<figcaption>The exact reason, captured inside the flow rather than only in run history.</figcaption></figure>
+
+<h2 id="status">Why the run says Succeeded</h2>
+<p>This run shows <em>Your flow ran successfully</em> even though Calculate tax failed. Power Automate judges a run by its last steps, and Finally succeeded. That's fine when Catch really handled the problem. When it didn't, the run should still be marked as Failed so it shows up in monitoring. The <strong>Terminate</strong> action does that (see Error alerts and Terminate).</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Scope</strong>: a container that groups actions. The scope's status is the combined status of what's inside it.</p>
+<p><strong>Run after</strong>: the setting that decides when an action runs: after the previous one succeeded, failed, was skipped or timed out. The next article covers it in detail.</p>
+<p><strong>result('ScopeName')</strong>: an expression that returns the outcome of every action inside a scope.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Add a <strong>Scope</strong> named <em>Try</em> and move your main actions into it.</li><li>Add a second Scope named <em>Catch</em> below it. Open its <strong>Settings</strong> &gt; <strong>Run after</strong>, tick <em>has failed</em> and <em>has timed out</em>, and untick <em>is successful</em>.</li><li>Inside Catch add <strong>Filter array</strong>: From <code>result('Try')</code>, where <code>item()?['status']</code> is equal to <code>Failed</code>.</li><li>Add a Compose with <code>first(body('Filter_array'))?['error']?['message']</code>.</li><li>Add a third Scope named <em>Finally</em>, set to run after Catch for all four outcomes.</li><li>Make a step in Try fail on purpose (for example <code>int('abc')</code>) and test.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Leaving Catch on the default <em>is successful</em>. It is then skipped exactly when you need it.</li>
+<li>Catching everything and reporting nothing. A Catch scope with no alert or log hides failures.</li>
+<li>One huge Try around the whole flow. Smaller Try scopes per stage tell you which stage broke.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/scopes">Use scopes to organize actions in cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Employ robust error handling</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="./">← All Power Automate topics</a><a href="configure-run-after.html">Configure run after →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#pattern">The pattern in one picture</a></li><li><a href="#error">Finding out what went wrong</a></li><li><a href="#status">Why the run says Succeeded</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

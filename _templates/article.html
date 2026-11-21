@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<!--
+  ARTICLE TEMPLATE
+  1. Copy this file to articles/<short-name>.html (for example articles/trigger-conditions.html).
+  2. Replace every [BRACKETED] part.
+  3. Put the poster image in assets/img/ and point the <img> below at it.
+  4. Add a card for it in the "Latest articles" section of index.html.
+  This folder starts with "_", so GitHub Pages does not publish this template.
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[ARTICLE TITLE] | Vinay Matsa</title>
+<meta name="description" content="[ONE-SENTENCE SUMMARY]">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[ARTICLE TITLE]">
+<meta property="og:description" content="[ONE-SENTENCE SUMMARY]">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../#articles" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="../#articles">Articles</a> / [TOPIC]</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">[Power Platform Deep Dive OR Copilot Studio &amp; AI Lab]</li>
+        <li>[TOPIC]</li>
+      </ul>
+      <h1>[ARTICLE TITLE]</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="[YYYY-MM-DD]">[DD Month YYYY]</time>
+        <span>[X] min read</span>
+      </div>
+
+      <div class="poster">
+        <img src="../assets/img/[poster-file].png" alt="[DESCRIBE THE POSTER]">
+      </div>
+
+      <div class="prose">
+        <p>[Opening paragraph: the problem in one or two sentences.]</p>
+
+        <h2 id="section-1">[Section heading]</h2>
+        <p>[Text.]</p>
+        <pre><code>[code or expression]</code></pre>
+        <div class="callout"><strong>Tip:</strong> [A practical tip.]</div>
+
+        <h2 id="section-2">[Section heading]</h2>
+        <p>[Text.]</p>
+
+        <h2 id="references">References</h2>
+        <ul>
+          <li><a href="[MICROSOFT LEARN URL]">[Microsoft Learn page title]</a></li>
+        </ul>
+      </div>
+
+      <div class="pager">
+        <a href="[previous-article].html">← [Previous article]</a>
+        <a href="[next-article].html">[Next article] →</a>
+      </div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol>
+          <li><a href="#section-1">[Section heading]</a></li>
+          <li><a href="#section-2">[Section heading]</a></li>
+          <li><a href="#references">References</a></li>
+        </ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upsert and duplicate checks | Vinay Matsa</title>
+<meta name="description" content="Create a record only if it doesn't exist yet, update it if it does, and drop duplicates before they reach your list.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Upsert and duplicate checks">
+<meta property="og:description" content="Create a record only if it doesn't exist yet, update it if it does, and drop duplicates before they reach your list.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 8</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 8 · Real-world patterns · 1 of 8</li>
+      </ul>
+      <h1>Upsert and duplicate checks</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Data that arrives from emails, forms or files often contains records you already have, and sometimes the same record twice. Creating a new item every time fills the list with copies. Two habits fix this: remove duplicates from the incoming batch, then <strong>upsert</strong> each record (update if it exists, insert if it doesn't).</p>
+
+<h2 id="demo">Four records in, three handled, no copies</h2>
+<p>The demo receives four requests. <em>Standing desk</em> appears twice, and <em>Monitor arms (x6)</em> already exists in the list.</p>
+<figure class="shot"><img src="../assets/img/pa/l8-upsert-canvas.webp" alt="Flow canvas: Incoming requests, Remove duplicates, Created count, Updated count, Upsert each loop (1 of 3) with Find existing and Already exists condition, Summary" width="190" height="560" loading="lazy">
+<figcaption>The loop runs three times, not four, because the duplicate was removed first.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l8-upsert-summary.webp" alt="Summary output: Received 4, After removing duplicates 3, Created 2, Updated 1" width="618" height="175" loading="lazy">
+<figcaption>Two new items were created and the existing one was updated.</figcaption></figure>
+
+<h2 id="dedupe">Removing duplicates in one step</h2>
+<pre><code>union(outputs(&#x27;Incoming_requests&#x27;), outputs(&#x27;Incoming_requests&#x27;))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>union(a, b)</code></td><td>Joins two arrays and keeps each distinct value once.</td></tr><tr><td><code>the same array twice</code></td><td>A neat trick: the result is the array with exact duplicates removed.</td></tr><tr><td><code>exact</code></td><td>Objects count as duplicates only if every property matches. For a match on one field (such as an email), use the key-based approach below.</td></tr></tbody></table></div>
+
+<h2 id="upsert">The upsert</h2>
+<ol>
+<li><strong>Get items</strong> with a filter on the business key and Top count 1: <code>Title eq 'Standing desk'</code>.</li>
+<li><strong>Condition</strong>: <code>length(outputs('Find_existing')?['body/value'])</code> is greater than 0.</li>
+<li>Yes: <strong>Update item</strong> using <code>first(...)?['ID']</code>. No: <strong>Create item</strong>.</li>
+</ol>
+<pre><code>Title eq &#x27;@{replace(items(&#x27;Upsert_each&#x27;)?[&#x27;Title&#x27;], &#x27;&#x27;&#x27;&#x27;, &#x27;&#x27;&#x27;&#x27;&#x27;&#x27;)}&#x27;</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>Title eq &#x27;...&#x27;</code></td><td>An OData filter on the key column.</td></tr><tr><td><code>replace(..., &#x27;&#x27;&#x27;&#x27;, &#x27;&#x27;&#x27;&#x27;&#x27;&#x27;)</code></td><td>Doubles any apostrophe, so a value like <em>O'Brien</em> doesn't break the filter.</td></tr></tbody></table></div>
+<p>Run the flow twice and the second run updates everything and creates nothing. That property (running again doesn't create copies) is what makes a flow safe to retry.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Business key</strong>: the value that identifies a record in real life, such as an order number or email, as opposed to SharePoint's own ID.</p>
+<p><strong>Idempotent</strong>: running it again gives the same result. Upserts are idempotent; plain creates are not.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Decide the key column and, if you can, make it unique in the list settings (<em>Enforce unique values</em>).</li><li>Remove duplicates from the incoming data with <code>union()</code>, or with Select plus union on the key.</li><li>Loop over the records with concurrency set to 1 (so two copies of the same key can't both be created).</li><li>Inside: Get items filtered on the key, then a Condition on the result length.</li><li>Update in the Yes branch, Create in the No branch, and count both.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Parallel loop runs on an upsert. Two runs both see "not found" and both create.</li>
+<li>Filtering on a display name that people edit. Use a stable key.</li>
+<li>Forgetting the apostrophe escape. One name like <em>D'Souza</em> fails the run.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference (union)</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Error handling guidance for cloud flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="./">← All Power Automate topics</a><a href="trigger-loops-column-changes.html">Guarding trigger loops and detecting column changes →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">Four records in, three handled, no copies</a></li><li><a href="#dedupe">Removing duplicates in one step</a></li><li><a href="#upsert">The upsert</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

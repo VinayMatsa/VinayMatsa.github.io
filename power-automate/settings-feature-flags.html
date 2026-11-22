@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configurable templates and feature flags | Vinay Matsa</title>
+<meta name="description" content="Keep thresholds, message text and on/off switches in one settings object so the business can change them without editing the flow.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Configurable templates and feature flags">
+<meta property="og:description" content="Keep thresholds, message text and on/off switches in one settings object so the business can change them without editing the flow.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 8</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 8 · Real-world patterns · 6 of 8</li>
+      </ul>
+      <h1>Configurable templates and feature flags</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>A flow is easier to maintain when the values people want to change (a limit, a reminder delay, the wording of a message) live outside the logic. Put them in one <strong>settings object</strong>, read it at the start of the run, and use it everywhere.</p>
+
+<h2 id="demo">Settings from a JSON environment variable</h2>
+<p>The demo reads a <strong>JSON</strong> environment variable (see Environment variables in Level 6):</p>
+<figure class="shot"><img src="../assets/img/pa/l8-settings-values.webp" alt="Settings output: remindersEnabled true, reminderAfterDays 3, approvalLimit 1000, messageTemplate Hello ~Name~, your request ~Title~ has been waiting for ~Days~ days." width="618" height="175" loading="lazy">
+<figcaption>One object holds the switch, two numbers and a message template.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l8-settings-decision.webp" alt="Decision output: Reminders enabled true, Approval limit 1000, Needs senior approval true, Message Hello Alex, your request Monitor arms (x6) has been waiting for 4 days." width="618" height="175" loading="lazy">
+<figcaption>The flow's decisions all come from the settings.</figcaption></figure>
+<pre><code>outputs(&#x27;Settings&#x27;)?[&#x27;remindersEnabled&#x27;]</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>outputs(&#x27;Settings&#x27;)</code></td><td>The settings object, read once at the start.</td></tr><tr><td><code>?[&#x27;remindersEnabled&#x27;]</code></td><td>A <strong>feature flag</strong>: set it to false to switch reminders off without changing or turning off the flow.</td></tr></tbody></table></div>
+
+<h2 id="where">Where to keep settings</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Place</th><th>Good for</th><th>Changed by</th></tr></thead><tbody>
+<tr><td>JSON environment variable</td><td>A handful of values that differ per environment</td><td>An admin, per environment</td></tr>
+<tr><td>SharePoint "Settings" list</td><td>Values the business owns, such as message wording or limits</td><td>Business users with access to the list</td></tr>
+<tr><td>Child flow "Get settings"</td><td>Many flows sharing the same settings</td><td>One place, read by every flow</td></tr>
+</tbody></table></div>
+<p>The child-flow option suits larger solutions: one small flow reads the settings (from a list or environment variables), returns them as JSON, and every other flow calls it first. Changing the source, say from a list to Dataverse, then touches one flow, not twenty.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Feature flag</strong>: a true/false setting that turns a part of the flow on or off.</p>
+<p><strong>Template</strong>: text with placeholders like <code>~Name~</code> that the flow fills in (see Text functions).</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>List the values that might change: limits, delays, recipients, wording, switches.</li><li>Create a JSON environment variable (or a settings list) holding them.</li><li>Add a Compose named <em>Settings</em> at the start of the flow that reads it.</li><li>Replace every hard-coded value with <code>outputs('Settings')?['name']</code>.</li><li>Wrap optional features in a Condition on their flag.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Reading the settings list inside a loop. Read it once, before the loop.</li>
+<li>No default when a setting is missing. Use <code>coalesce()</code> with a safe value.</li>
+<li>Storing secrets in settings. Use a Secret environment variable with Azure Key Vault.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables">Environment variables overview</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-child-flows">Create child flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="archival-audit.html">← Archival and audit logs</a><a href="batch-counters-summary.html">Batch counters and run summaries →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">Settings from a JSON environment variable</a></li><li><a href="#where">Where to keep settings</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

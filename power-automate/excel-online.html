@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Excel Online basics | Vinay Matsa</title>
+<meta name="description" content="Read and write rows in an Excel table, and avoid the date and number surprises the connector brings.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Excel Online basics">
+<meta property="og:description" content="Read and write rows in an Excel table, and avoid the date and number surprises the connector brings.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 7</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 7 · Files, email and documents · 3 of 7</li>
+      </ul>
+      <h1>Excel Online basics</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>The <strong>Excel Online (Business)</strong> connector reads and writes data in Excel files stored in SharePoint or OneDrive. It works with <strong>tables</strong>, not loose cells: the data must be formatted as a table (Insert &gt; Table) before a flow can see it.</p>
+
+<h2 id="demo">Reading a table</h2>
+<p>The demo workbook has a table named <em>Orders</em> with five rows: OrderId, Customer, Amount and OrderDate.</p>
+<figure class="shot"><img src="../assets/img/pa/l7-excel-canvas.webp" alt="Flow canvas: List orders, List orders ISO dates, List payments, Paid order IDs, Unpaid orders, Unpaid customers, Summary" width="220" height="437" loading="lazy">
+<figcaption>The same table is read twice, once with each date setting.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l7-excel-summary.webp" alt="Summary output: Orders in the table 5, OrderDate by default 46328, OrderDate with ISO 8601 2026-11-02T00:00:00.000Z, Amount is returned as text, Orders with no payment Fabrikam (102), Tailspin (104)" width="618" height="185" loading="lazy">
+<figcaption>Dates arrive as numbers unless you ask for ISO 8601, and every value arrives as text.</figcaption></figure>
+
+<h2 id="surprises">Two surprises to plan for</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>What you see</th><th>Why</th><th>Fix</th></tr></thead><tbody>
+<tr><td>OrderDate is <strong>46328</strong></td><td>Excel stores dates as a day count. The connector returns that number by default.</td><td>Set <strong>DateTime Format</strong> (advanced parameter) to <em>ISO 8601</em>, or convert with <code>addDays('1899-12-30', ...)</code> (see Dates and time zones).</td></tr>
+<tr><td>Amount is <strong>text</strong></td><td>The connector returns every cell as a string.</td><td>Wrap in <code>float()</code> or <code>int()</code> before any maths or comparison.</td></tr>
+</tbody></table></div>
+
+<h2 id="limits">Limits from the connector documentation</h2>
+<ul>
+<li>The largest file the Excel Online (Business) connector supports is 25 MB.</li>
+<li><strong>List rows present in a table</strong> returns up to 256 rows unless you turn on pagination in the action's settings.</li>
+<li>Its filter supports only basic functions (eq, ne, contains, startswith, endswith), one filter function per column, and one sort column.</li>
+<li>A file can stay locked for a few minutes after the connector last used it, so avoid people editing the same file while a flow writes to it.</li>
+</ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Table</strong>: a named range in Excel with headers. The connector reads by table name, not by sheet.</p>
+<p><strong>Key column</strong>: the column used to find a row for Update a row or Delete a row. Use a unique ID column.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>In Excel, select your data and choose <strong>Insert &gt; Table</strong>. Give the table a name on the Table Design tab.</li><li>Add <strong>List rows present in a table</strong>: choose the location, library, file and table.</li><li>Open <em>Advanced parameters</em> and set <strong>DateTime Format</strong> to ISO 8601.</li><li>For more than 256 rows, open the action's <strong>Settings</strong>, turn on Pagination and set a threshold.</li><li>To write, use <strong>Add a row into a table</strong>, or <strong>Update a row</strong> with a key column and value.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Data that isn't formatted as a table. The table drop-down is empty.</li>
+<li>Comparing amounts as text: <em>"80"</em> is greater than <em>"1200"</em> when compared as text.</li>
+<li>One row at a time in a loop for thousands of rows. It is slow and uses many requests; consider a SharePoint list or Dataverse for large data.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/connectors/excelonlinebusiness/">Excel Online (Business) connector reference and known limits</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="reply-move-read-email.html">← Reply, move and read email</a><a href="excel-patterns.html">Excel processing patterns →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">Reading a table</a></li><li><a href="#surprises">Two surprises to plan for</a></li><li><a href="#limits">Limits from the connector documentation</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

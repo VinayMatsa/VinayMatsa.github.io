@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Building .eml files | Vinay Matsa</title>
+<meta name="description" content="Save an email as a file that opens in Outlook, for records, audits or drafts to send later.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Building .eml files">
+<meta property="og:description" content="Save an email as a file that opens in Outlook, for records, audits or drafts to send later.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 7</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 7 · Files, email and documents · 6 of 7</li>
+      </ul>
+      <h1>Building .eml files</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>An <strong>.eml</strong> file is an email saved as a text file. Double-click it and Outlook opens it as a message. Flows create them to keep a copy of what was sent, to hand someone a ready-made draft, or to archive an email next to the record it belongs to.</p>
+
+<h2 id="demo">An .eml built in a Compose</h2>
+<p>An .eml file is just headers, a blank line, then the body. The demo builds one in a Compose and saves it with SharePoint Create file:</p>
+<pre><code>From: Contoso Support &lt;support@contoso.com&gt;
+To: Alex Johnson &lt;alex@contoso.com&gt;
+Subject: Request REQ-1042 received
+Date: Sun, 22 Nov 2026 10:06:04 +0000
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+&lt;p&gt;Hello Alex,&lt;/p&gt;&lt;p&gt;We received request &lt;b&gt;REQ-1042&lt;/b&gt;.&lt;/p&gt;</code></pre>
+<figure class="shot"><img src="../assets/img/pa/l7-files-result.webp" alt="Result output: .eml file moved to /Shared Documents/Website demo archive/website-demo-REQ-1042.eml" width="618" height="155" loading="lazy">
+<figcaption>The .eml file was saved, then moved into an archive folder.</figcaption></figure>
+
+<h2 id="line-breaks">The line-break detail</h2>
+<p>Email headers must be separated by a carriage return and line feed. A Compose box doesn't make that obvious, so the demo inserts them with an expression:</p>
+<pre><code>concat(&#x27;From: ...&#x27;, decodeUriComponent(&#x27;%0D%0A&#x27;), &#x27;To: ...&#x27;, decodeUriComponent(&#x27;%0D%0A&#x27;), ...)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>decodeUriComponent(&#x27;%0D%0A&#x27;)</code></td><td>Produces a real carriage return and line feed between headers.</td></tr><tr><td><code>two in a row</code></td><td>Make the blank line that separates the headers from the body.</td></tr><tr><td><code>Content-Type: text/html</code></td><td>Tells Outlook the body is HTML; use text/plain for plain text.</td></tr></tbody></table></div>
+
+<h2 id="draft">Drafts that open ready to send</h2>
+<p>Add the header <code>X-Unsent: 1</code> and Outlook opens the file as a <strong>new draft</strong> instead of a received message, so a person can review and press Send. Leave out <em>From</em> in that case; Outlook uses the person's own account.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Headers</strong>: the lines at the top of an email (From, To, Subject, Date) that describe it.</p>
+<p><strong>MIME</strong>: the standard format for email content, including how attachments are added.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Add a Compose that builds the headers and body with <code>concat()</code> and <code>decodeUriComponent('%0D%0A')</code> between lines.</li><li>Add SharePoint <strong>Create file</strong> with a name ending in <code>.eml</code> and the Compose output as content.</li><li>Download the file and open it in Outlook to check the layout.</li><li>For a draft, add <code>X-Unsent: 1</code> and remove the From line.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Plain line breaks typed in the box. Some clients then show headers as body text.</li>
+<li>No blank line between headers and body. The body disappears.</li>
+<li>Putting real customer emails into archived .eml files without a retention plan.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference (Create file)</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="word-template-pdf.html">← Word templates and PDF conversion</a><a href="sharepoint-attachments-folders.html">SharePoint attachments, folders and moving files →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">An .eml built in a Compose</a></li><li><a href="#line-breaks">The line-break detail</a></li><li><a href="#draft">Drafts that open ready to send</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

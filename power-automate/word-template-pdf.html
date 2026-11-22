@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Word templates and PDF conversion | Vinay Matsa</title>
+<meta name="description" content="Fill a Word template with data from a flow, save it, and convert it to PDF.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Word templates and PDF conversion">
+<meta property="og:description" content="Fill a Word template with data from a flow, save it, and convert it to PDF.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 7</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 7 · Files, email and documents · 5 of 7</li>
+      </ul>
+      <h1>Word templates and PDF conversion</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Letters, certificates and confirmations usually follow a fixed layout with a few changing values. The <strong>Word Online (Business)</strong> connector fills a Word template with those values and converts the result to PDF, ready to email or store.</p>
+
+<h2 id="demo">From template to PDF</h2>
+<figure class="shot"><img src="../assets/img/pa/l7-word-canvas.webp" alt="Flow canvas: Order, Populate a Word template, Save Word file, Convert to PDF, Save PDF, Result" width="220" height="382" loading="lazy">
+<figcaption>Five steps from data to a stored PDF.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l7-word-pdf.webp" alt="The generated PDF: Contoso Ltd, Date: 22 November 2026, Dear Contoso, Thank you for order 101. The total amount is 250.00." width="793" height="290" loading="lazy">
+<figcaption>The finished PDF. The date, name, order number and amount were filled in by the flow.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l7-word-result.webp" alt="Result output: Word file website-demo-letter-101.docx, PDF file website-demo-letter-101.pdf" width="618" height="155" loading="lazy">
+<figcaption>Both files saved in the library.</figcaption></figure>
+
+<h2 id="template">How the template works</h2>
+<p>A template is a normal .docx file with <strong>content controls</strong> where the values go. In Word desktop, turn on the <strong>Developer</strong> tab, place a <em>Plain Text Content Control</em> for each value, and give each one a clear title in Properties (LetterDate, CustomerName, OrderId, Amount). When you pick the file in <strong>Populate a Microsoft Word template</strong>, those titles appear as input boxes.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Action</th><th>Input</th><th>Output</th></tr></thead><tbody>
+<tr><td>Populate a Microsoft Word template</td><td>Template file and a value per control</td><td>The new document's content (not yet saved)</td></tr>
+<tr><td>SharePoint Create file</td><td>A name ending in .docx and the content from above</td><td>The saved Word file</td></tr>
+<tr><td>Convert Word Document to PDF</td><td>The saved Word file</td><td>PDF content to save or attach</td></tr>
+</tbody></table></div>
+<p>The connector is <strong>premium</strong>, so the flow needs a Power Automate Premium (or Process) licence.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Content control</strong>: a marked box in a Word document that a program can fill in. Word desktop shows them on the Developer tab.</p>
+<p><strong>.docx vs .dotx</strong>: save the template as a normal .docx. The action works with .docx files.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>In Word desktop, write the letter and insert a Plain Text Content Control for each value. Give each a title.</li><li>Save it as .docx in a SharePoint library.</li><li>Add <strong>Populate a Microsoft Word template</strong>, select the file, and fill each box with dynamic content.</li><li>Add SharePoint <strong>Create file</strong> with a unique name, such as <code>concat('letter-', variables('OrderId'), '.docx')</code>.</li><li>Add <strong>Convert Word Document to PDF</strong> on the saved file, then Create file again with a .pdf name, or attach it to an email.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Content controls that aren't plain text (rich text, date picker). Use plain text and format the value in the flow.</li>
+<li>Converting before saving. Convert to PDF needs a saved Word file.</li>
+<li>Re-using one output name, so each run overwrites the last letter.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/connectors/wordonlinebusiness/">Word Online (Business) connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types">Types of Power Automate licenses</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="excel-patterns.html">← Excel processing patterns</a><a href="eml-files.html">Building .eml files →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">From template to PDF</a></li><li><a href="#template">How the template works</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

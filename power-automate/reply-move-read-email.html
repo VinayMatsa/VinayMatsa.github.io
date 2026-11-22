@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reply, move and read email | Vinay Matsa</title>
+<meta name="description" content="Reply to the right person, file processed mail into a folder, and read the email body as plain text.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Reply, move and read email">
+<meta property="og:description" content="Reply to the right person, file processed mail into a folder, and read the email body as plain text.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 7</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 7 · Files, email and documents · 2 of 7</li>
+      </ul>
+      <h1>Reply, move and read email</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>After a flow processes an email it usually does three more things: replies to the sender, moves the email out of the Inbox so it isn't processed twice, and reads the body text to find details. Each has one catch worth knowing.</p>
+
+<h2 id="demo">Reply and move</h2>
+<figure class="shot"><img src="../assets/img/pa/l7-email-canvas-end.webp" alt="Flow canvas: Send test email, Wait for delivery, Get emails, Save each attachment, Reply to email, Move email, Summary" width="175" height="420" loading="lazy">
+<figcaption>After saving the attachment, the flow replies and moves the email.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Action</th><th>Key inputs</th></tr></thead><tbody>
+<tr><td><strong>Reply to email (V3)</strong></td><td>Message Id from the trigger or Get emails, the reply text, and Reply All yes or no</td></tr>
+<tr><td><strong>Move email (V2)</strong></td><td>Message Id and the destination folder (Archive in the demo)</td></tr>
+</tbody></table></div>
+<p><strong>A real failure from the demo.</strong> The first run failed at Reply to email with <em>A message needs to have at least one recipient</em>. The test email was sent by the same account that replied, and Outlook leaves you out of your own reply. Setting the reply's <strong>To</strong> field to the original sender, <code>first(outputs('Get_emails')?['body/value'])?['from']</code>, fixed it. Real senders are usually other people, but shared-mailbox and test setups hit this often.</p>
+
+<h2 id="read-body">Reading the body as text</h2>
+<p>The email body is HTML. To search it for an order number or a name, you need plain text.</p>
+<figure class="shot"><img src="../assets/img/pa/l7-email-summary.webp" alt="Summary output: Body preview (plain text) Hello, The order file for this week is at..., Body (HTML) starts with &lt;html&gt;&lt;head&gt;&lt;meta http-equiv=..." width="618" height="190" loading="lazy">
+<figcaption>The same email as plain text (Body preview) and as HTML.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Option</th><th>Gives you</th><th>Watch out for</th></tr></thead><tbody>
+<tr><td><code>bodyPreview</code> from Get emails or the trigger</td><td>Plain text, no connector needed</td><td>Only the first part of the message (about 255 characters)</td></tr>
+<tr><td><strong>Html to text</strong> (Content Conversion connector)</td><td>The full body as plain text</td><td>A separate connector that your data policy must allow</td></tr>
+<tr><td>Text functions on the HTML</td><td>Values between known markers with <code>split()</code> and <code>substring()</code></td><td>Breaks when the email layout changes</td></tr>
+</tbody></table></div>
+<p>In the environment used for these demos, the data policy blocks Content Conversion (<em>Admin data policy 'Advanced Connector Policy' restricts use of these apis: shared_conversionservice</em>), so the demo uses <code>bodyPreview</code>. Check your own policy before you design around Html to text.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Message Id</strong>: the unique ID of one email. Reply, move, flag and mark-as-read actions all need it.</p>
+<p><strong>Well-known folders</strong>: Inbox, Archive, Sent Items, Deleted Items. Other folders are chosen from the folder list in the action.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>After the trigger or Get emails, add <strong>Reply to email (V3)</strong> with the Message Id and your reply text.</li><li>Under <em>Show all</em>, set <strong>To</strong> to the original sender when the mailbox may reply to itself.</li><li>Add <strong>Move email (V2)</strong> with the same Message Id and a folder such as <em>Processed</em>.</li><li>For the body, use <code>bodyPreview</code> for short checks, or Html to text if your policy allows it.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Leaving processed mail in the Inbox, so a polling flow picks it up again.</li>
+<li>Replying with Reply All to a large distribution list.</li>
+<li>Searching the HTML body for text that is split by tags, such as <code>REQ-&lt;b&gt;1042&lt;/b&gt;</code>.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/conversionservice/">Content Conversion connector (Html to text)</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/advanced-connector-policies">Advanced connector policies</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="email-attachments.html">← Email attachments and file content</a><a href="excel-online.html">Excel Online basics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">Reply and move</a></li><li><a href="#read-body">Reading the body as text</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

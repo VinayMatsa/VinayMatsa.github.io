@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batch operations and changesets | Vinay Matsa</title>
+<meta name="description" content="Write many records in fewer calls, and group Dataverse changes so they all succeed or all roll back.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Batch operations and changesets">
+<meta property="og:description" content="Write many records in fewer calls, and group Dataverse changes so they all succeed or all roll back.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 5</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 5 · Performance and scale · 4 of 6</li>
+      </ul>
+      <h1>Batch operations and changesets</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>When a flow writes many rows, the usual pattern is a loop with one Create or Update per item. Every pass is a request and a round trip to the service. Batching sends several operations in one call. Changesets go further: they make a group of writes <strong>all or nothing</strong>.</p>
+
+<h2 id="options">Ways to reduce write calls</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Approach</th><th>What it does</th><th>When to use it</th></tr></thead><tbody>
+<tr><td>Prepare data before the loop</td><td>Use Select and Filter array so the loop only does the write, with nothing else inside it</td><td>Always. It is the cheapest win.</td></tr>
+<tr><td>Loop concurrency</td><td>Runs several passes at once (up to 50)</td><td>Independent writes where order doesn't matter. Faster, but the request count is the same.</td></tr>
+<tr><td>Dataverse changeset</td><td>Groups Add, Update and Delete row actions into one transaction</td><td>Rows that must stay consistent with each other</td></tr>
+<tr><td>Batch request through HTTP</td><td>One <code>$batch</code> call to the Dataverse Web API or SharePoint REST API holding many operations</td><td>Large volumes, when you are comfortable building the request body</td></tr>
+<tr><td>Process outside the flow</td><td>Hand the file to a dataflow, an import, or a stored procedure</td><td>Thousands of rows on a regular schedule</td></tr>
+</tbody></table></div>
+
+<h2 id="changeset">What a changeset gives you</h2>
+<p>Normally, if the third of five writes fails, the first two stay saved and the data is half-updated. Inside a <strong>changeset</strong>, Dataverse runs the writes as one transaction. If any of them fails, all of them are rolled back. Typical uses: creating an order with its order lines, or moving a balance from one record to another.</p>
+<p>Points to know:</p>
+<ul>
+<li>A changeset holds only Dataverse <em>Add a new row</em>, <em>Update a row</em> and <em>Delete a row</em> actions.</li>
+<li>You can't use an output of one action in a later action of the same changeset, because nothing is saved until the end.</li>
+<li>Microsoft lists changesets as not yet supported in the new designer, so build or edit them in the classic designer.</li>
+</ul>
+<p>This page has no demo screenshot for that reason: the environment used for these articles runs the new designer, and the documented limitation applies.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Batch</strong>: many operations sent together in one HTTP call. Each one can still succeed or fail on its own.</p>
+<p><strong>Transaction</strong>: a group of changes that is saved together or not at all.</p>
+<p><strong>Rollback</strong>: undoing the changes already made in a transaction when a later one fails.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Switch to the classic designer for the flow (Microsoft's changeset page explains how).</li><li>Add the action <strong>Perform a changeset request</strong> from the Dataverse connector.</li><li>Inside it, add the Add a new row, Update a row or Delete a row actions you need.</li><li>Fill in each action with values from before the changeset, not from actions inside it.</li><li>Test with one bad value on purpose and confirm that none of the rows were saved.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Expecting a batch to be a transaction. Only a changeset rolls back; plain batches don't.</li>
+<li>Turning on high concurrency for writes that depend on each other, such as running totals.</li>
+<li>Referencing the ID of a row created earlier in the same changeset. It doesn't exist yet.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/change-set">Perform changesets in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/developer/data-platform/webapi/execute-batch-operations-using-web-api">Execute batch operations using the Web API</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="avoid-nested-loops.html">← Avoiding nested loops</a><a href="large-files.html">Working with large files →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#options">Ways to reduce write calls</a></li><li><a href="#changeset">What a changeset gives you</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

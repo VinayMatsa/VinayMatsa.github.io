@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Do until loops and their limits | Vinay Matsa</title>
+<meta name="description" content="Repeat steps until a condition is true, and understand the count and timeout limits that quietly stop the loop.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Do until loops and their limits">
+<meta property="og:description" content="Repeat steps until a condition is true, and understand the count and timeout limits that quietly stop the loop.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 5</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 5 · Performance and scale · 2 of 6</li>
+      </ul>
+      <h1>Do until loops and their limits</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p><strong>Do until</strong> repeats the actions inside it until a condition becomes true. It is the right loop when you don't know how many passes you need: waiting for a status to change, paging through an API, or retrying until something is ready.</p>
+
+<h2 id="demo">Two loops: one that finishes, one that doesn't</h2>
+<figure class="shot"><img src="../assets/img/pa/l5-until-canvas.webp" alt="Flow canvas: Initialize Attempts, Do until counter reaches 5 (0.7 seconds), Do until something that never happens (0.6 seconds), Results" width="400" height="399" loading="lazy">
+<figcaption>Both loops show a green tick. Only the first one actually reached its condition.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l5-until-results.webp" alt="Results output: Counter after first loop 5, Attempts before the limit stopped it 3" width="514" height="110" loading="lazy">
+<figcaption>The first loop reached 5. The second loop stopped after 3 tries because of its limit, not because the condition came true.</figcaption></figure>
+<p>The second loop waits for <code>equals(1, 2)</code>, which can never be true. It still ends with <strong>Succeeded</strong>. When a Do until hits its limit, it simply stops and the flow carries on as if nothing went wrong. That is the most important thing to know about this loop.</p>
+
+<h2 id="limits">Count and timeout</h2>
+<figure class="shot"><img src="../assets/img/pa/l5-until-code.webp" alt="Code view of the Until action: type Until, expression equals(1, 2), limit count 3, timeout PT1H" width="480" height="100" loading="lazy">
+<figcaption>Code view shows both limits on the loop.</figcaption></figure>
+<pre><code>&quot;limit&quot;: { &quot;count&quot;: 3, &quot;timeout&quot;: &quot;PT1H&quot; }</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>count</code></td><td>The most passes allowed. The default is 60, and Microsoft documents 5,000 as the maximum.</td></tr><tr><td><code>timeout</code></td><td>The longest the loop may run, in ISO 8601 duration format. <code>PT1H</code> is one hour, which is the default.</td></tr><tr><td><code>Whichever comes first</code></td><td>The loop stops when the condition is true, or the count is reached, or the timeout passes.</td></tr></tbody></table></div>
+
+<h2 id="check">Telling a real finish from a limit</h2>
+<p>Because the loop succeeds either way, check after it. Add a Condition that tests the same thing the loop was waiting for. If it is still false, the loop gave up: send an alert or Terminate the run as Failed.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Condition</strong>: the test that ends the loop. It is checked <em>after</em> each pass, so the actions inside always run at least once.</p>
+<p><strong>ISO 8601 duration</strong>: <code>PT30M</code> is 30 minutes, <code>PT1H</code> one hour, <code>P1D</code> one day.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Initialize an integer variable <em>Attempts</em> to 0.</li><li>Add <strong>Do until</strong>. Set the condition to <code>variables('Attempts')</code> is greater than or equal to 5.</li><li>Inside it, add <strong>Increment variable</strong> on Attempts by 1, plus the work you want to repeat (for example a status check and a short <strong>Delay</strong>).</li><li>Open the loop's <strong>Settings</strong> (or Change limits) and set Count and Timeout to sensible values.</li><li>After the loop, add a Condition that checks the goal again and handles the case where it was not reached.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Assuming success means the condition was met. The limit may have stopped it.</li>
+<li>No Delay inside a polling loop. It spends requests as fast as it can and finishes all passes in seconds.</li>
+<li>Forgetting to change the value the condition checks. The loop then always runs to its limit.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-control-flow-loops">Create loops that repeat actions (Until loops)</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config">Limits and configuration: looping</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="request-limits.html">← Request limits and how actions are counted</a><a href="avoid-nested-loops.html">Avoiding nested loops →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">Two loops: one that finishes, one that doesn't</a></li><li><a href="#limits">Count and timeout</a></li><li><a href="#check">Telling a real finish from a limit</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

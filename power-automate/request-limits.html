@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Request limits and how actions are counted | Vinay Matsa</title>
+<meta name="description" content="Every action a flow runs counts against a daily request allowance. Learn how the counting works so a flow doesn't hit the limit.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Request limits and how actions are counted">
+<meta property="og:description" content="Every action a flow runs counts against a daily request allowance. Learn how the counting works so a flow doesn't hit the limit.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 5</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 5 · Performance and scale · 1 of 6</li>
+      </ul>
+      <h1>Request limits and how actions are counted</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Power Automate doesn't charge per action, but it does <strong>count</strong> them. Each licence comes with a daily allowance of <strong>Power Platform requests</strong>. Flows that go over it for a long time get slowed down (throttled). Knowing how actions are counted is the first step to writing flows that scale.</p>
+
+<h2 id="counting">How actions are counted</h2>
+<p>The rule from Microsoft's licensing FAQ is simple: <strong>every action that runs is one request</strong>, and that includes the loop itself. A loop with 2 actions inside that runs 10 times uses 1 + (2 &times; 10) = 21 requests. Triggers, conditions, Compose and variables all count too, not only connector calls.</p>
+<p>The demo flow does the same job twice for 50 numbers: once with an Apply to each loop holding 2 actions, once with a single Select.</p>
+<figure class="shot"><img src="../assets/img/pa/l5-loop-canvas.webp" alt="Flow canvas: Start loop, Apply to each number (2 actions, 5 seconds), End loop, Select labels (0 seconds), End select" width="400" height="390" loading="lazy">
+<figcaption>The loop took 5 seconds. Select did the same work in under a second.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l5-loop-comparison.webp" alt="Comparison output: Loop actions run 101, Loop seconds 5, Select actions run 1, Select seconds 0" width="514" height="140" loading="lazy">
+<figcaption>101 requests for the loop against 1 for Select, for the same 50 results.</figcaption></figure>
+<pre><code>1 + (2 * 50) = 101</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>1</code></td><td>The Apply to each action itself.</td></tr><tr><td><code>2 * 50</code></td><td>Two actions inside the loop, run once for each of the 50 numbers.</td></tr><tr><td><code>Select = 1</code></td><td>Select transforms the whole array in a single action, however many items it has.</td></tr></tbody></table></div>
+
+<h2 id="allowance">The daily allowance</h2>
+<p>Allowances are per 24 hours and depend on the licence. At the time of writing, Microsoft's request limits page lists:</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Licence</th><th>Requests per 24 hours</th></tr></thead><tbody>
+<tr><td>Power Automate Premium (per user)</td><td>40,000, shared by all of that user's flows</td></tr>
+<tr><td>Power Automate Process (per flow)</td><td>250,000 for the flow it is assigned to</td></tr>
+<tr><td>Users without a standalone licence (for example Microsoft 365 only)</td><td>Lower allowance; check the official page</td></tr>
+</tbody></table></div>
+<p>Numbers change, so always check the request limits page before you plan capacity. Desktop flow steps run on a machine and don't use these requests.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Request</strong>: one action run. A connector call, a Compose, a variable update and a loop are all one request each.</p>
+<p><strong>Throttling</strong>: when a flow uses far more than its allowance, Power Automate slows it down instead of stopping it. Runs take longer and may time out.</p>
+<p><strong>Allowance</strong>: the number of requests a licence gives per 24 hours.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Open a busy flow's run and count the actions in each loop.</li><li>Multiply by the number of items the loop usually handles, and add the actions outside loops.</li><li>Multiply by the number of runs per day. That is the flow's daily request use.</li><li>Compare it with the owner's allowance. If it is close, replace loops with Select, Filter array or a single bulk call.</li><li>Use the <strong>Analytics</strong> page on the flow, or the Power Platform admin center, to watch actual usage.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Thinking only connector calls count. A Compose or Set variable inside a loop counts on every pass.</li>
+<li>Polling with a short recurrence (every minute) when a trigger that fires on change would do.</li>
+<li>Running many heavy flows under one person's account. They all share that one user's allowance.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations">Requests limits and allocations</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/faqs">Power Automate licensing FAQ</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="./">← All Power Automate topics</a><a href="do-until-loops.html">Do until loops and their limits →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#counting">How actions are counted</a></li><li><a href="#allowance">The daily allowance</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

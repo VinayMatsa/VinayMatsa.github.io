@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Environment variables | Vinay Matsa</title>
+<meta name="description" content="Keep values that change between environments, such as site addresses and email addresses, out of the flow itself.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Environment variables">
+<meta property="og:description" content="Keep values that change between environments, such as site addresses and email addresses, out of the flow itself.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 6</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 6 · ALM and governance · 3 of 7</li>
+      </ul>
+      <h1>Environment variables</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>A flow in development posts to the test site and emails the test team. In production it must use the real site and the real team. Editing the flow after every deployment is slow and easy to get wrong. An <strong>environment variable</strong> holds the value outside the flow, so each environment can have its own value while the flow stays the same.</p>
+
+<h2 id="values">Default value and current value</h2>
+<figure class="shot"><img src="../assets/img/pa/l6-envvar-values.webp" alt="Edit Demo greeting panel: Name vm_DemoGreeting, Data type Text, Default value Hello from the Contoso support team, Current value Hello from the Contoso TEST environment" width="270" height="430" loading="lazy">
+<figcaption>A demo variable with both a default value and a current value.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Part</th><th>What it does</th></tr></thead><tbody>
+<tr><td>Default value</td><td>Part of the definition. Used when there is no current value.</td></tr>
+<tr><td>Current value</td><td>An override for this environment only. If it exists, it wins.</td></tr>
+</tbody></table></div>
+
+<h2 id="demo">Reading it in a flow</h2>
+<p>The demo flow reads the variable in a Compose. The run shows the <strong>current</strong> value, not the default:</p>
+<figure class="shot"><img src="../assets/img/pa/l6-envvar-run.webp" alt="Message action inputs: Greeting Hello from the Contoso TEST environment, Flow name Demo – Environment variables, Sent at (UTC)" width="464" height="170" loading="lazy">
+<figcaption>The current value overrides the default.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l6-envvar-code.webp" alt="Code view: Compose with inputs @parameters(&#x27;Demo greeting (vm_DemoGreeting)&#x27;)" width="468" height="75" loading="lazy">
+<figcaption>In the flow's code, the variable is a parameter named after its display name and schema name.</figcaption></figure>
+<pre><code>@parameters(&#x27;Demo greeting (vm_DemoGreeting)&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>parameters(...)</code></td><td>Environment variables reach the flow as parameters.</td></tr><tr><td><code>Demo greeting</code></td><td>The display name.</td></tr><tr><td><code>(vm_DemoGreeting)</code></td><td>The schema name, with the publisher prefix. This part is what stays fixed across environments.</td></tr></tbody></table></div>
+<p>The same Compose also uses <code>workflow()?['tags']?['flowDisplayName']</code>, which returns the flow's own name. It is handy in alert messages so the reader knows which flow sent them.</p>
+
+<h2 id="types">Data types</h2>
+<p>Microsoft lists these types: Decimal number, JSON, Text, Yes/No, Data source and Secret. <strong>Secret</strong> points to a secret stored in Azure Key Vault, so passwords and keys never sit in the flow or the solution.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Hard-coding</strong>: typing a value such as a URL directly into an action. It then has to be changed by hand in every environment.</p>
+<p><strong>Schema name</strong>: the fixed internal name of a component, including the publisher prefix.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>In your solution, select <strong>New</strong> &gt; <strong>More</strong> &gt; <strong>Environment variable</strong>.</li><li>Enter a display name, choose the data type and add a default value if one makes sense everywhere.</li><li>In the flow, find the variable under the <strong>Environment variables</strong> section of dynamic content.</li><li>Before exporting, decide whether the current value should travel with the solution (under <strong>Advanced</strong>), or remove it so each environment sets its own.</li><li>On import, enter the value for the target environment when the wizard asks.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Exporting the development current value, which then overrides production's setting.</li>
+<li>Storing passwords in a Text variable. Use the Secret type with Azure Key Vault.</li>
+<li>Expecting a changed value to show up in a run that is already in progress. It is read when the flow runs.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/environment-variables">Create environment variables (Power Automate)</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables">Environment variables overview</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables-azure-key-vault-secrets">Use environment variables for Azure Key Vault secrets</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="connection-references.html">← Connection references</a><a href="pipelines.html">Deploying with pipelines →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#values">Default value and current value</a></li><li><a href="#demo">Reading it in a flow</a></li><li><a href="#types">Data types</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

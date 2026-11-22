@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deploying with pipelines | Vinay Matsa</title>
+<meta name="description" content="Move a solution from development to test to production in a few clicks, with checks for connections and variables built in.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Deploying with pipelines">
+<meta property="og:description" content="Move a solution from development to test to production in a few clicks, with checks for connections and variables built in.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 6</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 6 · ALM and governance · 4 of 7</li>
+      </ul>
+      <h1>Deploying with pipelines</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Exporting a zip file and importing it by hand works, but it is easy to deploy the wrong version, skip a test stage or forget a variable. <strong>Pipelines in Power Platform</strong> automate that path. An admin or maker sets up the stages once; after that, deploying is choosing a solution and pressing Deploy.</p>
+
+<h2 id="how">How a pipeline is built</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Part</th><th>What it is</th></tr></thead><tbody>
+<tr><td>Development environment</td><td>Where the unmanaged solution is built. Deployments start here.</td></tr>
+<tr><td>Stages</td><td>The targets in order, for example Test, then Production</td></tr>
+<tr><td>Host environment</td><td>Stores the pipeline setup, permissions and deployment history</td></tr>
+<tr><td>Run</td><td>One deployment of one solution version to one stage, deployed as managed</td></tr>
+</tbody></table></div>
+
+<h2 id="hosts">Two ways to host</h2>
+<ul>
+<li><strong>Platform host</strong>: the default, tenant-wide host. Makers can create personal pipelines to environments they can already import into.</li>
+<li><strong>Custom host</strong>: an environment an admin sets up to govern pipelines centrally, with approvals and extensions.</li>
+</ul>
+<p>Per Microsoft's documentation, all environments in a pipeline need a Dataverse database, and target environments must be <strong>managed environments</strong>.</p>
+
+<h2 id="checks">What pipelines check for you</h2>
+<ul>
+<li>The solution is validated against the target before it is deployed.</li>
+<li>Connection references and environment variable values are asked for up front, so the flows can be turned on straight away.</li>
+<li>Deployments can be scheduled, and every run is kept in history, with deployment notes that Copilot can draft.</li>
+</ul>
+<p>This page has no screenshots, because a pipeline view shows real environment names. The steps below follow the Microsoft Learn guide.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Managed environment</strong>: an environment with extra governance features switched on, such as sharing limits, usage insights and pipelines.</p>
+<p><strong>Stage</strong>: one step in the path to production, tied to a target environment.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Open your solution in the development environment and select <strong>Pipelines</strong> on the left.</li><li>If there is no pipeline yet, create one and add the target stages (for example Test and Production).</li><li>Select <strong>Deploy here</strong> on the next stage.</li><li>Review the validation results, set connections for each connection reference, and enter environment variable values.</li><li>Deploy, then test in the target before deploying to the next stage.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Skipping the test stage because the change is small.</li>
+<li>Editing the deployed managed solution in the target. Fix it in development and deploy again.</li>
+<li>Forgetting to increase the solution version, which makes the history hard to follow.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/pipelines">Overview of pipelines in Power Platform</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/set-up-pipelines">Set up pipelines in Power Platform</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/platform-host-pipelines">Create pipelines using the platform host</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview">Managed environments overview</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="environment-variables.html">← Environment variables</a><a href="ownership-service-accounts.html">Flow ownership and service accounts →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#how">How a pipeline is built</a></li><li><a href="#hosts">Two ways to host</a></li><li><a href="#checks">What pipelines check for you</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -83,6 +83,14 @@
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
 <div class="layer-body"><ol><li>Add an <strong>HTTP</strong> action calling a test endpoint that returns 503.</li><li>Open <strong>Settings</strong> &gt; <strong>Networking</strong> &gt; <strong>Retry policy</strong>: Fixed interval, Count 3, Interval <code>PT5S</code>.</li><li>Test, open the failed action and look at <strong>Retry history</strong>.</li><li>Change the policy to <em>None</em> and test again: it fails in under a second.</li><li>Add a Compose after it with Run after set to <em>has failed</em> to handle the final failure.</li></ol></div></details>
 
+<h2 id="delay">Delay and Delay until</h2>
+<p>Sometimes a flow should wait on purpose: give a file time to finish saving, space out calls to a busy service, or send a reminder later.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Action</th><th>Waits</th><th>Example</th></tr></thead><tbody>
+<tr><td><strong>Delay</strong></td><td>A fixed amount of time</td><td>Count 2, Unit Minute, before reading an Excel file that was just uploaded</td></tr>
+<tr><td><strong>Delay until</strong></td><td>Until a date and time</td><td><code>addDays(utcNow(), 3)</code> for a reminder in three days</td></tr>
+</tbody></table></div>
+<p>A waiting run still counts toward the 30-day run limit. For waits longer than a few days, a scheduled flow that checks what is due is usually safer than one long run.</p>
+
 <h2 id="mistakes">Common mistakes</h2>
 <ul class="mistakes">
 <li>Retrying actions that create records. A retry after a timeout can create a duplicate; make the target check for an existing record first.</li>
@@ -91,7 +99,7 @@
 </ul>
 
 <h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Employ robust error handling (retry policies)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Employ robust error handling (retry policies)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/schedule/">Schedule connector (Delay, Delay until)</a></li></ul>
       </div>
 
       <div class="pager"><a href="configure-run-after.html">← Configure run after</a><a href="concurrency-control.html">Concurrency control →</a></div>
@@ -100,7 +108,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#demo">The demo</a></li><li><a href="#retries">Retries</a></li><li><a href="#timeout">Timeouts</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#demo">The demo</a></li><li><a href="#retries">Retries</a></li><li><a href="#timeout">Timeouts</a></li><li><a href="#delay">Delay and Delay until</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

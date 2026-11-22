@@ -79,6 +79,10 @@
 <li>Build in an environment whose policy matches what production will allow, so there are no surprises at deployment.</li>
 </ul>
 
+<h2 id="tenant-isolation">Tenant isolation</h2>
+<p>Data policies control which connectors may be used. <strong>Tenant isolation</strong> controls <em>where</em> they may connect. It is off by default, so a connector that signs in with Microsoft Entra ID can connect to another organisation's tenant if the user has valid credentials there. With tenant isolation on, connections to and from other tenants are blocked, apart from tenants the admin adds to an allow list.</p>
+<p>If a flow that reads another company's SharePoint suddenly can't connect, tenant isolation is a likely cause. It is an admin setting in the Power Platform admin center, not something a maker can change.</p>
+
 <h2 id="mistakes">Common mistakes</h2>
 <ul class="mistakes">
 <li>Assuming the flow is broken and rebuilding it. The policy is the cause.</li>
@@ -87,7 +91,7 @@
 </ul>
 
 <h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification">Connector classification</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/advanced-connector-policies">Advanced connector policies</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/guidance/adoption/dlp-strategy">Implement a data policy strategy</a></li></ul>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification">Connector classification</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/advanced-connector-policies">Advanced connector policies</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/guidance/adoption/dlp-strategy">Implement a data policy strategy</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/cross-tenant-restrictions">Restrict cross-tenant inbound and outbound access</a></li></ul>
       </div>
 
       <div class="pager"><a href="ownership-service-accounts.html">← Flow ownership and service accounts</a><a href="automation-center.html">Monitoring with Automation center →</a></div>
@@ -96,7 +100,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#error">What it looks like</a></li><li><a href="#groups">Classic policies: three groups</a></li><li><a href="#acp">Advanced connector policies</a></li><li><a href="#maker">What to do as a maker</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#error">What it looks like</a></li><li><a href="#groups">Classic policies: three groups</a></li><li><a href="#acp">Advanced connector policies</a></li><li><a href="#maker">What to do as a maker</a></li><li><a href="#tenant-isolation">Tenant isolation</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

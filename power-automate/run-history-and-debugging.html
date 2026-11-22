@@ -83,6 +83,10 @@
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
 <div class="layer-body"><ol><li>Open your first flow and change the Name length expression to <code>length(triggerBody()['missing'])</code> (no question mark, wrong field).</li><li>Save and test. The run fails.</li><li>Open the run from the 28-day run history and select the red card. Read the error: the property does not exist.</li><li>Correct the expression back to <code>length(triggerBody()?['text'])</code> and save.</li><li>Return to the failed run and select <strong>Resubmit</strong>. The new run succeeds.</li></ol></div></details>
 
+<h2 id="tracked">Tracked properties and secure inputs</h2>
+<p><strong>Tracked properties</strong> (an action's <em>Settings</em>) let you name values to record with that action's run, such as <code>orderId</code> set to <code>triggerBody()?['id']</code>. They make it easier to trace which record a run handled when you search runs and logs later.</p>
+<p><strong>Secure inputs</strong> and <strong>Secure outputs</strong> (also in Settings) do the opposite: they hide an action's values in run history. Turn them on for actions that handle passwords, keys or personal data. Anyone who opens the run then sees that the data is hidden instead of the values.</p>
+
 <h2 id="mistakes">Common mistakes</h2>
 <ul class="mistakes">
 <li>Fixing the last red step instead of the first one.</li>
@@ -91,7 +95,7 @@
 </ul>
 
 <h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/fix-flow-failures">Troubleshoot a cloud flow</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/troubleshoot-flow-errors">Troubleshoot cloud flow errors</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li></ul>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/fix-flow-failures">Troubleshoot a cloud flow</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/troubleshoot-flow-errors">Troubleshoot cloud flow errors</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/how-tos-use-sensitive-input">Manage sensitive input like passwords</a></li></ul>
       </div>
 
       <div class="pager"><a href="conditions-switch-loops.html">← Conditions, Switch and loops</a><a href="./">Back to all topics →</a></div>
@@ -100,7 +104,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#find">Find the run</a></li><li><a href="#read">Read the run</a></li><li><a href="#errors">Errors you will meet first</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#find">Find the run</a></li><li><a href="#read">Read the run</a></li><li><a href="#errors">Errors you will meet first</a></li><li><a href="#tracked">Tracked properties and secure inputs</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

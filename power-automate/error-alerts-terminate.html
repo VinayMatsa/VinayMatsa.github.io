@@ -82,6 +82,16 @@
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
 <div class="layer-body"><ol><li>Build the Try / Catch scopes from the earlier article.</li><li>Inside Catch, add <strong>Post message in a chat or channel</strong> (or Send an email) with the flow name, the failed step and a link using the workflow() expression above.</li><li>After the alert, add <strong>Terminate</strong>: Status Failed, Code a short name such as <em>OrderValidationFailed</em>, Message a sentence a person can understand.</li><li>Make Try fail on purpose and test.</li><li>Check three things: the alert arrived, the link opens the run, and run history shows Failed.</li></ol></div></details>
 
+<h2 id="be-se">Business errors and system errors</h2>
+<p>Larger solutions sort every failure into one of two kinds, because each needs a different response:</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th>Business exception (BE)</th><th>System exception (SE)</th></tr></thead><tbody>
+<tr><td>Cause</td><td>The data breaks a rule: a missing amount, an unknown product, a duplicate</td><td>Something technical failed: a connector is down, a timeout, no permission</td></tr>
+<tr><td>Retry?</td><td>No. The same data fails again.</td><td>Yes, often. It may work in a few minutes.</td></tr>
+<tr><td>Who is told</td><td>The business user who owns the request</td><td>The support team</td></tr>
+<tr><td>Example code</td><td>BE001 Amount missing</td><td>SE001 Connector unavailable</td></tr>
+</tbody></table></div>
+<p>Keep the codes and their messages in a SharePoint list or a JSON environment variable. In the Catch scope, decide the code (a Condition on the error message, or a validation step that already set it), look up the message, send it to the right people, log it, and end with <strong>Terminate</strong> using that code. Reports can then count failures by code instead of reading raw error text.</p>
+
 <h2 id="mistakes">Common mistakes</h2>
 <ul class="mistakes">
 <li>Sending alerts to the flow owner's personal inbox. Use a team channel or shared mailbox so alerts outlive job changes.</li>
@@ -99,7 +109,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#flow">The demo flow</a></li><li><a href="#alert">The alert</a></li><li><a href="#terminate">Terminate</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#flow">The demo flow</a></li><li><a href="#alert">The alert</a></li><li><a href="#terminate">Terminate</a></li><li><a href="#be-se">Business errors and system errors</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

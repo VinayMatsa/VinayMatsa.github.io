@@ -82,6 +82,18 @@
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
 <div class="layer-body"><ol><li>Create an instant flow and add <strong>Send an email (V2)</strong>. To: your own address. Subject and an HTML body with a short list.</li><li>Add <strong>Post message in a chat or channel</strong> (Microsoft Teams). Post as: Flow bot. Post in: Chat with Flow bot. Recipient: your address.</li><li>Write a one-line message with <code>&lt;b&gt;</code> for the key words.</li><li>Test. Check your inbox and the Workflows chat in Teams.</li><li>Change Post in to a channel you own and test again to see the difference.</li></ol></div></details>
 
+<h2 id="shared-mailbox">Shared mailboxes and message options</h2>
+<p>Team processes usually run from a <strong>shared mailbox</strong> (such as support@contoso.com), not from one person's inbox.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Need</th><th>Outlook action or trigger</th></tr></thead><tbody>
+<tr><td>Start when mail reaches the shared mailbox</td><td><strong>When a new email arrives in a shared mailbox (V2)</strong>. Give the mailbox address, the folder, and filters such as subject.</td></tr>
+<tr><td>Send as the shared mailbox</td><td><strong>Send an email from a shared mailbox (V2)</strong>. The connection's account needs Send As permission on the mailbox.</td></tr>
+<tr><td>Copy people in</td><td>CC and BCC under <em>Show all</em> on Send an email (V2). Separate addresses with <code>;</code>.</td></tr>
+<tr><td>Flag as urgent</td><td>Importance: Low, Normal or High.</td></tr>
+<tr><td>Send replies somewhere else</td><td>Reply To: for example, the shared mailbox, even when sending from a service account.</td></tr>
+</tbody></table></div>
+<p>When an action has several versions (V2, V3), use the newest one the designer offers; older versions are kept only so existing flows keep working. The separate <strong>Mail</strong> connector (Send an email notification) sends from a Microsoft no-reply address, which is fine for system alerts but not for messages people should answer.</p>
+<p><strong>Ignore replies.</strong> A trigger condition such as <code>@not(startsWith(triggerOutputs()?['body/subject'], 'RE:'))</code> stops the flow running again for every reply in a thread.</p>
+
 <h2 id="mistakes">Common mistakes</h2>
 <ul class="mistakes">
 <li>Testing with real recipients. Send to yourself until the content is right, or store the recipient in an environment variable that differs per environment.</li>
@@ -90,7 +102,7 @@
 </ul>
 
 <h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/teams/">Microsoft Teams connector reference</a></li></ul>
+<ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/teams/">Microsoft Teams connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="trigger-conditions.html">← Trigger conditions</a><a href="adaptive-cards.html">Adaptive Cards in Teams →</a></div>
@@ -99,7 +111,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#flow">The demo flow</a></li><li><a href="#email">The email</a></li><li><a href="#teams">The Teams message</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#flow">The demo flow</a></li><li><a href="#email">The email</a></li><li><a href="#teams">The Teams message</a></li><li><a href="#shared-mailbox">Shared mailboxes and message options</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

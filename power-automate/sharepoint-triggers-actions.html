@@ -45,7 +45,7 @@
         <span class="mini" aria-hidden="true">VM</span>
         <strong>Vinay Matsa</strong>
         <time datetime="2026-11-21">21 November 2026</time>
-        <span>3 min read</span>
+        <span>4 min read</span>
       </div>
 
       <div class="prose">
@@ -88,6 +88,17 @@
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
 <div class="layer-body"><ol><li>Create a list with Title, Status (choice), Priority (choice), Amount (number) and Department (text), and add a few rows.</li><li>Create an instant flow. Add <strong>Get items</strong> (SharePoint), choose the site and list, and open <strong>Show all</strong>.</li><li>Set Filter Query <code>Status eq 'New'</code>, Order By <code>Amount desc</code>, Top Count 10.</li><li>Add a <strong>Select</strong> in text mode over <em>value</em>: <code>concat(item()?['Title'], ' - ', string(item()?['Amount']))</code>.</li><li>Add <strong>Create item</strong> for the same list and fill Title, Status, Amount.</li><li>Add a Compose with the <em>ID</em> from Create item. Test and check the list: the new row is there.</li></ol></div></details>
 
+<h2 id="update-delete">Update, delete and special columns</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Need</th><th>How</th></tr></thead><tbody>
+<tr><td>Change an item</td><td><strong>Update item</strong> with the item's <em>Id</em>. Required columns must be filled in again, even if they don't change, so map them from the trigger or a Get item.</td></tr>
+<tr><td>Remove an item</td><td><strong>Delete item</strong> with the <em>Id</em>. It goes to the site's recycle bin.</td></tr>
+<tr><td>Read a Choice column</td><td><code>triggerBody()?['Status']?['Value']</code>. The column is an object; <em>Value</em> is the text.</td></tr>
+<tr><td>Read a Person column</td><td><code>triggerBody()?['AssignedTo']?['Email']</code> or <code>?['DisplayName']</code></td></tr>
+<tr><td>Set a Person column</td><td>Use the person's email in the Claims box (for example <code>alex@contoso.com</code>).</td></tr>
+<tr><td>Link to the item in a message</td><td><code>triggerBody()?['{Link}']</code> gives the item's address, ready for an email or Teams message.</td></tr>
+</tbody></table></div>
+<p><strong>Size limits to plan for.</strong> A Single line of text column holds up to 255 characters, and a Multiple lines of text column up to 63,999. Writing longer text to a single-line column fails, so choose multiple lines for comments, AI output or email bodies.</p>
+
 <h2 id="mistakes">Common mistakes</h2>
 <ul class="mistakes">
 <li>Get items with no filter on a big list, then a Condition inside a loop. Filter in SharePoint instead.</li>
@@ -96,7 +107,7 @@
 </ul>
 
 <h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/sharepoint/dev/business-apps/power-automate/sharepoint-connector-actions-triggers">Microsoft SharePoint connector in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/odata-filters">Filter and copy data</a></li></ul>
+<ul><li><a href="https://learn.microsoft.com/en-us/sharepoint/dev/business-apps/power-automate/sharepoint-connector-actions-triggers">Microsoft SharePoint connector in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/odata-filters">Filter and copy data</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://support.microsoft.com/en-us/sharepoint/lists/data-and-lists/list-and-library-column-types-and-options">List and library column types and options (Microsoft Support)</a></li></ul>
       </div>
 
       <div class="pager"><a href="./">← All Power Automate topics</a><a href="dataverse-triggers.html">Dataverse triggers and row actions →</a></div>
@@ -105,7 +116,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#list">The demo list</a></li><li><a href="#get-items">Get items with a filter</a></li><li><a href="#create">Create item</a></li><li><a href="#triggers">Which trigger?</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#list">The demo list</a></li><li><a href="#get-items">Get items with a filter</a></li><li><a href="#create">Create item</a></li><li><a href="#triggers">Which trigger?</a></li><li><a href="#update-delete">Update, delete and special columns</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

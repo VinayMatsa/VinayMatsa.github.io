@@ -81,6 +81,10 @@
 <p><strong>Premium connector</strong>: needs a standalone Power Automate (or qualifying Power Apps / Dynamics 365) licence.</p>
 <p><strong>Owner</strong>: the account a flow belongs to. Automated flows use its licence and its request allowance.</p></div></details>
 
+<h2 id="ai-rpa">AI Builder capacity and desktop flows</h2>
+<p><strong>AI Builder</strong> (document processing, prompts, text recognition) is licensed by capacity, not by user. Building and testing models doesn't use credits; running them in flows does. Microsoft is ending AI Builder credits: since November 2025, AI Builder features can use <strong>Copilot Credits</strong> when no AI Builder credits are left, and the credits that came with premium licences are being removed. Check the capacity page in the admin center before relying on AI steps in production.</p>
+<p><strong>Desktop flows (RPA):</strong> the Premium user licence covers attended desktop flows, which run while the user is signed in. Running desktop flows <strong>unattended</strong> needs Process licences (or pay-as-you-go).</p>
+
 <h2 id="mistakes">Common mistakes</h2>
 <ul class="mistakes">
 <li>Building with a trial and discovering at go-live that users only have Microsoft 365 licences.</li>
@@ -89,7 +93,7 @@
 </ul>
 
 <h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types">Types of Power Automate licenses</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/deep-dive-on-specific-license">Deep dive on specific licenses</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/faqs">Power Automate licensing FAQ</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations">Requests limits and allocations</a></li></ul>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types">Types of Power Automate licenses</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/deep-dive-on-specific-license">Deep dive on specific licenses</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/faqs">Power Automate licensing FAQ</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations">Requests limits and allocations</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/administer-licensing">AI Builder licensing overview</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/endofaibcredits">End of AI Builder credits</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/add-ons">Types of Power Automate add-ons</a></li></ul>
       </div>
 
       <div class="pager"><a href="large-files.html">← Working with large files</a><a href="./">Back to all topics →</a></div>
@@ -98,7 +102,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#types">The main licence types</a></li><li><a href="#premium">What makes a flow premium</a></li><li><a href="#whose">Whose licence counts</a></li><li><a href="#choose">Per user or per flow?</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#types">The main licence types</a></li><li><a href="#premium">What makes a flow premium</a></li><li><a href="#whose">Whose licence counts</a></li><li><a href="#choose">Per user or per flow?</a></li><li><a href="#ai-rpa">AI Builder capacity and desktop flows</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

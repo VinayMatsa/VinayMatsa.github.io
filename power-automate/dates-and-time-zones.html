@@ -80,6 +80,18 @@
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
 <div class="layer-body"><ol><li>Add Compose actions for <code>utcNow()</code>, <code>convertFromUtc()</code> to India Standard Time and <code>convertTimeZone()</code> to Pacific Standard Time.</li><li>Add Compose actions for <code>addDays()</code>, <code>startOfMonth()</code> and the ticks formula above.</li><li>Add a weekend check: <code>or(equals(dayOfWeek(utcNow()), 0), equals(dayOfWeek(utcNow()), 6))</code>.</li><li>Test late in the evening (India time) to see the dates disagree, which is the point of the lesson.</li><li>Change the weekend check to use local time: wrap <code>utcNow()</code> in <code>convertFromUtc(..., 'India Standard Time')</code>.</li></ol></div></details>
 
+<h2 id="working-days">Working days and Excel dates</h2>
+<figure class="shot"><img src="../assets/img/pa/ext-dates.webp" alt="Dates output: Working days in 14 days from 23 Nov 2026: 10; Excel serial 46348 as a date: 2026-11-22" width="514" height="130" loading="lazy">
+<figcaption>Working days counted without weekends, and an Excel date number turned into a date.</figcaption></figure>
+<p><strong>Count working days</strong> (for an SLA or a due date) with a Filter array over a range of day numbers, keeping only Monday to Friday:</p>
+<pre><code>From: range(0, 14)   Where: and(not(equals(dayOfWeek(addDays(&#x27;2026-11-23&#x27;, item())), 0)), not(equals(dayOfWeek(addDays(&#x27;2026-11-23&#x27;, item())), 6)))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>range(0, 14)</code></td><td>The numbers 0 to 13: one per day in the period.</td></tr><tr><td><code>addDays(&#x27;2026-11-23&#x27;, item())</code></td><td>The date for each of those days.</td></tr><tr><td><code>dayOfWeek(...)</code></td><td>0 is Sunday, 6 is Saturday.</td></tr><tr><td><code>not(equals(..., 0)) and not(equals(..., 6))</code></td><td>Keeps weekdays only.</td></tr><tr><td><code>length(body(&#x27;Working_days&#x27;))</code></td><td>The count: 10 working days in these two weeks.</td></tr></tbody></table></div>
+<p>To exclude public holidays too, keep them in a SharePoint list and add a third check that the date isn't in that list.</p>
+<p><strong>Excel dates</strong> often arrive as a number, such as 46348, because Excel stores dates as days counted from 30 December 1899:</p>
+<pre><code>formatDateTime(addDays(&#x27;1899-12-30&#x27;, 46348), &#x27;yyyy-MM-dd&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>addDays(&#x27;1899-12-30&#x27;, 46348)</code></td><td>Counts that many days from Excel's starting point.</td></tr><tr><td><code>formatDateTime(..., &#x27;yyyy-MM-dd&#x27;)</code></td><td>Shows it as 2026-11-22.</td></tr></tbody></table></div>
+<p>If the number has a decimal part, that part is the time of day. Wrap the value in <code>int()</code> first when you only need the date.</p>
+
 <h2 id="mistakes">Common mistakes</h2>
 <ul class="mistakes">
 <li>Checking "is it the weekend?" or "is it before 9 AM?" against UTC. Convert to the user's time zone first.</li>
@@ -88,7 +100,7 @@
 </ul>
 
 <h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/date-time-values">Customize or format date and time values in a flow</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/convert-time-zone">Convert a time zone</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (date and time functions)</a></li></ul>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/date-time-values">Customize or format date and time values in a flow</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/convert-time-zone">Convert a time zone</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (date and time functions)</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="arrays-and-objects.html">← Arrays and objects: first, last, union, intersection</a><a href="text-functions.html">Text functions: split, substring, replace →</a></div>
@@ -97,7 +109,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#results">One run, three clocks</a></li><li><a href="#convert">Converting to local time</a></li><li><a href="#maths">Date maths</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#results">One run, three clocks</a></li><li><a href="#convert">Converting to local time</a></li><li><a href="#maths">Date maths</a></li><li><a href="#working-days">Working days and Excel dates</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

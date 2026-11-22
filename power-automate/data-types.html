@@ -91,6 +91,22 @@
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
 <div class="layer-body"><ol><li>Create an instant flow named <em>Data Types</em>.</li><li>Add six <strong>Initialize variable</strong> actions: Product (String, Laptop), Quantity (Integer, 3), Unit price (Float, 49.99), In stock (Boolean, true), Tags (Array, <code>["hardware","office"]</code>), Order (Object, <code>{"id":101,"customer":"Contoso"}</code>).</li><li>Add Compose <em>Order total</em>: <code>mul(variables('Quantity'), variables('Unit price'))</code>.</li><li>Add Compose <em>Order as text</em>: <code>string(variables('Order'))</code>.</li><li>Add Compose <em>Customer</em>: <code>variables('Order')?['customer']</code>.</li><li>Add Compose <em>Text to Base64</em>: <code>base64('Hello Contoso')</code>, then <em>Back to text</em>: <code>base64ToString(outputs('Text_to_Base64'))</code>.</li><li>Test the flow and open each Compose card to compare the values.</li></ol></div></details>
 
+<h2 id="math">Math functions</h2>
+<p>Numbers in flows are calculated with functions, not with + and - signs. The demo runs each one with fixed numbers:</p>
+<figure class="shot"><img src="../assets/img/pa/ext-math.webp" alt="Math output: add(7, 3) 10, sub(7, 3) 4, mul(7, 3) 21, div(7, 2) 3, div(7.0, 2) 3.5, mod(7, 2) 1, min 2, max 9, formatNumber(1234.5, &#x27;N2&#x27;) 1,234.50, formatNumber(0.256, &#x27;P0&#x27;) 26%, rand(1, 100) 43" width="514" height="240" loading="lazy">
+<figcaption>The results of each math function in one run.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Function</th><th>Result here</th><th>Watch out for</th></tr></thead><tbody>
+<tr><td><code>add</code>, <code>sub</code>, <code>mul</code></td><td>10, 4, 21</td><td>Text such as <code>'7'</code> must be converted with <code>int()</code> or <code>float()</code> first.</td></tr>
+<tr><td><code>div(7, 2)</code></td><td><strong>3</strong></td><td>Two whole numbers give a whole number. The .5 is dropped.</td></tr>
+<tr><td><code>div(7.0, 2)</code></td><td>3.5</td><td>Make one side a decimal (or wrap it in <code>float()</code>) to keep the fraction.</td></tr>
+<tr><td><code>mod(7, 2)</code></td><td>1</td><td>The remainder. <code>mod(x, 2)</code> is 0 for even numbers.</td></tr>
+<tr><td><code>min</code>, <code>max</code></td><td>2, 9</td><td>Also accept one array: <code>max(createArray(4, 9, 2))</code>.</td></tr>
+<tr><td><code>formatNumber</code></td><td>1,234.50 and 26%</td><td>Returns text, so format only for display, at the end.</td></tr>
+<tr><td><code>rand(1, 100)</code></td><td>43</td><td>The upper number is never returned.</td></tr>
+</tbody></table></div>
+<pre><code>div(float(triggerBody()?[&#x27;amount&#x27;]), 3)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>triggerBody()?[&#x27;amount&#x27;]</code></td><td>The amount, which may arrive as text.</td></tr><tr><td><code>float(...)</code></td><td>Turns it into a decimal number.</td></tr><tr><td><code>div(..., 3)</code></td><td>Divides by 3 and keeps the decimal part, because one side is a decimal.</td></tr></tbody></table></div>
+
 <h2 id="mistakes">Common mistakes</h2>
 <ul class="mistakes">
 <li>Comparing a number with text in a condition, for example <code>'10'</code> greater than <code>9</code>. Convert with <code>int()</code> first.</li>
@@ -99,7 +115,7 @@
 </ul>
 
 <h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (conversion functions)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-variable-store-values">Store and manage values in variables</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li></ul>
+<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (conversion functions)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-variable-store-values">Store and manage values in variables</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="dynamic-content-and-expressions.html">← Dynamic content and expressions</a><a href="variables-vs-compose.html">Variables vs Compose →</a></div>
@@ -108,7 +124,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#six-types">The six types, with examples</a></li><li><a href="#convert">Converting between types</a></li><li><a href="#read-object">Reading a field from an object</a></li><li><a href="#base64">Base64: why files look strange</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#six-types">The six types, with examples</a></li><li><a href="#convert">Converting between types</a></li><li><a href="#read-object">Reading a field from an object</a></li><li><a href="#base64">Base64: why files look strange</a></li><li><a href="#math">Math functions</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

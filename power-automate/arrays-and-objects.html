@@ -84,6 +84,15 @@ Customer = {"name": "Contoso", "city": "Seattle"}</code></pre>
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
 <div class="layer-body"><ol><li>Add two Compose actions, <em>Team A</em> and <em>Team B</em>, with the JSON arrays above.</li><li>Add Compose actions for <code>first()</code>, <code>union()</code>, <code>intersection()</code>, <code>length()</code> and <code>contains()</code> as in the table.</li><li>Add a Compose <em>Customer</em> with the record above, then one with <code>addProperty()</code> and one with <code>setProperty()</code>.</li><li>Optional: add a final Compose named <em>Results</em> that builds an object of all outputs, so one screen shows every answer.</li><li>Test and open <strong>Results</strong> &gt; <strong>Show raw outputs</strong>.</li></ol></div></details>
 
+<h2 id="sort-guid">Sorting, reversing and unique IDs</h2>
+<figure class="shot"><img src="../assets/img/pa/ext-text-arrays.webp" alt="Text_and_arrays output: Request ID from subject 1042, Filled template Hello Alex, request REQ-1042 is ready., uriComponent Contoso%20%26%20Co, guid() a random ID, sort [1, 2, 3], reverse [3, 2, 1]" width="514" height="300" loading="lazy">
+<figcaption>sort, reverse and guid next to the text examples from the same run.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Expression</th><th>Result</th><th>Use it for</th></tr></thead><tbody>
+<tr><td><code>sort(createArray(3, 1, 2))</code></td><td>[1, 2, 3]</td><td>Putting values in order. For objects, give the property: <code>sort(body('Get_items')?['value'], 'Title')</code>.</td></tr>
+<tr><td><code>reverse(...)</code></td><td>[3, 2, 1]</td><td>Newest first, after a sort by date.</td></tr>
+<tr><td><code>guid()</code></td><td>A new random ID each time</td><td>A batch ID or reference that must be unique, so every row written in one run can be traced back to it.</td></tr>
+</tbody></table></div>
+
 <h2 id="mistakes">Common mistakes</h2>
 <ul class="mistakes">
 <li>Calling <code>first()</code> on an empty list returns null, and the next <code>?['field']</code> returns null too. Check <code>empty()</code> before you rely on it.</li>
@@ -92,7 +101,7 @@ Customer = {"name": "Contoso", "city": "Seattle"}</code></pre>
 </ul>
 
 <h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (collection and object functions)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/expression-cookbook">Expression cookbook for cloud flows</a></li></ul>
+<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (collection and object functions)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/expression-cookbook">Expression cookbook for cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="parse-json.html">← Parse JSON and schemas</a><a href="dates-and-time-zones.html">Dates, times and time zones →</a></div>
@@ -101,7 +110,7 @@ Customer = {"name": "Contoso", "city": "Seattle"}</code></pre>
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#results">All results in one view</a></li><li><a href="#lists">List functions</a></li><li><a href="#objects">Object functions</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#results">All results in one view</a></li><li><a href="#lists">List functions</a></li><li><a href="#objects">Object functions</a></li><li><a href="#sort-guid">Sorting, reversing and unique IDs</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

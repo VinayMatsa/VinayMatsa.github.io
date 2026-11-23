@@ -1,0 +1,59 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Contoso Exchange Rates",
+    "description": "Lab connector for learning custom connectors. Wraps the free open.er-api.com exchange rate API (no key needed).",
+    "version": "1.0"
+  },
+  "host": "open.er-api.com",
+  "basePath": "/v6",
+  "schemes": ["https"],
+  "consumes": [],
+  "produces": ["application/json"],
+  "paths": {
+    "/latest/{base}": {
+      "get": {
+        "operationId": "GetLatestRates",
+        "summary": "Get latest exchange rates",
+        "description": "Returns the latest rates for one base currency.",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "default": "USD",
+            "x-ms-summary": "Base currency",
+            "description": "Three-letter currency code, for example USD, EUR or INR."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rates for the base currency",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {"type": "string", "x-ms-summary": "Result"},
+                "base_code": {"type": "string", "x-ms-summary": "Base currency"},
+                "time_last_update_utc": {"type": "string", "x-ms-summary": "Last updated (UTC)"},
+                "rates": {
+                  "type": "object",
+                  "x-ms-summary": "Rates",
+                  "properties": {
+                    "USD": {"type": "number", "x-ms-summary": "USD"},
+                    "EUR": {"type": "number", "x-ms-summary": "EUR"},
+                    "GBP": {"type": "number", "x-ms-summary": "GBP"},
+                    "INR": {"type": "number", "x-ms-summary": "INR"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {},
+  "securityDefinitions": {},
+  "security": []
+}

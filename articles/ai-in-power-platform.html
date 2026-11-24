@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI in Power Platform: models, generative AI and agents | Vinay Matsa</title>
+<meta name="description" content="AI Builder models, prompts and Copilot Studio agents: what each is for and how they combine in one solution.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI in Power Platform: models, generative AI and agents">
+<meta property="og:description" content="AI Builder models, prompts and Copilot Studio agents: what each is for and how they combine in one solution.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / AI</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Copilot Studio &amp; AI Lab</li>
+        <li>AI</li>
+      </ul>
+      <h1>AI in Power Platform: models, generative AI and agents</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-05-26">26 May 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Choosing the right AI capability is key to building effective solutions in Power Platform. Think of it as a simple progression: <strong>models, prompts, agents</strong>.</p>
+
+<h2 id="root">Start from the root</h2>
+<p>"AI" in Power Platform covers three quite different things:</p>
+<ul>
+<li>A <strong>model</strong> does one trained task with structured output, like reading an invoice into fields.</li>
+<li>A <strong>prompt</strong> asks a large language model to understand or write text, like summarising an email.</li>
+<li>An <strong>agent</strong> holds a conversation, decides what to do and calls tools to do it.</li>
+</ul>
+
+<h2 id="tools">Which tool for which job</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Capability</th><th>Best for</th><th>Use when</th></tr></thead><tbody>
+<tr><td>AI Builder models</td><td>Document and invoice extraction, OCR, classification, prediction from business data</td><td>You need reliable, structured output</td></tr>
+<tr><td>Prompts (generative AI)</td><td>Summaries, drafting, extracting meaning from unstructured text</td><td>You're working with natural language</td></tr>
+<tr><td>Copilot Studio agents</td><td>Chat experiences that answer and act through flows and connectors</td><td>You need AI that can both reason and act</td></tr>
+</tbody></table></div>
+
+<h2 id="together">How they work together</h2>
+<p>An agent can use a prompt for reasoning, call an AI Builder model for extraction, and trigger a flow for the action. Take invoice processing:</p>
+<ol>
+<li>An invoice is uploaded; an AI Builder model extracts the fields.</li>
+<li>A prompt validates or formats the text.</li>
+<li>A flow starts the approval and notifies the requester, and an agent lets people ask about status.</li>
+</ol>
+<p>The Learn section on this site shows these pieces in flows: <a href="../power-automate/ai-builder-documents.html">AI Builder document processing</a> and <a href="../power-automate/ai-prompts-clean-json.html">prompts with clean JSON output</a>.</p>
+<div class="callout">The real power isn't in one tool but in combining models, prompts and agents, each doing what it's best at.</div>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/ai-builder/overview">Overview of AI Builder</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/prompts-overview">Prompts overview</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/flows-overview">Agent flows overview</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7465066443408285696/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="null-empty-missing.html">← Handling null, empty and missing values in Power Automate</a><a href="confident-not-correct.html">Confident is not correct: 12 ways AI answers go wrong →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#tools">Which tool for which job</a></li><li><a href="#together">How they work together</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7465066443408285696/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

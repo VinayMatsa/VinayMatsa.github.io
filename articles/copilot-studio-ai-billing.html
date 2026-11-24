@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI billing in Copilot Studio: tokens, credits and limits | Vinay Matsa</title>
+<meta name="description" content="How agent activity becomes Copilot Credits, who actually pays, the ways to buy, and how to stop costs running away.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI billing in Copilot Studio: tokens, credits and limits">
+<meta property="og:description" content="How agent activity becomes Copilot Credits, who actually pays, the ways to buy, and how to stop costs running away.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Copilot Studio</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Copilot Studio &amp; AI Lab</li>
+        <li>Copilot Studio</li>
+      </ul>
+      <h1>AI billing in Copilot Studio: tokens, credits and limits</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-10-14">14 October 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Every answer, action and reasoning step an agent performs consumes Copilot Credits. But the harness, the user's licence and the channel decide whether that usage is actually billed.</p>
+
+<h2 id="root">Start from the root</h2>
+<ul>
+<li>A <strong>token</strong> is a small piece of text the AI reads or writes, roughly a short word or part of one.</li>
+<li>A <strong>Copilot Credit</strong> is the unit Microsoft charges for AI work in Copilot Studio.</li>
+<li>You never pay in tokens. Agent activity is priced in credits per type of event.</li>
+</ul>
+
+<h2 id="example">One question, priced step by step</h2>
+<p>Using the published rates at the time of writing (October 2026):</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Step</th><th>Feature</th><th>Credits</th></tr></thead><tbody>
+<tr><td>Search the HR policy</td><td>Tenant graph grounding</td><td>10</td></tr>
+<tr><td>Write the answer</td><td>Generative answer</td><td>2</td></tr>
+<tr><td>Check the balance in the HR system</td><td>Agent action</td><td>5</td></tr>
+<tr><td colspan="2"><strong>Total for one question</strong></td><td><strong>17</strong></td></tr>
+</tbody></table></div>
+
+<h2 id="who">Who pays?</h2>
+<ul>
+<li>Users licensed for Microsoft 365 Copilot, in Microsoft channels: included, within fair use.</li>
+<li>Unlicensed users and external websites: billed.</li>
+<li>The harness matters too: some harnesses bill even while you build and test. See <a href="copilot-studio-harnesses.html">harnesses in Copilot Studio</a>.</li>
+</ul>
+
+<h2 id="buy">Ways to buy</h2>
+<ul>
+<li><strong>Pay-as-you-go</strong>: billed per credit through an Azure subscription ($0.01 per credit at the time of writing).</li>
+<li><strong>Capacity packs</strong>: a fixed number of credits per month (25,000 for $200 at the time of writing).</li>
+<li><strong>Pre-purchase plans</strong> for a year, with a discount.</li>
+</ul>
+
+<h2 id="control">Keeping costs under control</h2>
+<ul>
+<li>Unused capacity-pack credits expire each month.</li>
+<li>An Azure budget only <em>alerts</em>; it never stops usage.</li>
+<li>Custom agents are disabled when usage reaches 125% of prepaid capacity.</li>
+<li>Set a monthly limit per agent in the admin center, so one busy agent can't use everyone's capacity.</li>
+</ul>
+<div class="callout"><strong>Tip:</strong> prices and rates change. Before a business case, check the current billing rates page and the licensing guide.</div>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management">Billing rates and management</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing">Copilot Studio licensing</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7516003999918141441/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="dataverse-security-model.html">← The Dataverse security model: who sees what</a><a href="knowledge-vs-tools.html">Knowledge or tools? How Copilot Studio agents use your data →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#example">One question, priced step by step</a></li><li><a href="#who">Who pays?</a></li><li><a href="#buy">Ways to buy</a></li><li><a href="#control">Keeping costs under control</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7516003999918141441/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

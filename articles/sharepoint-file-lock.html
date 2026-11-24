@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SharePoint file lock errors in Power Automate | Vinay Matsa</title>
+<meta name="description" content="Why SPFileLockException (HTTP 423) happens when flows touch files too soon, and the Do until plus Delay retry pattern.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SharePoint file lock errors in Power Automate">
+<meta property="og:description" content="Why SPFileLockException (HTTP 423) happens when flows touch files too soon, and the Do until plus Delay retry pattern.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Power Automate</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Platform Deep Dive</li>
+        <li>Power Automate</li>
+      </ul>
+      <h1>SharePoint file lock errors in Power Automate</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-05-01">1 May 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Ever hit <code>Microsoft.SharePoint.SPFileLockException</code> with HTTP 400 or 423? It usually happens when a flow moves or updates a file while SharePoint still holds a lock on it.</p>
+
+<h2 id="root">Start from the root</h2>
+<p>SharePoint <strong>locks</strong> a file while something is working with it, so two changes can't collide and corrupt it. Locks come from a file being created or uploaded, a person editing it in Office, or a previous connector action that hasn't fully released it. Locks are temporary. The problem is timing: a flow runs actions faster than SharePoint releases them.</p>
+
+<h2 id="why">Why flows hit it</h2>
+<ul>
+<li>Back-to-back actions on the same file (create, then immediately update properties or move).</li>
+<li>Parallel branches or loops touching the same file.</li>
+<li>Someone has the file open in the desktop app.</li>
+</ul>
+
+<h2 id="fix">The retry pattern</h2>
+<p>Power Automate can't unlock a file. It can only wait and try again safely:</p>
+<ol>
+<li>Initialise a boolean variable <code>done</code> = false.</li>
+<li><strong>Do until</strong> <code>done</code> is true (with a sensible count and timeout limit).</li>
+<li>Inside: the file action, then a Set variable <code>done</code> = true that runs only if the action succeeded.</li>
+<li>A <strong>Delay</strong> (for example 30 seconds) configured to run after the action <em>failed</em>.</li>
+</ol>
+<p>Exit the loop only after a successful run, and fail clearly if the limit is reached. The built-in retry policy helps for some errors, but a lock can last longer than its intervals, so the explicit loop is more reliable. The Learn section covers <a href="../power-automate/do-until-loops.html">Do until loops</a> and <a href="../power-automate/configure-run-after.html">configure run after</a>.</p>
+<div class="callout"><strong>Remember:</strong> the goal isn't to beat the lock but to wait it out safely, with a limit.</div>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Error handling guidance for cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7455908416973201408/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="exception-handling-power-automate.html">← Exception handling in Power Automate: the deep dive</a><a href="null-empty-missing.html">Handling null, empty and missing values in Power Automate →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#why">Why flows hit it</a></li><li><a href="#fix">The retry pattern</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7455908416973201408/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handling null, empty and missing values in Power Automate | Vinay Matsa</title>
+<meta name="description" content="Why 'The provided value is of type Null' happens, the difference between null, empty and missing, and the safe patterns that prevent it.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Handling null, empty and missing values in Power Automate">
+<meta property="og:description" content="Why 'The provided value is of type Null' happens, the difference between null, empty and missing, and the safe patterns that prevent it.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Power Automate</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Platform Deep Dive</li>
+        <li>Power Automate</li>
+      </ul>
+      <h1>Handling null, empty and missing values in Power Automate</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-05-13">13 May 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>One of the most common errors in Power Automate is <code>InvalidTemplate ... The provided value is of type 'Null'</code>. Most of these failures aren't flow problems; they're data-handling problems.</p>
+
+<h2 id="root">Start from the root</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>State</th><th>Meaning</th><th>Example</th></tr></thead><tbody>
+<tr><td>Null</td><td>The field exists but has no value</td><td><code>"phone": null</code></td></tr>
+<tr><td>Empty</td><td>A value exists but contains nothing</td><td><code>"phone": ""</code> or <code>[]</code></td></tr>
+<tr><td>Missing</td><td>The property isn't there at all</td><td>No <code>phone</code> key in the object</td></tr>
+<tr><td>Blank</td><td>A Power Apps idea, not a flow value</td><td><code>Blank()</code> in a formula</td></tr>
+</tbody></table></div>
+<p>Flow expressions don't validate their inputs. They expect the right type, and fail when a value is missing or null where text or a number was expected.</p>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul>
+<li>Using values without checking them.</li>
+<li>Assuming optional fields always have data.</li>
+<li>Reading nested fields directly (<code>['a']['b']</code>).</li>
+<li>Checking only for null and forgetting empty strings.</li>
+</ul>
+<p>The result is runtime failures, or worse, silently wrong output.</p>
+
+<h2 id="functions">The three tools</h2>
+<pre><code>empty(triggerBody()?['phone'])                       // true for null, "" and []
+coalesce(triggerBody()?['phone'], 'No phone on file') // first non-null value
+triggerBody()?['address']?['city']                    // ? returns null instead of failing</code></pre>
+<ul>
+<li><code>empty()</code> safely checks whether there's anything there.</li>
+<li><code>coalesce()</code> supplies a default when data is missing.</li>
+<li>The <code>?</code> operator reads optional or nested properties without failing.</li>
+</ul>
+
+<h2 id="rule">The golden rule</h2>
+<p><strong>Check, convert, use.</strong> If a field is optional, treat it as unsafe; validate before using it. Small checks prevent big failures. The <a href="../power-automate/handling-nulls.html">handling nulls</a> page in the Learn section has a demo flow with real outputs.</p>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7460400605925363713/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="sharepoint-file-lock.html">← SharePoint file lock errors in Power Automate</a><a href="ai-in-power-platform.html">AI in Power Platform: models, generative AI and agents →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#functions">The three tools</a></li><li><a href="#rule">The golden rule</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7460400605925363713/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

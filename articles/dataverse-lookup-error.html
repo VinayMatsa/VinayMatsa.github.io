@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fixing the Dataverse lookup error in Power Automate | Vinay Matsa</title>
+<meta name="description" content="Why Update a row fails with ODataUnrecognizedPathException when you set a lookup with a plain GUID, and the one-line fix.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fixing the Dataverse lookup error in Power Automate">
+<meta property="og:description" content="Why Update a row fails with ODataUnrecognizedPathException when you set a lookup with a plain GUID, and the one-line fix.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Power Automate</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Platform Deep Dive</li>
+        <li>Power Automate</li>
+      </ul>
+      <h1>Fixing the Dataverse lookup error in Power Automate</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-10-09">9 October 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Ever hit <code>BadRequest: ODataUnrecognizedPathException</code> with <em>"Resource not found for the segment"</em>? In my run, List rows and Get a row by ID both worked with a GUID, and only Update a row failed.</p>
+
+<h2 id="root">Start from the root</h2>
+<p>Every Dataverse row has a <strong>GUID</strong>, a unique ID like <code>3f2b...-...</code>. A <strong>lookup column</strong> is a column that points to a row in another table: a Case's <em>Customer</em> points to a Contact, for example.</p>
+<p>Two different jobs use GUIDs:</p>
+<ul>
+<li><strong>Identifying a row</strong> (Row ID in Get, Update, Delete): a plain GUID is right.</li>
+<li><strong>Linking to a row</strong> (setting a lookup): Dataverse needs to know which <em>table</em> the GUID belongs to, so it expects a path like <code>/contacts(GUID)</code>.</li>
+</ul>
+<p>Passing a plain GUID into a lookup column is what triggers the error.</p>
+
+<h2 id="fix">The fix</h2>
+<ol>
+<li>Find the related row's GUID, for example with List rows.</li>
+<li>Wrap it in the table's path with <code>concat()</code>.</li>
+<li>Put that into the lookup column in Update a row (or Add a new row).</li>
+</ol>
+<pre><code>concat('/contacts(', first(outputs('List_rows')?['body/value'])?['contactid'], ')')</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>'/contacts('</code></td><td>The <em>entity set name</em> (plural, lowercase) of the target table.</td></tr>
+<tr><td><code>first(...)?['contactid']</code></td><td>The GUID of the first row found.</td></tr>
+<tr><td><code>')'</code></td><td>Closes the path.</td></tr>
+</tbody></table></div>
+
+<h2 id="remember">Remember</h2>
+<ul>
+<li>Keep Row ID as a plain GUID; only lookup columns need the table path.</li>
+<li>Identifying a record = <code>GUID</code>. Linking a record = <code>/table(GUID)</code>.</li>
+<li>Use the entity set name (for example <code>contacts</code>, <code>accounts</code>), not the display name.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/update">Use a flow to update a row in Dataverse</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/overview">Integrate flows with Dataverse</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7514211479286472705/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="copilot-studio-harnesses.html">← Harnesses in Copilot Studio: the runtime behind every agent</a><a href="dataverse-security-model.html">The Dataverse security model: who sees what →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#fix">The fix</a></li><li><a href="#remember">Remember</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7514211479286472705/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

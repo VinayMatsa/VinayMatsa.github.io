@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Custom connectors in Power Platform: why you need them and how to build one | Vinay Matsa</title>
+<meta name="description" content="When a custom connector is the right answer, its building blocks, authentication, OpenAPI extensions, environments, custom code and the errors I hit.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Custom connectors in Power Platform: why you need them and how to build one">
+<meta property="og:description" content="When a custom connector is the right answer, its building blocks, authentication, OpenAPI extensions, environments, custom code and the errors I hit.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Connectors</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Platform Deep Dive</li>
+        <li>Connectors</li>
+      </ul>
+      <h1>Custom connectors in Power Platform: why you need them and how to build one</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-10-07">7 October 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Power Automate, Power Apps, Logic Apps and Copilot Studio share over 1,000 prebuilt connectors. But what happens when the API you need isn't one of them?</p>
+
+<h2 id="root">Start from the root</h2>
+<p>A <strong>connector</strong> is a wrapper around a web API that turns its endpoints into actions and triggers makers can drag into a flow or app. Each connector describes the API (its URLs, inputs and outputs) and how to sign in. A <strong>custom connector</strong> is one you describe yourself, for any REST API. Once built, it looks and behaves like any other connector, and it can be shared and governed by data policies.</p>
+
+<h2 id="blocks">The building blocks</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Block</th><th>What it is</th></tr></thead><tbody>
+<tr><td>Connector</td><td>The object you create and share in an environment.</td></tr>
+<tr><td>Definition</td><td>An OpenAPI (Swagger) description of the API's operations.</td></tr>
+<tr><td>Connection</td><td>A signed-in instance of the connector for a user or service account.</td></tr>
+<tr><td>Request</td><td>Each action: method, path, parameters and response schema.</td></tr>
+<tr><td>Code</td><td>Optional C# that transforms requests or responses.</td></tr>
+</tbody></table></div>
+
+<h2 id="auth">Authentication</h2>
+<p>Options include no authentication, API key, basic authentication and OAuth 2.0 (including Microsoft Entra ID). Each needs its own parameters, such as the header name for an API key or the client ID, authorisation URL and scope for OAuth.</p>
+
+<h2 id="extensions">OpenAPI extensions worth knowing</h2>
+<ul>
+<li><code>x-ms-visibility</code>: hide or promote parameters in the designer.</li>
+<li><code>testConnection</code>: an operation the platform calls to check a connection works.</li>
+<li>Chunked transfer for large payloads.</li>
+<li>Dynamic values for drop-down lists filled from the API.</li>
+</ul>
+
+<h2 id="envs">One connector across Dev, Test and Prod</h2>
+<p>Hosts usually differ per environment. Use an environment variable for the host, or the <em>Set host URL</em> policy, so the same connector definition moves through your solutions unchanged.</p>
+
+<h2 id="code">Custom code</h2>
+<p>A C# <code>Script</code> class inheriting <code>ScriptBase</code> implements <code>ExecuteAsync</code> and can call <code>Context.SendAsync</code> to forward the request, letting you reshape requests and responses the API returns awkwardly.</p>
+
+<h2 id="lesson">My biggest lesson</h2>
+<p>"Saved" is not "valid". The portal enforces only some of the documented rules when you save, so follow the documentation, not just what the portal accepts. One of my connectors failed silently; the cause turned out to be a data policy blocking it.</p>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/connectors/custom-connectors/">Custom connectors overview</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/custom-connectors/write-code">Use custom code in a custom connector</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7513420399133655040/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="confident-not-correct.html">← Confident is not correct: 12 ways AI answers go wrong</a><a href="copilot-studio-harnesses.html">Harnesses in Copilot Studio: the runtime behind every agent →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#blocks">The building blocks</a></li><li><a href="#auth">Authentication</a></li><li><a href="#extensions">OpenAPI extensions worth knowing</a></li><li><a href="#envs">One connector across Dev, Test and Prod</a></li><li><a href="#code">Custom code</a></li><li><a href="#lesson">My biggest lesson</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7513420399133655040/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

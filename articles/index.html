@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Articles | Vinay Matsa</title>
+<meta name="description" content="Practical deep dives on Power Platform, Copilot Studio and AI, explained from the basics.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Articles">
+<meta property="og:description" content="Practical deep dives on Power Platform, Copilot Studio and AI, explained from the basics.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / Articles</p>
+  <section class="wrap section" style="padding-top:8px">
+    <h1>Articles</h1>
+    <p class="lead" style="max-width:720px">Practical deep dives from my hands-on labs, each explained from the basics. Every article links to its original LinkedIn post, where you'll find the visual carousel and the discussion.</p>
+    <h2 style="margin:36px 0 8px">Power Platform Deep Dive</h2>
+<p style="margin:0 0 20px;color:var(--muted)">Power Automate, Dataverse, connectors and ALM.</p>
+<div class="grid">
+<a class="post" href="data-formats-power-platform.html">
+  <span class="kicker">Power Automate</span>
+  <span class="title">Understanding and debugging data formats in Power Platform</span>
+  <span class="desc">Base64, binary, URL encoding, escaped JSON, decimals, case and time zones: the formats behind most 'weird text' in flow runs.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="pac-cli-deployments.html">
+  <span class="kicker">ALM</span>
+  <span class="title">Deploying solutions with PAC CLI: Dev to Stage to Prod</span>
+  <span class="desc">Authentication profiles, versioning, export, deployment settings files, staged upgrades and the checks that make scripted releases safe.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="dataverse-security-model.html">
+  <span class="kicker">Dataverse</span>
+  <span class="title">The Dataverse security model: who sees what</span>
+  <span class="desc">Business units, security roles, access levels, teams, sharing, hierarchy and column security, and how they combine.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="dataverse-lookup-error.html">
+  <span class="kicker">Power Automate</span>
+  <span class="title">Fixing the Dataverse lookup error in Power Automate</span>
+  <span class="desc">Why Update a row fails with ODataUnrecognizedPathException when you set a lookup with a plain GUID, and the one-line fix.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="custom-connectors.html">
+  <span class="kicker">Connectors</span>
+  <span class="title">Custom connectors in Power Platform: why you need them and how to build one</span>
+  <span class="desc">When a custom connector is the right answer, its building blocks, authentication, OpenAPI extensions, environments, custom code and the errors I hit.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="null-empty-missing.html">
+  <span class="kicker">Power Automate</span>
+  <span class="title">Handling null, empty and missing values in Power Automate</span>
+  <span class="desc">Why 'The provided value is of type Null' happens, the difference between null, empty and missing, and the safe patterns that prevent it.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="sharepoint-file-lock.html">
+  <span class="kicker">Power Automate</span>
+  <span class="title">SharePoint file lock errors in Power Automate</span>
+  <span class="desc">Why SPFileLockException (HTTP 423) happens when flows touch files too soon, and the Do until plus Delay retry pattern.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="exception-handling-power-automate.html">
+  <span class="kicker">Power Automate</span>
+  <span class="title">Exception handling in Power Automate: the deep dive</span>
+  <span class="desc">Try, Catch and Finally scopes, configure run after, Terminate, retries, logging and the expressions that capture the real error.</span>
+  <span class="go">Read article →</span>
+</a>
+</div>
+<h2 style="margin:36px 0 8px">Copilot Studio &amp; AI Lab</h2>
+<p style="margin:0 0 20px;color:var(--muted)">Copilot Studio agents, AI security, billing, MCP and Claude.</p>
+<div class="grid">
+<a class="post" href="prompt-injection-test.html">
+  <span class="kicker violet">Copilot Studio</span>
+  <span class="title">I tried prompt injection on my own Copilot Studio agent</span>
+  <span class="desc">Three tests with a hidden instruction in a Word file: what the agent did, what I learned, and how to limit the damage if an agent is fooled.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="prompt-injection-explained.html">
+  <span class="kicker violet">Copilot Studio</span>
+  <span class="title">Prompt injection: the hidden instructions that hijack your agent</span>
+  <span class="desc">What prompt injection is, the two types, what can go wrong, and the layers of defence every Copilot Studio maker should use.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="mcp-explained.html">
+  <span class="kicker violet">MCP</span>
+  <span class="title">MCP explained: host, client, server and tools, with a Dataverse example</span>
+  <span class="desc">The Model Context Protocol in plain words: who does what, how one request flows from start to end, and why it beats one-off integrations.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="claude-in-power-platform.html">
+  <span class="kicker violet">Claude</span>
+  <span class="title">Four ways to put Claude to work in Microsoft Power Platform</span>
+  <span class="desc">Claude Code, VS Code, Claude Desktop with the Dataverse MCP server, the browser extension, and Claude models inside Copilot Studio: which fits which job.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="claude-code-plugins-installed.html">
+  <span class="kicker violet">Claude Code</span>
+  <span class="title">What really gets installed when you add Power Platform plugins to Claude Code</span>
+  <span class="desc">Skills, agents, hooks and MCP servers: what each part of a plugin does, and what to check before you trust one.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="connect-claude-code-power-platform.html">
+  <span class="kicker violet">Claude Code</span>
+  <span class="title">Connect Claude Code to Microsoft Power Platform in seven steps</span>
+  <span class="desc">The prerequisites, sign-ins and checks to let Claude Code build solutions, canvas apps and flows in your own dev environment, and the guardrails to keep.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="flowactiontimedout-agent-flows.html">
+  <span class="kicker violet">Copilot Studio</span>
+  <span class="title">Handling FlowActionTimedOut in Copilot Studio agent flows</span>
+  <span class="desc">Why an agent flow that waits for an approval fails, why that creates duplicates, and the respond-early design that fixed it.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="knowledge-vs-tools.html">
+  <span class="kicker violet">Copilot Studio</span>
+  <span class="title">Knowledge or tools? How Copilot Studio agents use your data</span>
+  <span class="desc">The simple rule for choosing between knowledge sources and tools, a decision order for real projects, and the limits worth remembering.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="copilot-studio-ai-billing.html">
+  <span class="kicker violet">Copilot Studio</span>
+  <span class="title">AI billing in Copilot Studio: tokens, credits and limits</span>
+  <span class="desc">How agent activity becomes Copilot Credits, who actually pays, the ways to buy, and how to stop costs running away.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="copilot-studio-harnesses.html">
+  <span class="kicker violet">Copilot Studio</span>
+  <span class="title">Harnesses in Copilot Studio: the runtime behind every agent</span>
+  <span class="desc">What a harness is, how the harnesses differ, and why your choice affects billing, features and capabilities.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="confident-not-correct.html">
+  <span class="kicker violet">AI literacy</span>
+  <span class="title">Confident is not correct: 12 ways AI answers go wrong</span>
+  <span class="desc">AI sounds just as sure when it's wrong. Twelve predictable failure patterns, grouped, and three questions to ask before trusting an answer.</span>
+  <span class="go">Read article →</span>
+</a>
+<a class="post" href="ai-in-power-platform.html">
+  <span class="kicker violet">AI</span>
+  <span class="title">AI in Power Platform: models, generative AI and agents</span>
+  <span class="desc">AI Builder models, prompts and Copilot Studio agents: what each is for and how they combine in one solution.</span>
+  <span class="go">Read article →</span>
+</a>
+</div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

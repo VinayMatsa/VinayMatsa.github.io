@@ -234,3 +234,6 @@ h2 { margin: 0; font-family: var(--head); font-size: clamp(28px, 3.5vw, 36px); f
   .breakdown td { border: 0; padding: 4px 14px; min-width: 0; }
   .breakdown td:first-child { font-weight: 600; }
 }
+
+.li-cta { margin-top: 12px; border: 1px solid #BFDBFE; background: var(--accent-soft); border-radius: 12px; padding: 22px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+.li-cta p { margin: 0; font-size: 16px; line-height: 1.6; flex: 1 1 320px; }

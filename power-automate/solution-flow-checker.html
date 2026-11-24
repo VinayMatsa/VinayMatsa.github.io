@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solution checker and flow checker | Vinay Matsa</title>
+<meta name="description" content="Catch broken flows and missing dependencies before you deploy, with the two built-in checkers.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Solution checker and flow checker">
+<meta property="og:description" content="Catch broken flows and missing dependencies before you deploy, with the two built-in checkers.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 10</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 10 · Enterprise ALM and admin · 2 of 6</li>
+      </ul>
+      <h1>Solution checker and flow checker</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Two checkers look at your work before it goes anywhere. <strong>Flow checker</strong> runs inside the designer and checks one flow. <strong>Solution checker</strong> runs a static analysis over a whole solution, including the solution's own metadata. Both are free and quick; run them before every export.</p>
+
+<h2 id="flow">Flow checker</h2>
+<p>The stethoscope icon in the designer's toolbar opens it. It lists <strong>errors</strong> (the flow can't be saved or will fail) and <strong>warnings</strong> (it works, but there's a better way). To show it, the demo removed the <em>From</em> value of a Filter array without saving:</p>
+<figure class="shot"><img src="../assets/img/pa/l10-flow-checker.webp" alt="Flow checker panel: Errors 1, Operation errors, Failed runs, Parameter errors: &#x27;From&#x27; is required. The Failed runs card on the canvas shows Invalid parameters" width="875" height="320" loading="lazy">
+<figcaption>Each finding links straight to the action with Open operation.</figcaption></figure>
+<p>Warnings typically cover things like an action in a loop that could be outside it, or a deprecated action version. Fix errors before saving; treat warnings as a checklist.</p>
+
+<h2 id="solution">Solution checker</h2>
+<p>In <strong>Solutions</strong>, select the solution, then <strong>Solution checker &gt; Run</strong>. It takes a few minutes. The demo ran it on the website's demo solution:</p>
+<figure class="shot"><img src="../assets/img/pa/l10-checker-results.webp" alt="Solution checker results: four Medium issues in category Design, type Configuration, reference meta-include-missingunmanageddependencies. The solution.xml contains an unmanaged dependency" width="1425" height="320" loading="lazy">
+<figcaption>Four findings, all the same rule.</figcaption></figure>
+<p>The full message says the solution depends on a <strong>connection reference that isn't in the solution</strong>, and that it <em>will fail to import</em> in another environment. Three demo flows used a Dataverse connection reference created outside the solution. Export catches the same problem:</p>
+<figure class="shot"><img src="../assets/img/pa/l10-export-missing.webp" alt="Missing required unmanaged components: Microsoft Dataverse connection reference, used by Demo – Dataverse row trigger, with Add to solution and Skip step buttons" width="644" height="245" loading="lazy">
+<figcaption>The export wizard offers to add the missing component.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l10-export-dependencies.webp" alt="Managed solution dependencies: Power Automate Online, MicrosoftFlowExtensionsOnline 1.10.24.1. Import will fail if these managed solutions do not exist in the target" width="644" height="220" loading="lazy">
+<figcaption>It also lists managed solutions the target environment must already have.</figcaption></figure>
+<p>The fix is <strong>Add existing &gt; Connection reference</strong> (or <em>Add required objects</em> on the flow), then run the checker again.</p>
+
+<h2 id="enforce">Making it mandatory</h2>
+<p>In a <strong>Managed Environment</strong>, admins can set solution checker enforcement to <em>Warn</em> or <em>Block</em>, so imports with critical issues are flagged or refused. In pipelines, the build tools include a checker task that can fail the build.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Static analysis</strong>: checking something without running it, by reading its definition against a set of rules.</p>
+<p><strong>Dependency</strong>: something an object needs to work, such as a connection reference a flow uses.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Open each flow you changed and run <strong>Flow checker</strong>. Fix every error.</li><li>In Solutions, run <strong>Solution checker</strong> on the solution and open the results.</li><li>Sort by severity. Fix Critical and High first; read each rule's reference link.</li><li>Add any missing dependencies to the solution, then run the checker again.</li><li>Export with <em>Run solution checker on export</em> left on.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Skipping the "missing components" step in the export wizard. The import into test fails later, with a less helpful message.</li>
+<li>Creating connection references from the designer outside a solution. Create them inside the solution.</li>
+<li>Treating "no flow checker errors" as "the flow is right". It checks structure, not your business logic.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/error-checker">Find and fix errors with flow checker</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/use-powerapps-checker">Use solution checker</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="managed-unmanaged-layers.html">← Managed and unmanaged solutions, layers and upgrades</a><a href="source-control-cli.html">Source control with Git and the Power Platform CLI →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#flow">Flow checker</a></li><li><a href="#solution">Solution checker</a></li><li><a href="#enforce">Making it mandatory</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

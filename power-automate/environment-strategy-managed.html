@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Environment strategy and Managed Environments | Vinay Matsa</title>
+<meta name="description" content="Decide which environments you need and who can build where, and the admin controls that Managed Environments add.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Environment strategy and Managed Environments">
+<meta property="og:description" content="Decide which environments you need and who can build where, and the admin controls that Managed Environments add.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 10</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 10 · Enterprise ALM and admin · 5 of 6</li>
+      </ul>
+      <h1>Environment strategy and Managed Environments</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Every tenant starts with one <strong>default environment</strong>, where everyone can build. Left alone, it fills up with personal flows that nobody owns. An <strong>environment strategy</strong> decides where different kinds of work happen, and <strong>Managed Environments</strong> give admins the controls to enforce it.</p>
+
+<h2 id="strategy">A typical layout</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Environment</th><th>Purpose</th><th>Who builds</th></tr></thead><tbody>
+<tr><td>Default (renamed <em>Personal productivity</em>)</td><td>Personal flows that only help the person who made them</td><td>Everyone, with tight data policies</td></tr>
+<tr><td>Developer environments</td><td>One per maker for learning and building</td><td>The owner</td></tr>
+<tr><td>Project Dev / Test / Prod</td><td>Business solutions that other people rely on</td><td>Only the project team in Dev; nobody builds in Test and Prod</td></tr>
+</tbody></table></div>
+<p>The rule of thumb: once a flow matters to more than its maker, it moves into a solution in a project environment.</p>
+
+<h2 id="managed">What Managed Environments add</h2>
+<p>A Managed Environment is a normal environment with extra governance features turned on. The ones that matter most for flows:</p>
+<ul>
+<li><strong>Environment groups</strong> and rules: apply the same settings to many environments at once.</li>
+<li><strong>Limit sharing</strong>: for example, stop makers sharing with everyone or with security groups.</li>
+<li><strong>Weekly usage insights</strong>: a digest email to admins about apps and flows in use.</li>
+<li><strong>Solution checker enforcement</strong> on import (Warn or Block).</li>
+<li><strong>Pipelines</strong>: target environments for Power Platform pipelines must be managed.</li>
+<li><strong>Maker welcome content</strong> and <strong>default environment routing</strong>: send new makers to their own developer environment instead of the default one.</li>
+<li>Data policies for desktop flows, IP firewall, customer-managed keys and more.</li>
+</ul>
+<p>Managed Environments come as an entitlement with standalone Power Apps, Power Automate and Copilot Studio licences. Check the licensing requirements for the people who use the environment before you turn it on.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Tenant</strong>: your organisation's whole Microsoft 365 and Power Platform setup.</p>
+<p><strong>Governance</strong>: the rules and controls that keep automation safe and supportable.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>List what exists today: environments, their purpose and owners (the CoE Starter Kit or admin center helps).</li><li>Rename the default environment and give it the strictest data policy.</li><li>Turn on default environment routing so new makers get developer environments.</li><li>Create Dev/Test/Prod for each important project, make Test and Prod managed, and group them.</li><li>Set sharing limits and solution checker enforcement through the group's rules.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Running business-critical flows from someone's personal flows in the default environment.</li>
+<li>One shared "Dev" environment for every project, so solutions collide.</li>
+<li>Turning on Managed Environments without checking that users have the licences.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/guidance/adoption/environment-strategy">Develop a tenant environment strategy</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview">Managed Environments overview</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/environment-groups">Environment groups</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-sharing-limits">Limit sharing</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="cicd-devops-github.html">← CI/CD with Azure DevOps and GitHub Actions</a><a href="flow-run-monitoring.html">Monitoring flows at scale →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#strategy">A typical layout</a></li><li><a href="#managed">What Managed Environments add</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

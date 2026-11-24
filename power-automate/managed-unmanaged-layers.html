@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Managed and unmanaged solutions, layers and upgrades | Vinay Matsa</title>
+<meta name="description" content="What managed and unmanaged really mean, how solution layers decide what runs, and how to ship new versions safely.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Managed and unmanaged solutions, layers and upgrades">
+<meta property="og:description" content="What managed and unmanaged really mean, how solution layers decide what runs, and how to ship new versions safely.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 10</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 10 · Enterprise ALM and admin · 1 of 6</li>
+      </ul>
+      <h1>Managed and unmanaged solutions, layers and upgrades</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Level 6 covered putting flows in a solution. In an enterprise you then move that solution from development to test to production many times. Doing that well depends on three ideas: <strong>managed vs unmanaged</strong>, <strong>layers</strong>, and <strong>upgrades</strong>.</p>
+
+<h2 id="types">Managed vs unmanaged</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th>Unmanaged</th><th>Managed</th></tr></thead><tbody>
+<tr><td>Where</td><td>Development environments and source control</td><td>Test and production</td></tr>
+<tr><td>Can you edit its objects?</td><td>Yes</td><td>Only what the solution's managed properties allow</td></tr>
+<tr><td>Deleting the solution</td><td>Removes the container; the objects stay</td><td>Removes the solution and everything in it</td></tr>
+<tr><td>Export</td><td>Yes</td><td>No: you always export from the unmanaged source</td></tr>
+</tbody></table></div>
+<p>The export panel says the same thing in one line each:</p>
+<figure class="shot"><img src="../assets/img/pa/l10-export-managed.webp" alt="Export this solution panel: version number 1.0.0.1, Export as Managed (recommended) for test or production, or Unmanaged for another development environment or source control, and Run solution checker on export ticked" width="336" height="506" loading="lazy">
+<figcaption>Pick managed for test and production, and raise the version every time.</figcaption></figure>
+
+<h2 id="layers">Layers</h2>
+<p>Every object (a flow, a table, an environment variable) can be touched by several solutions. Dataverse keeps each change as a <strong>layer</strong>. Managed solutions stack in the order they were installed, and one <strong>unmanaged layer</strong> sits on top. The top layer is what runs.</p>
+<figure class="shot"><img src="../assets/img/pa/l10-layers-menu.webp" alt="Solution object menu: Advanced, with Add required objects, Show dependencies, See solution layers, Managed properties, Remove active customizations and Add to solution" width="420" height="360" loading="lazy">
+<figcaption>Advanced, then See solution layers, on any object in a solution.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l10-solution-layers.webp" alt="Solution Layers view: one row, order 1, Unmanaged layer, Default Publisher for the organisation, layer status Active" width="1184" height="85" loading="lazy">
+<figcaption>In development, a flow has only its unmanaged (Active) layer.</figcaption></figure>
+<p>In production, the same view should show only managed layers. If someone edits a flow directly in production, an unmanaged layer appears on top, and your next managed upgrade is <em>hidden</em> under it: you deploy a fix and nothing changes. <strong>Remove active customizations</strong> deletes that unmanaged layer so the managed version shows again.</p>
+
+<h2 id="upgrades">Shipping new versions</h2>
+<ul>
+<li><strong>Update</strong> (the default import): replaces the solution's layer with the new version. Objects you removed from the solution are left behind.</li>
+<li><strong>Upgrade</strong>: also deletes objects that are no longer in the new version. Use it when you've removed flows or columns.</li>
+<li><strong>Stage for upgrade</strong>: imports the new version alongside the old one, so you can migrate data before applying the upgrade.</li>
+<li><strong>Patches</strong>: small partial solutions. Microsoft's guidance is to prefer full-solution updates; patches complicate the layer stack.</li>
+</ul>
+<p>Version numbers are <code>major.minor.build.revision</code>. Raise one on every export, so anyone can tell which build is installed.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Solution</strong>: a package that holds your flows, apps, tables and settings so they can move between environments together.</p>
+<p><strong>Environment</strong>: a separate space with its own data and apps, such as Dev, Test or Prod.</p>
+<p><strong>Layer</strong>: one solution's version of an object. Layers stack, and the top one wins.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Build only in an unmanaged solution in a development environment, with your own publisher prefix.</li><li>Before each release, raise the version and export as <strong>Managed</strong>.</li><li>Import into test with the upgrade option if you removed anything.</li><li>In test and production, never edit objects directly. Check <em>See solution layers</em> if a deployed change seems not to take effect.</li><li>Keep the unmanaged export (or better, source control) as your master copy.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Importing unmanaged solutions into production. The objects become editable there and can't be removed cleanly.</li>
+<li>Hot-fixing a flow in production, which creates an unmanaged layer that blocks future deployments.</li>
+<li>Exporting with the same version number every time.</li>
+<li>Using the default publisher (prefix <code>new_</code> or <code>cr123_</code>) for real work.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/solution-concepts-alm">Solution concepts</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/solution-layers-alm">Solution layers and merge behavior</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/update-solutions-alm">Create and update custom solutions for ALM</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="./">← All Power Automate topics</a><a href="solution-flow-checker.html">Solution checker and flow checker →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#types">Managed vs unmanaged</a></li><li><a href="#layers">Layers</a></li><li><a href="#upgrades">Shipping new versions</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

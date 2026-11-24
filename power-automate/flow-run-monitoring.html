@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitoring flows at scale | Vinay Matsa</title>
+<meta name="description" content="Report on every run in an environment from Dataverse, and the admin tools for finding and managing flows across a tenant.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Monitoring flows at scale">
+<meta property="og:description" content="Report on every run in an environment from Dataverse, and the admin tools for finding and managing flows across a tenant.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 10</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 10 · Enterprise ALM and admin · 6 of 6</li>
+      </ul>
+      <h1>Monitoring flows at scale</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>The run history page shows one flow at a time. Admins need the opposite view: every run in an environment, failures across all flows, the slowest ones. For solution flows, Dataverse already stores this in the <strong>FlowRun</strong> table, and a flow can read it like any other table.</p>
+
+<h2 id="demo">A weekly health summary, built with a flow</h2>
+<figure class="shot"><img src="../assets/img/pa/l10-runs-canvas.webp" alt="Flow canvas: Manually trigger a flow, List flow runs, Failed runs, Durations, Flows with failures, Run summary" width="220" height="514" loading="lazy">
+<figcaption>One Dataverse call, then data operations.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l10-runs-code.webp" alt="Code view of List flow runs: ListRecords on entityName flowruns, $select status, starttime, duration, triggertype, _workflow_value, $filter starttime ge addDays(utcNow(),-7), $orderby starttime desc, $top 5000" width="600" height="178" loading="lazy">
+<figcaption>List rows on the flowruns table for the last seven days.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l10-runs-summary.webp" alt="Run summary output: Runs in last 7 days 70, Failed 7, Flows with at least one failure 6, Success rate 90, Longest run 797523 ms" width="618" height="200" loading="lazy">
+<figcaption>70 runs, 90% success, and the longest run took about 13 minutes.</figcaption></figure>
+<pre><code>length(union(body(&#x27;Flows_with_failures&#x27;), body(&#x27;Flows_with_failures&#x27;)))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>Flows_with_failures</code></td><td>A Select that keeps only <code>_workflow_value</code> (the flow's ID) from each failed run.</td></tr><tr><td><code>union(x, x)</code></td><td>Removes duplicate IDs.</td></tr><tr><td><code>length(...)</code></td><td>How many different flows failed at least once.</td></tr></tbody></table></div>
+<pre><code>div(mul(100, sub(total, failed)), total)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>sub(total, failed)</code></td><td>Runs that didn't fail.</td></tr><tr><td><code>mul(100, ...)</code></td><td>Multiply first, so integer division doesn't round to zero.</td></tr><tr><td><code>div(..., total)</code></td><td>The success rate as a whole percentage. The demo wraps it in an <code>if()</code> to avoid dividing by zero.</td></tr></tbody></table></div>
+<p>Add a Recurrence trigger and a Teams post, and this becomes a weekly health report. Useful columns on each run: <code>status</code>, <code>starttime</code>, <code>endtime</code>, <code>duration</code> (milliseconds), <code>triggertype</code>, <code>errorcode</code>, <code>errormessage</code>, and <code>_workflow_value</code> to link to the flow.</p>
+
+<h2 id="facts">What to know about FlowRun</h2>
+<ul>
+<li>Only <strong>solution</strong> flows get their runs stored here.</li>
+<li>Records are kept for <strong>28 days</strong> by default, set by <code>FlowRunTimeToLiveInSeconds</code> on the Organization table. They use Dataverse database storage.</li>
+<li>It's an elastic table, built for volume; normal Dataverse security roles control who can read it.</li>
+</ul>
+
+<h2 id="tenant">Across the tenant</h2>
+<ul>
+<li><strong>Automation center</strong> (Level 6): failures and recommendations for the flows you can see.</li>
+<li><strong>Power Platform admin center analytics</strong>: usage and error trends per environment.</li>
+<li><strong>CoE Starter Kit</strong>: a free set of solutions that inventories every flow, app and maker into Dataverse, with dashboards and clean-up processes.</li>
+<li><strong>PowerShell admin cmdlets</strong>: list, disable or reassign flows in bulk:</li>
+</ul>
+<pre><code># Admin module: Install-Module Microsoft.PowerApps.Administration.PowerShell
+Add-PowerAppsAccount
+
+# every flow in an environment, with owner and state
+Get-AdminFlow -EnvironmentName &lt;environment id&gt; |
+  Select-Object DisplayName, Enabled, CreatedTime, @{n=&#x27;Owner&#x27;;e={$_.CreatedBy.userId}}
+
+# turn off a flow that is misbehaving, without opening it
+Disable-AdminFlow -EnvironmentName &lt;environment id&gt; -FlowName &lt;flow id&gt;</code></pre>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Elastic table</strong>: a Dataverse table type for very large, fast-growing data such as logs.</p>
+<p><strong>Inventory</strong>: a complete list of what exists, with owners, so nothing is forgotten.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Make sure the flows you care about are in solutions.</li><li>Build a flow with <strong>List rows</strong> on <em>Flow Runs</em>, filtered to the last 7 days.</li><li>Filter failures, count them, and compute a success rate and the longest duration.</li><li>Post the summary to a Teams channel on a weekly Recurrence.</li><li>For tenant-wide inventory, install the CoE Starter Kit in a dedicated environment.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Expecting non-solution flows in FlowRun.</li>
+<li>Raising the retention a lot without checking storage capacity.</li>
+<li>Reporting only failures. A flow that silently stopped running has no failures at all: also check flows with no runs.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/cloud-flow-run-metadata">Manage cloud flow run history in Dataverse</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/analytics-flow">View analytics for cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/guidance/coe/starter-kit">Center of Excellence (CoE) Starter Kit</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/powerapps-powershell">PowerShell support for Power Apps and Power Automate</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="environment-strategy-managed.html">← Environment strategy and Managed Environments</a><a href="./">Back to all topics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">A weekly health summary, built with a flow</a></li><li><a href="#facts">What to know about FlowRun</a></li><li><a href="#tenant">Across the tenant</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI prompts in flows and cleaning their JSON | Vinay Matsa</title>
+<meta name="description" content="Use a prompt to pull structured data from text, and turn a chatty AI answer into JSON a flow can use.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI prompts in flows and cleaning their JSON">
+<meta property="og:description" content="Use a prompt to pull structured data from text, and turn a chatty AI answer into JSON a flow can use.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 9</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 9 · Integration and AI · 9 of 10</li>
+      </ul>
+      <h1>AI prompts in flows and cleaning their JSON</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>A <strong>prompt</strong> is an instruction you write once and run from a flow with <strong>Run a prompt</strong>: "extract the invoice number from this email", "classify this request as Hardware, Software or Access". Prompts are built in Copilot Studio or AI Builder and run on the same capacity as other AI features.</p>
+
+<h2 id="prompt">Ask for JSON, and say exactly which keys</h2>
+<pre><code>Extract the invoice number, supplier name, total and currency
+from the email below.
+Return only a JSON object with the keys invoiceNumber, supplier,
+total (a number) and currency. No other text.
+If a value is missing, use null.
+
+Email:
+[Email body]</code></pre>
+<p><em>[Email body]</em> is an input you add to the prompt; the flow fills it with the email text. Many prompts let you choose JSON as the output format, which gives you tokens directly. Even then, models sometimes add a sentence before the JSON or wrap it in a code fence, so a flow that parses the output should be able to clean it.</p>
+
+<h2 id="demo">The demo: a messy answer in, clean fields out</h2>
+<p>The first Compose holds a typical chatty answer (it stands in for a prompt output, so the demo needs no AI capacity):</p>
+<pre><code>Sure! Here is the extracted data:
+```json
+{
+  &quot;invoiceNumber&quot;: &quot;INV-2048&quot;,
+  &quot;supplier&quot;: &quot;Fabrikam Ltd&quot;,
+  &quot;total&quot;: 1240.50,
+  &quot;currency&quot;: &quot;EUR&quot;
+}
+```
+Let me know if you need anything else.</code></pre>
+<p><code>json()</code> on that text fails. <strong>Only the JSON</strong> cuts out everything from the first <code>{</code> to the last <code>}</code>:</p>
+<figure class="shot"><img src="../assets/img/pa/l9-json-code.webp" alt="Code view of Only the JSON: a Compose using substring, indexOf and lastIndexOf on the AI response text" width="600" height="220" loading="lazy">
+<figcaption>One expression removes the chat and the code fence.</figcaption></figure>
+<pre><code>substring(outputs(&#x27;AI_response_text&#x27;), indexOf(outputs(&#x27;AI_response_text&#x27;), &#x27;{&#x27;), add(sub(lastIndexOf(outputs(&#x27;AI_response_text&#x27;), &#x27;}&#x27;), indexOf(outputs(&#x27;AI_response_text&#x27;), &#x27;{&#x27;)), 1))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>indexOf(text, &#x27;{&#x27;)</code></td><td>Position of the first opening brace: where the JSON starts.</td></tr><tr><td><code>lastIndexOf(text, &#x27;}&#x27;)</code></td><td>Position of the last closing brace: where it ends.</td></tr><tr><td><code>sub(end, start) + 1</code></td><td>The length to keep, including the closing brace.</td></tr><tr><td><code>substring(text, start, length)</code></td><td>The JSON alone.</td></tr></tbody></table></div>
+<p>Then <code>json(outputs('Only_the_JSON'))</code> turns it into an object, and the fields are ready to use:</p>
+<figure class="shot"><img src="../assets/img/pa/l9-json-fields.webp" alt="Fields output: Invoice INV-2048, Supplier Fabrikam Ltd, Total 1240.5, Total above 1000 true" width="592" height="130" loading="lazy">
+<figcaption>Values read from the cleaned JSON, including a calculated check.</figcaption></figure>
+<pre><code>greater(float(outputs(&#x27;As_object&#x27;)?[&#x27;total&#x27;]), 1000)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[&#x27;total&#x27;]</code></td><td>The total from the AI. It might come back as text or a number.</td></tr><tr><td><code>float(...)</code></td><td>Makes sure it's a number before comparing.</td></tr><tr><td><code>greater(a, 1000)</code></td><td>True when the invoice needs extra approval.</td></tr></tbody></table></div>
+
+<h2 id="safety">Before you trust it</h2>
+<ul>
+<li>Put the parse in a Scope. If it fails, route the item to a person instead of failing silently.</li>
+<li>Check required keys with <code>empty()</code> and sensible ranges (a negative total is wrong whatever the model says).</li>
+<li>Keep the raw AI output in your log, so you can see what it said when a value looks odd.</li>
+<li>Don't send confidential data to a prompt unless your organisation has approved it for that data.</li>
+</ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Prompt</strong>: written instructions for a generative AI model, with placeholders for inputs.</p>
+<p><strong>JSON</strong>: text that describes objects with keys and values. Flows can read it once it's parsed.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Write the prompt with a clear list of keys and the instruction to return only JSON. Test it with three or four real examples.</li><li>In the flow, add <strong>Run a prompt</strong> and map its inputs.</li><li>Add a Compose with the substring expression above on the prompt's text output.</li><li>Add <code>json()</code> (or Parse JSON with a schema) and read the fields.</li><li>Validate the fields and route failures to review.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Parsing the raw answer directly. It works in testing and fails the first time the model adds a friendly sentence.</li>
+<li>Vague key names in the prompt, so the model invents its own.</li>
+<li>Comparing numbers that arrived as text.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/prompts-overview">Prompts overview</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/use-a-custom-prompt-in-flow">Use your prompt in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Expression functions reference (substring, indexOf, json)</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="ai-builder-documents.html">← AI Builder document processing and human review</a><a href="copilot-studio-agent-flows.html">Flows for Copilot Studio agents →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#prompt">Ask for JSON, and say exactly which keys</a></li><li><a href="#demo">The demo: a messy answer in, clean fields out</a></li><li><a href="#safety">Before you trust it</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

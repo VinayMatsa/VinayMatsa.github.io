@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flows for Copilot Studio agents | Vinay Matsa</title>
+<meta name="description" content="How an agent calls a flow to take action or fetch data, and what to keep in mind when building one.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flows for Copilot Studio agents">
+<meta property="og:description" content="How an agent calls a flow to take action or fetch data, and what to keep in mind when building one.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 9</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 9 · Integration and AI · 10 of 10</li>
+      </ul>
+      <h1>Flows for Copilot Studio agents</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>An agent built in <strong>Copilot Studio</strong> can answer questions from knowledge, but to <em>do</em> something (create a ticket, look up an order, send an approval) it calls a flow. Copilot Studio calls these <strong>agent flows</strong>. They use the same designer and connectors as cloud flows, with a trigger and a response made for agents.</p>
+
+<h2 id="shape">The shape</h2>
+<ol>
+<li>Trigger: <strong>When an agent calls the flow</strong>, with typed inputs (text, number, yes/no).</li>
+<li>Your actions: look up, create, update.</li>
+<li><strong>Respond to the agent</strong>, with typed outputs the agent can use in its reply.</li>
+</ol>
+<p>It's the same pattern as calling a flow from Power Apps: typed inputs in, typed outputs back, and the caller waits for the response.</p>
+
+<h2 id="using">Using the flow in an agent</h2>
+<ul>
+<li>Add the flow to the agent as a <strong>tool</strong> (action). Give the tool and each input a clear name and description: the agent uses them to decide when to call it and what to pass.</li>
+<li>Or call it from a <strong>topic</strong> with an action node, mapping topic variables to inputs and outputs to variables.</li>
+<li>Return short, useful outputs (a status, an ID, one or two fields). Large tables slow the conversation.</li>
+</ul>
+
+<h2 id="limits">Things to plan for</h2>
+<ul>
+<li><strong>Time.</strong> The agent waits for the response, and there is a time limit. Respond quickly; for long work, respond with "started" and send the result later (for example by email or Teams).</li>
+<li><strong>Whose identity.</strong> Connections can use the maker's credentials or the user's. For user-specific data, use the user's, so people only see what they're allowed to.</li>
+<li><strong>Billing.</strong> Agent flows created in Copilot Studio run on Copilot Studio capacity, not on Power Automate per-user licences.</li>
+<li><strong>ALM.</strong> Build them in a solution, with connection references, like any other flow.</li>
+</ul>
+
+<h2 id="demo">Why there's no demo here</h2>
+<p>The demos in this series stay inside Power Automate. The flow side is the same as the Power Apps demo: swap the trigger and the response for the agent versions.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Agent</strong>: an AI assistant you build in Copilot Studio that people chat with.</p>
+<p><strong>Tool</strong>: something the agent can use to act, such as a flow, a connector action or a prompt.</p>
+<p><strong>Topic</strong>: a scripted conversation path inside an agent.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>In Copilot Studio, open your agent and add a new tool of type agent flow (or create one from the Flows area).</li><li>Define the inputs with clear names and descriptions.</li><li>Add the actions, then <strong>Respond to the agent</strong> with the outputs.</li><li>Publish the flow, then test from the agent's test pane with a natural request.</li><li>Check the activity map to see which inputs the agent passed.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Vague tool descriptions, so the agent calls the wrong flow or none.</li>
+<li>Returning raw JSON blobs that the agent then repeats to the user.</li>
+<li>Running everything as the maker, which can show users data they shouldn't see.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/flows-overview">Agent flows overview</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow">Use agent flows with your agent</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="ai-prompts-clean-json.html">← AI prompts in flows and cleaning their JSON</a><a href="./">Back to all topics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#shape">The shape</a></li><li><a href="#using">Using the flow in an agent</a></li><li><a href="#limits">Things to plan for</a></li><li><a href="#demo">Why there's no demo here</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SharePoint REST API and $batch | Vinay Matsa</title>
+<meta name="description" content="Use Send an HTTP request to SharePoint for what the standard actions can't do, and create many items in one call.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SharePoint REST API and $batch">
+<meta property="og:description" content="Use Send an HTTP request to SharePoint for what the standard actions can't do, and create many items in one call.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 9</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 9 · Integration and AI · 4 of 10</li>
+      </ul>
+      <h1>SharePoint REST API and $batch</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>The SharePoint actions cover the everyday work. <strong>Send an HTTP request to SharePoint</strong> lets you call SharePoint's REST API directly, signed in through the same connection. Use it for things like breaking permission inheritance, reading version history, or creating many items in one call with <strong>$batch</strong>.</p>
+
+<h2 id="demo">Read with REST, then write three items in one call</h2>
+<figure class="shot"><img src="../assets/img/pa/l9-rest-canvas.webp" alt="Flow canvas: Manually trigger a flow, Get items with REST, Big requests, Create three items in one call, Batch result" width="190" height="345" loading="lazy">
+<figcaption>Two REST calls: one GET, one $batch POST.</figcaption></figure>
+
+<h2 id="get">A REST read</h2>
+<pre><code>_api/web/lists/getbytitle(&#x27;Requests&#x27;)/items?$select=Title,Amount&amp;$filter=Amount gt 500&amp;$orderby=Amount desc&amp;$top=5</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>_api/web/lists/getbytitle(&#x27;Requests&#x27;)</code></td><td>The list. You can also use <code>lists(guid'...')</code> with the list ID, which survives a rename.</td></tr><tr><td><code>/items</code></td><td>Its items.</td></tr><tr><td><code>$select / $filter / $orderby / $top</code></td><td>OData query options, the same idea as in Get items.</td></tr></tbody></table></div>
+<p>Set the header <code>Accept: application/json;odata=nometadata</code> so the response is plain JSON without extra metadata. Then a <strong>Select</strong> maps <code>body('Get_items_with_REST')?['value']</code> into clean rows:</p>
+<figure class="shot"><img src="../assets/img/pa/l9-rest-big-requests.webp" alt="Big requests output: five requests with amounts 2300, 1450, 990, 620 and 560" width="592" height="420" loading="lazy">
+<figcaption>Requests over 500, largest first.</figcaption></figure>
+
+<h2 id="batch">$batch: many changes, one request</h2>
+<p>A $batch request sends several operations in one HTTP call, wrapped in a multipart body. The demo creates three audit rows. Method <code>POST</code>, URI <code>_api/$batch</code>, header <code>Content-Type: multipart/mixed; boundary=batch_demo</code>, and this body:</p>
+<pre><code>--batch_demo
+Content-Type: multipart/mixed; boundary=&quot;changeset_demo&quot;
+
+--changeset_demo
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST https://contoso.sharepoint.com/sites/Demo/_api/web/lists/getbytitle(&#x27;Audit Log&#x27;)/items HTTP/1.1
+Content-Type: application/json;odata=nometadata
+Accept: application/json;odata=nometadata
+
+{&quot;Title&quot;:&quot;Batch demo row 1&quot;,&quot;Action&quot;:&quot;Created by $batch&quot;}
+
+--changeset_demo
+... (rows 2 and 3, same shape) ...
+--changeset_demo--
+
+--batch_demo--</code></pre>
+<p>Every boundary line must match the header, blank lines matter, and each inner request uses the full site URL. The response is also multipart text; each created item returns <code>HTTP/1.1 201</code>. The demo counts them:</p>
+<figure class="shot"><img src="../assets/img/pa/l9-batch-result.webp" alt="Batch result output: Items created by one call 3, Requests over 500 5" width="618" height="140" loading="lazy">
+<figcaption>Three items from one action instead of three.</figcaption></figure>
+<pre><code>sub(length(split(string(body(&#x27;Create_three_items_in_one_call&#x27;)), &#x27;HTTP/1.1 201&#x27;)), 1)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>string(body(...))</code></td><td>The multipart response as text.</td></tr><tr><td><code>split(..., &#x27;HTTP/1.1 201&#x27;)</code></td><td>Cuts the text at each success marker.</td></tr><tr><td><code>length(...) - 1</code></td><td>Number of pieces minus one = number of successes.</td></tr></tbody></table></div>
+<p>For hundreds of items, build the body with a Select and <code>join()</code> instead of typing it, and keep each batch small (tens of operations, not thousands).</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>REST</strong>: calling a service with plain web requests (GET to read, POST to create, PATCH to update, DELETE to remove).</p>
+<p><strong>Multipart</strong>: a body made of several parts separated by a boundary string, like attachments in an email.</p></div></details>
+
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Add <strong>Send an HTTP request to SharePoint</strong> and pick the site.</li><li>Method GET, Uri <code>_api/web/lists/getbytitle('YourList')/items?$top=5</code>, header <code>Accept: application/json;odata=nometadata</code>. Run and look at the output.</li><li>For a batch, use POST to <code>_api/$batch</code> with the multipart header, and build the body with a <code>changeset</code> for the writes.</li><li>Count the <code>201</code> responses, or parse them, to confirm every change succeeded.</li></ol></div></details>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul class="mistakes">
+<li>Leaving out the <code>Accept</code> header, then fighting with the verbose default format.</li>
+<li>Missing a blank line or a closing boundary in the batch body. SharePoint rejects the whole request.</li>
+<li>Assuming a 200 on the batch call means every item succeeded. Check each inner response.</li>
+<li>Using internal column names wrongly. REST needs internal names (<code>Amount</code>, not <em>Request amount</em>).</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/sharepoint/dev/business-apps/power-automate/guidance/working-with-send-sp-http-request">Working with the SharePoint Send HTTP Request action</a></li><li><a href="https://learn.microsoft.com/en-us/sharepoint/dev/sp-add-ins/make-batch-requests-with-the-rest-apis">Make batch requests with the REST APIs</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="microsoft-graph-requests.html">← Calling Microsoft Graph from a flow</a><a href="http-request-trigger.html">Starting a flow with an HTTP request →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">Read with REST, then write three items in one call</a></li><li><a href="#get">A REST read</a></li><li><a href="#batch">$batch: many changes, one request</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Child flows | Vinay Matsa</title>
+<meta name="description" content="Move reusable logic into its own flow, call it from many parents with inputs, and get a result back.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Child flows">
+<meta property="og:description" content="Move reusable logic into its own flow, call it from many parents with inputs, and get a result back.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 4</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 4 · Reliable flows · 6 of 7</li>
+      </ul>
+      <h1>Child flows</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>As flows grow, the same steps appear in several of them: look up an approver, calculate a price, write a log entry. A <strong>child flow</strong> holds that logic once; parents call it, pass inputs and get outputs back.</p>
+
+<h2 id="demo"><span class="ico ico-arrow"></span>Parent and child</h2>
+<div class="cards"><div><strong>What</strong>A flow called by other flows with <strong>Run a Child Flow</strong>, which returns a result.</div><div><strong>Why</strong>Fix a bug once and every caller gets the fix; it also keeps flows under the 500-action limit.</div><div><strong>Demo</strong>The child <em>Calculate total</em> multiplies quantity by unit price.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>One call, start to finish</p><div class="fl"><div class="nd act">Parent: <strong>Run a Child Flow</strong> with Quantity <span class="chip ">3</span> and Unit price <span class="chip ">49.99</span></div><div class="ar"></div><div class="nd">Child: <strong>Manually trigger a flow</strong> receives the inputs</div><div class="ar"></div><div class="nd">Child: <code>mul(triggerBody()?['number'], triggerBody()?['number_1'])</code> → <span class="chip ">149.97</span></div><div class="ar"></div><div class="nd">Child: <strong>Respond to a Power App or flow</strong> returns <em>total</em></div><div class="ar"></div><div class="nd ok">Parent: <span class="chip ok">Total from the child flow: 149.97</span></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l4-child-canvas.webp" alt="Parent run view: Run a Child Flow took 0.2s, then Order total, both succeeded" width="400" height="215" loading="lazy">
+<figcaption>The parent run.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l4-child-total.webp" alt="Order total output: Total from the child flow: 149.97" width="505" height="240" loading="lazy">
+<figcaption>The value returned by the child.</figcaption></figure>
+
+<h2 id="parts"><span class="ico ico-scope"></span>The three parts</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-scope"></span>Where</th><th>Action</th><th>Purpose</th></tr></thead><tbody><tr><td>Child</td><td>Manually trigger a flow</td><td>Defines the inputs (Quantity, Unit price)</td></tr><tr><td>Child</td><td>Respond to a Power App or flow</td><td>Sends outputs back (total)</td></tr><tr><td>Parent</td><td>Run a Child Flow</td><td>Calls the child, fills the inputs, waits for the response</td></tr></tbody></table></div>
+<p>Inputs are named <code>number</code>, <code>number_1</code> internally, in the order you added them.</p>
+
+<h2 id="rules"><span class="ico ico-warn"></span>Rules to know</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-warn"></span>Rule</th><th>Why</th></tr></thead><tbody><tr><td>Parent and child must be in the same solution</td><td>Run a Child Flow only lists solution flows</td></tr><tr><td>The child must respond within 120 seconds</td><td>Otherwise the parent times out; respond first, continue after</td></tr><tr><td>Child connections: Run only users → use the child's own connection</td><td>A connection provided by the caller makes the call fail</td></tr><tr><td>500 actions per flow</td><td>Splitting into child flows is the recommended way to stay under it</td></tr></tbody></table></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Parent / child</strong>: the flow that calls / the flow being called.</p><p><strong>Response</strong>: the child's answer; without it the parent gets no outputs.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Long work before the child responds.</li><li>Child and parent in different solutions.</li><li>Leaving child connections set to the caller's.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/create-child-flows">Create child flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/create-reusable-code">Create reusable code with child flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/asychronous-flow-pattern">Use asynchronous responses</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="pagination-thresholds.html">← Pagination and thresholds</a><a href="error-alerts-terminate.html">Error alerts and Terminate →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">Parent and child</a></li><li><a href="#parts">The three parts</a></li><li><a href="#rules">Rules to know</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

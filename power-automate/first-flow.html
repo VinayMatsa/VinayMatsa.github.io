@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your first flow: trigger, actions and a test run | Vinay Matsa</title>
+<meta name="description" content="Build an instant flow that greets a person by name, run it, and read the result, step by step with the real values.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Your first flow: trigger, actions and a test run">
+<meta property="og:description" content="Build an instant flow that greets a person by name, run it, and read the result, step by step with the real values.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 1</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 1 · Foundations · 2 of 7</li>
+      </ul>
+      <h1>Your first flow: trigger, actions and a test run</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>The quickest way to understand flows is to build one. This flow asks for a name, builds a greeting with today's date, and counts the letters. It needs no connections, so you can build it in any environment.</p>
+
+<h2 id="the-flow"><span class="ico ico-arrow"></span>The flow: one input, two results</h2>
+<div class="cards"><div><strong>What</strong>An <strong>instant</strong> flow with one text input and two <strong>Compose</strong> actions.</div><div><strong>Why</strong>Compose shows the result of every formula in the run, so it's the best way to learn.</div><div><strong>Demo</strong>Type <em>Alex</em>, get a greeting and the name's length.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>What happens when you run it</p><div class="fl"><div class="nd act">Trigger: <strong>Manually trigger a flow</strong>, input <em>Name</em> = <span class="chip ">"Alex"</span></div><div class="ar"></div><div class="nd">Compose <strong>Greeting</strong>: build a sentence from the name and today's date</div><div class="ar"></div><div class="nd">Compose <strong>Name length</strong>: count the characters</div><div class="ar"></div><div class="nd ok">Run results: <span class="chip ">"Hello, Alex! Today is Saturday, 21 November 2026."</span> and <span class="chip ">4</span></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/designer-canvas.webp" alt="The flow designer showing three cards: Manually trigger a flow, Greeting and Name length" width="976" height="328" loading="lazy">
+<figcaption>The finished flow in the designer.</figcaption></figure>
+
+<h2 id="the-formula"><span class="ico ico-expr"></span>The greeting formula</h2>
+<pre><code>concat(&#x27;Hello, &#x27;, triggerBody()?[&#x27;text&#x27;], &#x27;! Today is &#x27;, formatDateTime(utcNow(), &#x27;dddd, dd MMMM yyyy&#x27;), &#x27;.&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>concat(...)</code></td><td>Joins all the pieces into one text.</td></tr><tr><td><code>&#x27;Hello, &#x27;</code></td><td>Fixed text. Text in expressions goes in single quotes.</td></tr><tr><td><code>triggerBody()?[&#x27;text&#x27;]</code></td><td>The value typed into the trigger's first text input: <em>Alex</em>.</td></tr><tr><td><code>utcNow()</code></td><td>The current date and time, in UTC.</td></tr><tr><td><code>formatDateTime(..., &#x27;dddd, dd MMMM yyyy&#x27;)</code></td><td>Turns the date into <em>Saturday, 21 November 2026</em>.</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Each piece, with the demo's values</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Piece</th><th>Value at run time</th></tr></thead><tbody><tr><td><code>'Hello, '</code></td><td><span class="chip ">"Hello, "</span></td></tr><tr><td><code>triggerBody()?['text']</code></td><td><span class="chip ">"Alex"</span></td></tr><tr><td><code>'! Today is '</code></td><td><span class="chip ">"! Today is "</span></td></tr><tr><td><code>formatDateTime(utcNow(), …)</code></td><td><span class="chip ">"Saturday, 21 November 2026"</span></td></tr><tr><td><code>concat(…)</code></td><td><span class="chip ok">"Hello, Alex! Today is Saturday, 21 November 2026."</span></td></tr></tbody></table></div></div>
+<p>The second action is simpler: <code>length(triggerBody()?['text'])</code> counts the characters, giving <strong>4</strong>.</p>
+
+<h2 id="run-it"><span class="ico ico-check"></span>Run it and read the result</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Test loop</p><div class="fl"><div class="nd">Save (or Publish)</div><div class="ar"></div><div class="nd">Test → Manually → Test</div><div class="ar"></div><div class="nd">Type <em>Alex</em> → <strong>Run flow</strong> → Done</div><div class="ar"></div><div class="nd ok">Open the run and select each card</div></div></div>
+<figure class="shot"><img src="../assets/img/pa/run-flow-panel.webp" alt="The Run flow panel asking for a Name, with Alex typed in" width="340" height="486" loading="lazy">
+<figcaption>The trigger's input appears as a form when you run the flow.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/greeting-output.webp" alt="Run results for the Greeting action showing: Hello, Alex! Today is Saturday, 21 November 2026." width="900" height="401" loading="lazy">
+<figcaption>The Greeting card's output in the run.</figcaption></figure>
+<h3>Watch out</h3><ul><li>The trigger input is called <code>text</code> internally even though you labelled it <em>Name</em>; a second text input would be <code>text_1</code>. Pick inputs from the dynamic content list rather than typing these names.</li><li><code>utcNow()</code> is UTC, not your local time. Use <code>convertFromUtc()</code> when the time of day matters.</li></ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Instant flow</strong>: a flow you start yourself. It can ask for inputs (text, number, yes/no, file, date).</p>
+<p><strong>Compose</strong>: an action that holds one value, like a calculator display.</p>
+<p><strong>Expression</strong>: a formula such as <code>concat()</code> or <code>length()</code>. The next article covers them.</p></div></details>
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Create an Instant cloud flow named <em>My First Flow</em> with <strong>Manually trigger a flow</strong>.</li><li>Select the trigger, <strong>Add an input</strong> → Text, label it <em>Name</em>.</li><li>Add a <strong>Compose</strong>, rename it <em>Greeting</em>, click in Inputs, select <strong>fx</strong>, paste the formula and select Add.</li><li>Add a second Compose <em>Name length</em> with <code>length(triggerBody()?['text'])</code>.</li><li>Save, then Test → Manually → Test, type <em>Alex</em>, Run flow, Done.</li><li>Open the run and select each card to see its result.</li></ol></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Typing the formula straight into Inputs without the <strong>fx</strong> editor: it's saved as plain text and never calculated.</li><li>Using double quotes in expressions. Only single quotes work: <code>'Hello'</code>.</li><li>Expecting local time from <code>utcNow()</code>.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/create-cloud-flow-without-copilot">Create your first cloud flow without Copilot</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/flows-designer">Explore the cloud flows designer</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="what-is-power-automate.html">← What is Power Automate? The types of flows</a><a href="dynamic-content-and-expressions.html">Dynamic content and expressions: the complete guide →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#the-flow">The flow: one input, two results</a></li><li><a href="#the-formula">The greeting formula</a></li><li><a href="#run-it">Run it and read the result</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

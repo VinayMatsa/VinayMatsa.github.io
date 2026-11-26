@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP explained: host, client, server and tools, with a Dataverse example | Vinay Matsa</title>
+<meta name="description" content="The Model Context Protocol in plain words: who does what, how one request flows from start to end, and why it beats one-off integrations.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MCP explained: host, client, server and tools, with a Dataverse example">
+<meta property="og:description" content="The Model Context Protocol in plain words: who does what, how one request flows from start to end, and why it beats one-off integrations.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / MCP</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Copilot Studio &amp; AI Lab</li>
+        <li>MCP</li>
+      </ul>
+      <h1>MCP explained: host, client, server and tools, with a Dataverse example</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-16">16 November 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Everyone's talking about MCP, but "MCP server", "connector", "tool" and "host" often get mixed up. This article puts them in order.</p>
+
+<h2 id="root">Start from the root</h2>
+<p>An AI model on its own can only produce text. To look something up or change something in your systems, it needs a way to call them. Before MCP, every AI app needed its own custom integration for every system: its own sign-in handling, URLs and data formats.</p>
+<p>The <strong>Model Context Protocol (MCP)</strong> is one shared set of rules between AI apps and the systems they use. A useful comparison is USB-C: one shape of plug, so any device fits any charger that follows the standard.</p>
+
+<h2 id="parts">The four parts</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Part</th><th>What it is</th><th>Example</th></tr></thead><tbody>
+<tr><td>Host</td><td>The AI app you use, with an MCP client built in</td><td>Claude, ChatGPT, Microsoft Copilot, Copilot Studio</td></tr>
+<tr><td>MCP client</td><td>The part of the host that talks MCP to a server</td><td>Built into the host</td></tr>
+<tr><td>MCP server</td><td>An adapter in front of one service</td><td>The Dataverse MCP server, a GitHub MCP server</td></tr>
+<tr><td>Tool</td><td>One action a server offers</td><td><code>create_record</code>, <code>list_tables</code></td></tr>
+</tbody></table></div>
+
+<h2 id="flow">How one request flows</h2>
+<ol>
+<li><strong>Discover</strong>: the client asks the server which tools it has (<code>tools/list</code>).</li>
+<li><strong>Decide</strong>: the AI picks a tool. MCP itself doesn't think; the model does.</li>
+<li><strong>Call</strong>: the client sends <code>tools/call</code> with the inputs.</li>
+<li><strong>Act</strong>: the server does the work, using your sign-in.</li>
+<li><strong>Answer</strong>: the result goes back to the AI, and then to you.</li>
+</ol>
+
+<h2 id="why">Why not just call the APIs?</h2>
+<p>Every API has its own authentication, URLs and formats. An MCP server wraps the API in one shape that any MCP-enabled app can discover and call. With three AI apps and three systems, direct integration needs nine custom connections; with MCP you build three clients and three servers. MCP doesn't replace APIs: the servers still call them underneath.</p>
+
+<h2 id="dataverse">A Power Platform example</h2>
+<p>Ask an MCP-enabled assistant to "add a contact called PVink". The AI picks <code>create_record</code>, and the Dataverse MCP server adds the row to Contacts. Deletes run only after you approve them, and your Dataverse security roles still apply, because the server acts as you.</p>
+<p>In Claude Code, you add a server with <code>claude mcp add</code> and check what's connected with <code>/mcp</code>.</p>
+
+<h2 id="safety">Staying safe</h2>
+<ul>
+<li>Use official servers from the vendor of the system.</li>
+<li>Watch for prompt injection and <strong>tool poisoning</strong> (a malicious server describing its tools in a way that manipulates the AI).</li>
+<li>Keep approvals on for actions that change data.</li>
+<li>Never paste API keys into chats.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-mcp">Connect to Dataverse with Model Context Protocol</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/agent-extend-action-mcp">Extend your agent with Model Context Protocol</a></li><li><a href="https://code.claude.com/docs/en/mcp">Connect Claude Code to tools via MCP</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7527953788939321344/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="claude-in-power-platform.html">← Four ways to put Claude to work in Microsoft Power Platform</a><a href="prompt-injection-explained.html">Prompt injection: the hidden instructions that hijack your agent →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#parts">The four parts</a></li><li><a href="#flow">How one request flows</a></li><li><a href="#why">Why not just call the APIs?</a></li><li><a href="#dataverse">A Power Platform example</a></li><li><a href="#safety">Staying safe</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7527953788939321344/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

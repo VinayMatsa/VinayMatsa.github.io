@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTTP requests and custom connectors | Vinay Matsa</title>
+<meta name="description" content="Call any web API with the HTTP action, read the status and body, handle authentication safely, and know when to build a custom connector instead.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTP requests and custom connectors">
+<meta property="og:description" content="Call any web API with the HTTP action, read the status and body, handle authentication safely, and know when to build a custom connector instead.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 3</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 3 · Triggers and connectors · 7 of 7</li>
+      </ul>
+      <h1>HTTP requests and custom connectors</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>More than a thousand connectors exist, but sooner or later you need a service that has none. The <strong>HTTP</strong> action calls any web API directly; a <strong>custom connector</strong> wraps the same API so makers get friendly actions.</p>
+
+<h2 id="flow"><span class="ico ico-arrow"></span>A request and its response</h2>
+<div class="cards"><div><strong>What</strong>The HTTP action sends a request (method, URL, headers, body) and returns a status and a body.</div><div><strong>Why</strong>Any service with an API becomes reachable, even without a connector.</div><div><strong>Demo</strong>Read a public GitHub repository's details.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>One HTTP call</p><div class="fl"><div class="nd act"><strong>GET</strong> <code>https://api.github.com/repos/microsoft/PowerPlatformConnectors</code></div><div class="ar"></div><div class="nd">Headers: <code>User-Agent</code>, <code>Accept: application/json</code></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Status code?</div><div class="ar"></div><div class="br"><div><span class="lbl t">200</span><div class="nd ok">Read the body: name, stars, language</div></div><div><span class="lbl f">4xx</span><div class="nd mute">Your request was wrong (401, 404)</div></div><div><span class="lbl f">5xx</span><div class="nd mute">The server failed; retry</div></div></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l3-http-canvas.webp" alt="Run of the flow: HTTP GET repository, Status code and Repository summary, all succeeded" width="400" height="285" loading="lazy">
+<figcaption>The demo run.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l3-http-inputs.webp" alt="HTTP action inputs: URI https://api.github.com/repos/microsoft/PowerPlatformConnectors, Method GET, headers User-Agent PowerAutomateDemo and Accept application/json" width="505" height="445" loading="lazy">
+<figcaption>The request.</figcaption></figure>
+
+<h2 id="response"><span class="ico ico-data"></span>Reading the response</h2>
+<figure class="shot"><img src="../assets/img/pa/l3-http-output.webp" alt="Repository summary: name microsoft/PowerPlatformConnectors, description, stars 1303, language C#" width="514" height="140" loading="lazy">
+<figcaption>Fields read from the body.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Expressions and their values</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Expression</th><th>Value</th></tr></thead><tbody><tr><td><code>outputs('HTTP_GET_repository')?['statusCode']</code></td><td><span class="chip ok">200</span></td></tr><tr><td><code>body('HTTP_GET_repository')?['full_name']</code></td><td><span class="chip ">microsoft/PowerPlatformConnectors</span></td></tr><tr><td><code>body('HTTP_GET_repository')?['stargazers_count']</code></td><td><span class="chip ">1303</span></td></tr><tr><td><code>body('HTTP_GET_repository')?['language']</code></td><td><span class="chip ">C#</span></td></tr></tbody></table></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Method</th><th>Does</th></tr></thead><tbody><tr><td>GET</td><td>Reads</td></tr><tr><td>POST</td><td>Creates</td></tr><tr><td>PATCH / PUT</td><td>Updates</td></tr><tr><td>DELETE</td><td>Removes</td></tr></tbody></table></div>
+
+<h2 id="auth"><span class="ico ico-stop"></span>Authentication</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-stop"></span>Option</th><th>Use for</th></tr></thead><tbody><tr><td>API key in a header</td><td>Simple services</td></tr><tr><td>Basic</td><td>User name and password (avoid where possible)</td></tr><tr><td>Active Directory OAuth</td><td>Microsoft Entra ID-protected APIs, as an app</td></tr><tr><td>Managed identity</td><td>Azure resources</td></tr></tbody></table></div>
+<p>Never type secrets into the action: keep them in a <strong>Secret</strong> environment variable backed by Azure Key Vault, and turn on <strong>Secure inputs</strong> so they don't show in run history.</p>
+
+<h2 id="custom"><span class="ico ico-scope"></span>HTTP action or custom connector?</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Which one?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Will this API be used in more than one or two flows, apps or agents?</div><div class="ar"></div><div class="br"><div><span class="lbl f">No</span><div class="nd ok"><strong>HTTP action</strong></div></div><div><span class="lbl t">Yes</span><div class="nd ok"><strong>Custom connector</strong></div></div></div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th><span class="ico ico-arrow"></span>HTTP action</th><th><span class="ico ico-scope"></span>Custom connector</th></tr></thead><tbody><tr><td>Defined</td><td>In each flow</td><td>Once: host, auth, actions</td></tr><tr><td>Fields</td><td>Raw JSON</td><td>Friendly names in dynamic content</td></tr><tr><td>Licence</td><td>Premium</td><td>Premium</td></tr><tr><td>Data policies</td><td>As HTTP</td><td>Classified on its own</td></tr></tbody></table></div>
+<p>See the Custom connectors article for building one end to end.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>API</strong>: a web address a program calls to get or change data.</p><p><strong>Header</strong>: extra information sent with the request.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Secrets typed into headers.</li><li>Ignoring the status code: a 404 can still return a body.</li><li>Calling an API in a tight loop and getting throttled.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/custom-connectors/">Custom connectors overview</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/custom-connectors/define-blank">Create a custom connector from scratch</a></li><li><a href="https://learn.microsoft.com/en-us/training/modules/http-connectors/">Overview of HTTP connectors in Power Automate (training)</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="approvals.html">← Approvals</a><a href="./">Back to all topics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#flow">A request and its response</a></li><li><a href="#response">Reading the response</a></li><li><a href="#auth">Authentication</a></li><li><a href="#custom">HTTP action or custom connector?</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

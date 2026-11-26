@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solutions and solution-aware flows | Vinay Matsa</title>
+<meta name="description" content="Package flows with everything they depend on so they move from development to test to production as one unit.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Solutions and solution-aware flows">
+<meta property="og:description" content="Package flows with everything they depend on so they move from development to test to production as one unit.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 6</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 6 · ALM and governance · 1 of 7</li>
+      </ul>
+      <h1>Solutions and solution-aware flows</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>A flow built under <em>My flows</em> lives only in the environment where you made it. A <strong>solution</strong> is a container that holds the flow with everything it depends on, so the whole set moves together.</p>
+
+<h2 id="why"><span class="ico ico-scope"></span>Why solutions</h2>
+<div class="cards"><div><strong>What</strong>A container for flows, connection references, environment variables, tables, apps and agents.</div><div><strong>Why</strong>Without one, moving a flow means exporting by hand, fixing connections and hoping nothing was missed.</div><div><strong>Demo</strong>The <em>Website Demos</em> solution behind every demo on this site.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>The path a solution takes</p><div class="fl"><div class="nd act"><strong>Dev</strong>: build in an <em>unmanaged</em> solution</div><div class="ar"></div><div class="nd">Export or pipeline (as <em>managed</em>)</div><div class="ar"></div><div class="nd"><strong>Test</strong>: check it works</div><div class="ar"></div><div class="nd">Deploy again</div><div class="ar"></div><div class="nd ok"><strong>Prod</strong>: people use it; nobody edits it here</div></div></div>
+
+<h2 id="inside"><span class="ico ico-data"></span>What a solution holds</h2>
+<figure class="shot"><img src="../assets/img/pa/l6-solution-objects.webp" alt="Website Demos solution, All objects view: Cloud flows (31), Connection references (4), Environment variables (1); list of flows such as Demo – Adaptive Card, Demo – Approvals, Demo – Arrays and objects" width="1027" height="430" loading="lazy">
+<figcaption>The demo solution's objects.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-scope"></span>Component</th><th>Why it's in the solution</th></tr></thead><tbody><tr><td>Cloud flows</td><td>The automation itself</td></tr><tr><td>Connection references</td><td>Point to a connection without hard-coding whose it is</td></tr><tr><td>Environment variables</td><td>Values that differ per environment: site address, email</td></tr><tr><td>Tables, apps, agents, child flows</td><td>Anything else the flow uses</td></tr></tbody></table></div>
+
+<h2 id="managed"><span class="ico ico-check"></span>Unmanaged and managed</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th>Unmanaged</th><th>Managed</th></tr></thead><tbody><tr><td>Where</td><td>Development</td><td>Test and production</td></tr><tr><td>Can you edit it?</td><td>Yes</td><td>No: change in Dev and redeploy</td></tr><tr><td>Removing it</td><td>Removes the container; components stay</td><td>Removes the solution and its components</td></tr></tbody></table></div>
+<p>More on layers and upgrades in Managed and unmanaged solutions (Level 10).</p>
+
+<h2 id="publisher"><span class="ico ico-data"></span>Publisher and prefix</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Where the prefix comes from</p><div class="fl"><div class="nd">Create a <strong>publisher</strong> with prefix <code>contoso</code></div><div class="ar"></div><div class="nd">Create the solution with that publisher</div><div class="ar"></div><div class="nd ok">Every new component gets it: <code>contoso_SiteUrl</code>, <code>contoso_sharepoint</code></div></div></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Solution-aware flow</strong>: created in, or added to, a solution. Only these can move with it.</p>
+<p><strong>ALM</strong>: the way changes move from idea to production safely and repeatably.</p></div></details>
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Solutions → New solution; create your own publisher and prefix.</li><li>Open it → New → Automation → Cloud flow (solution-aware from the start).</li><li>Bring older flows in with Add existing → Automation → Cloud flow.</li><li>Export as managed for Test and Prod, or deploy with a pipeline.</li></ol></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Production flows under My flows.</li><li>Editing directly in production.</li><li>The default publisher's random prefix.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/overview-solution-flows">Overview of solution-aware cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/solution-concepts-alm">Solution concepts (managed and unmanaged)</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/overview-alm">Overview of ALM with Microsoft Power Platform</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="./">← All Power Automate topics</a><a href="connection-references.html">Connection references →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#why">Why solutions</a></li><li><a href="#inside">What a solution holds</a></li><li><a href="#managed">Unmanaged and managed</a></li><li><a href="#publisher">Publisher and prefix</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knowledge or tools? How Copilot Studio agents use your data | Vinay Matsa</title>
+<meta name="description" content="The simple rule for choosing between knowledge sources and tools, a decision order for real projects, and the limits worth remembering.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Knowledge or tools? How Copilot Studio agents use your data">
+<meta property="og:description" content="The simple rule for choosing between knowledge sources and tools, a decision order for real projects, and the limits worth remembering.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Copilot Studio</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Copilot Studio &amp; AI Lab</li>
+        <li>Copilot Studio</li>
+      </ul>
+      <h1>Knowledge or tools? How Copilot Studio agents use your data</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-10-19">19 October 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>One question I hear a lot: "Should I add this as knowledge or as a tool?" There's a simple rule.</p>
+
+<h2 id="root">Start from the root</h2>
+<p>An agent can use your data in two fundamentally different ways. It can <strong>read</strong> it to answer a question, or it can <strong>call</strong> something to fetch live data or make a change. Copilot Studio calls the first <em>knowledge</em> and the second <em>tools</em>.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th>Knowledge</th><th>Tools</th></tr></thead><tbody>
+<tr><td>In one word</td><td>What the agent <strong>knows</strong></td><td>What the agent can <strong>do</strong></td></tr>
+<tr><td>How</td><td>Searches files, sites and tables, and answers with citations</td><td>Calls actions: connectors, flows, MCP servers, APIs</td></tr>
+<tr><td>Changes data?</td><td>Never; read-only</td><td>Can create, update, delete, send</td></tr>
+<tr><td>Example</td><td>"What is our leave policy?"</td><td>"Apply leave for Friday."</td></tr>
+</tbody></table></div>
+
+<h2 id="choose">Which to pick, in order</h2>
+<ol>
+<li>Fixed documents? Upload them, or point to SharePoint.</li>
+<li>Records in Dataverse? Add Dataverse as knowledge.</li>
+<li>Live data in another system? Use a real-time connector.</li>
+<li>Need an action? Add a tool.</li>
+<li>Data behind a firewall? Add the on-premises data gateway.</li>
+</ol>
+
+<h2 id="numbers">Numbers worth remembering</h2>
+<p>At the time of writing (October 2026), Microsoft Learn listed:</p>
+<ul>
+<li>Up to 500 knowledge sources per agent.</li>
+<li>Up to 128 tools per agent, with 25 to 30 working best in practice.</li>
+<li>512 MB per uploaded file, up to 500 files.</li>
+<li>SharePoint and OneDrive files synced every 4 to 6 hours.</li>
+</ul>
+<p>Limits change, so check the quotas page before designing around them.</p>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio">Knowledge sources summary</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-tools-custom-agent">Add tools to custom agents</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-quotas">Quotas and limits</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7517802703218077696/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="copilot-studio-ai-billing.html">← AI billing in Copilot Studio: tokens, credits and limits</a><a href="flowactiontimedout-agent-flows.html">Handling FlowActionTimedOut in Copilot Studio agent flows →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#choose">Which to pick, in order</a></li><li><a href="#numbers">Numbers worth remembering</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7517802703218077696/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Status-driven workflows and approvers from data | Vinay Matsa</title>
+<meta name="description" content="Move requests through clear statuses, block changes that skip steps, and look up who approves each one.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Status-driven workflows and approvers from data">
+<meta property="og:description" content="Move requests through clear statuses, block changes that skip steps, and look up who approves each one.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 8</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 8 · Real-world patterns · 4 of 8</li>
+      </ul>
+      <h1>Status-driven workflows and approvers from data</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Most processes are a series of statuses: New, Pending, Approved, Completed. A good flow knows which moves are allowed, refuses the rest, and sends each request to the right approver without hard-coded emails.</p>
+
+<h2 id="transitions"><span class="ico ico-switch"></span>Allowed moves, as data</h2>
+<div class="cards"><div><strong>What</strong>A JSON object listing, for each status, the statuses it may move to; plus a department → approver lookup.</div><div><strong>Why</strong>Rules in data can change without editing the flow; illegal jumps are caught.</div><div><strong>Demo</strong>Four requested status changes, checked and routed.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-switch"></span>The allowed moves</p><div class="fl"><div class="nd">New → Pending or Rejected</div><div class="ar"></div><div class="nd">Pending → Approved or Rejected</div><div class="ar"></div><div class="nd">Approved → Completed</div><div class="ar"></div><div class="nd mute">Rejected and Completed: nowhere (final)</div></div></div>
+<pre><code>{
+  &quot;New&quot;:       [&quot;Pending&quot;, &quot;Rejected&quot;],
+  &quot;Pending&quot;:   [&quot;Approved&quot;, &quot;Rejected&quot;],
+  &quot;Approved&quot;:  [&quot;Completed&quot;],
+  &quot;Rejected&quot;:  [],
+  &quot;Completed&quot;: []
+}</code></pre>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Four requested changes</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Request</th><th>From → To</th><th>Allowed?</th><th>Approver</th></tr></thead><tbody><tr><td>Monitor arms</td><td>New → Pending</td><td><span class="chip ok">true</span></td><td>it-lead</td></tr><tr><td>Team lunch</td><td>New → Completed</td><td><span class="chip no">false</span></td><td>–</td></tr><tr><td>Office chairs</td><td>Approved → Completed</td><td><span class="chip ok">true</span></td><td>–</td></tr><tr><td>Visitor badges</td><td>Completed → New</td><td><span class="chip no">false</span></td><td>default</td></tr></tbody></table></div></div>
+<figure class="shot"><img src="../assets/img/pa/l8-status-checks.webp" alt="Check each change output: Monitor arms New to Pending allowed true approver it-lead; Team lunch New to Completed allowed false; Office chairs Approved to Completed allowed true; Visitor badges Completed to New allowed false approver default" width="618" height="560" loading="lazy">
+<figcaption>The checks in the run.</figcaption></figure>
+<pre><code>contains(outputs(&#x27;Allowed_transitions&#x27;)?[item()?[&#x27;From&#x27;]], item()?[&#x27;To&#x27;])</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[item()?[&#x27;From&#x27;]]</code></td><td>The list of allowed targets for the current status.</td></tr><tr><td><code>contains(..., To)</code></td><td>Is the requested status in it?</td></tr></tbody></table></div>
+<pre><code>coalesce(outputs(&#x27;Approver_by_department&#x27;)?[item()?[&#x27;Department&#x27;]], &#x27;requests@contoso.com (default)&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[Department]</code></td><td>The approver for that department.</td></tr><tr><td><code>coalesce(..., default)</code></td><td>A default when the department isn't listed.</td></tr></tbody></table></div>
+
+<h2 id="build"><span class="ico ico-arrow"></span>Putting it in a flow</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Status change handler</p><div class="fl"><div class="nd act">Item modified, trigger condition: Status changed</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Is the move allowed?</div><div class="ar"></div><div class="br"><div><span class="lbl f">No</span><div class="nd mute">Set it back, tell the editor</div></div><div><span class="lbl t">Yes</span><div class="nd dec"><span class="ico ico-cond"></span>Switch on the new status</div><div class="ar"></div><div class="br"><div><span class="lbl c">Pending</span><div class="nd">Start approval with the looked-up approver</div></div><div><span class="lbl c">Approved</span><div class="nd">Notify requester</div></div><div><span class="lbl c">Completed</span><div class="nd">Archive</div></div></div></div></div></div></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>State machine</strong>: an item is always in one state, and only certain moves are allowed.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Rules hard-coded in nested Conditions.</li><li>Approver emails typed into the flow.</li><li>No default approver.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/use-expressions-in-conditions">Use expressions in conditions</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/modern-approvals">Get started with approvals</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="reminders-recurrence.html">← Reminder and recurrence flows</a><a href="archival-audit.html">Archival and audit logs →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#transitions">Allowed moves, as data</a></li><li><a href="#build">Putting it in a flow</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

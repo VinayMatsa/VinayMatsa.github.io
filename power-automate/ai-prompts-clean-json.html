@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI prompts in flows and cleaning their JSON | Vinay Matsa</title>
+<meta name="description" content="Use a prompt to pull structured data from text, and turn a chatty AI answer into JSON a flow can use.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI prompts in flows and cleaning their JSON">
+<meta property="og:description" content="Use a prompt to pull structured data from text, and turn a chatty AI answer into JSON a flow can use.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 9</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 9 · Integration and AI · 9 of 10</li>
+      </ul>
+      <h1>AI prompts in flows and cleaning their JSON</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>A <strong>prompt</strong> is an instruction you write once and run from a flow with <em>Run a prompt</em>: extract the invoice number, classify a request. Models sometimes wrap their JSON in chatty text, so the flow must clean it.</p>
+
+<h2 id="prompt"><span class="ico ico-expr"></span>Ask for JSON, with exact keys</h2>
+<div class="cards"><div><strong>What</strong>A prompt that returns JSON, plus one expression that strips anything around it.</div><div><strong>Why</strong><code>json()</code> fails the first time the model adds a friendly sentence.</div><div><strong>Demo</strong>Invoice fields from a chatty answer.</div></div>
+<pre><code>Extract the invoice number, supplier name, total and currency
+from the email below.
+Return only a JSON object with the keys invoiceNumber, supplier,
+total (a number) and currency. No other text.
+If a value is missing, use null.
+
+Email:
+[Email body]</code></pre>
+
+<h2 id="demo"><span class="ico ico-data"></span>Messy answer in, clean fields out</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Cleaning step by step</p><div class="fl"><div class="nd act">AI response text: <span class="chip warn">Sure! Here is… ```json {…} ``` Let me know…</span></div><div class="ar"></div><div class="nd"><strong>Only the JSON</strong>: from the first <code>{</code> to the last <code>}</code></div><div class="ar"></div><div class="nd"><strong>As object</strong>: <code>json(…)</code></div><div class="ar"></div><div class="nd ok"><strong>Fields</strong>: <span class="chip ">INV-2048</span><span class="chip ">Fabrikam Ltd</span><span class="chip ">1240.5</span></div></div></div>
+<pre><code>Sure! Here is the extracted data:
+```json
+{
+  &quot;invoiceNumber&quot;: &quot;INV-2048&quot;,
+  &quot;supplier&quot;: &quot;Fabrikam Ltd&quot;,
+  &quot;total&quot;: 1240.50,
+  &quot;currency&quot;: &quot;EUR&quot;
+}
+```
+Let me know if you need anything else.</code></pre>
+<figure class="shot"><img src="../assets/img/pa/l9-json-code.webp" alt="Code view of Only the JSON: a Compose using substring, indexOf and lastIndexOf on the AI response text" width="600" height="220" loading="lazy">
+<figcaption>The cleaning expression.</figcaption></figure>
+<pre><code>substring(outputs(&#x27;AI_response_text&#x27;), indexOf(outputs(&#x27;AI_response_text&#x27;), &#x27;{&#x27;), add(sub(lastIndexOf(outputs(&#x27;AI_response_text&#x27;), &#x27;}&#x27;), indexOf(outputs(&#x27;AI_response_text&#x27;), &#x27;{&#x27;)), 1))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>indexOf(text, &#x27;{&#x27;)</code></td><td>Where the JSON starts.</td></tr><tr><td><code>lastIndexOf(text, &#x27;}&#x27;)</code></td><td>Where it ends.</td></tr><tr><td><code>sub(end, start) + 1</code></td><td>Its length.</td></tr><tr><td><code>substring(...)</code></td><td>The JSON alone.</td></tr></tbody></table></div>
+<figure class="shot"><img src="../assets/img/pa/l9-json-fields.webp" alt="Fields output: Invoice INV-2048, Supplier Fabrikam Ltd, Total 1240.5, Total above 1000 true" width="592" height="130" loading="lazy">
+<figcaption>Clean fields, including a calculated check.</figcaption></figure>
+<pre><code>greater(float(outputs(&#x27;As_object&#x27;)?[&#x27;total&#x27;]), 1000)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>float(...)</code></td><td>The total may come back as text.</td></tr><tr><td><code>greater(..., 1000)</code></td><td>True: needs extra approval.</td></tr></tbody></table></div>
+
+<h2 id="safety"><span class="ico ico-check"></span>Before you trust it</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Safe parsing</p><div class="fl"><div class="nd">Parse inside a <strong>Scope</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Parsed, required keys present, values sensible?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">Use the values</div></div><div><span class="lbl f">No</span><div class="nd mute">Route to a person; keep the raw output in the log</div></div></div></div></div>
+<p>Don't send confidential data to a prompt unless your organisation has approved it.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Prompt</strong>: instructions for a generative AI model, with input placeholders.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Parsing the raw answer directly.</li><li>Vague key names.</li><li>Comparing numbers that arrived as text.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/prompts-overview">Prompts overview</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/use-a-custom-prompt-in-flow">Use your prompt in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Expression functions reference</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="ai-builder-documents.html">← AI Builder document processing and human review</a><a href="copilot-studio-agent-flows.html">Flows for Copilot Studio agents →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#prompt">Ask for JSON, with exact keys</a></li><li><a href="#demo">Messy answer in, clean fields out</a></li><li><a href="#safety">Before you trust it</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

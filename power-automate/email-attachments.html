@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Email attachments and file content | Vinay Matsa</title>
+<meta name="description" content="Send a file as an attachment, read attachments from incoming mail, and save them to SharePoint, with how file content moves.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Email attachments and file content">
+<meta property="og:description" content="Send a file as an attachment, read attachments from incoming mail, and save them to SharePoint, with how file content moves.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 7</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 7 · Files, email and documents · 1 of 7</li>
+      </ul>
+      <h1>Email attachments and file content</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Many processes start with a file in an email: an order sheet, an invoice, a signed form. A flow can send files as attachments, read attachments from incoming mail and save them where the team works.</p>
+
+<h2 id="demo"><span class="ico ico-data"></span>One flow, both directions</h2>
+<div class="cards"><div><strong>What</strong>Attachments are file content (Base64) plus a name, going out through Send an email and in through Get emails.</div><div><strong>Why</strong>Getting files out of inboxes and into libraries is one of the most common automations.</div><div><strong>Demo</strong>Email an order workbook, read it back from the Inbox, save the attachment to SharePoint.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The demo flow</p><div class="fl"><div class="nd act"><strong>Get order file</strong> from SharePoint</div><div class="ar"></div><div class="nd"><strong>Send test email</strong> with it attached</div><div class="ar"></div><div class="nd">Wait for delivery (31 s)</div><div class="ar"></div><div class="nd"><strong>Get emails</strong> with attachments</div><div class="ar"></div><div class="nd"><strong>Save each attachment</strong> (loop) → SharePoint</div><div class="ar"></div><div class="nd ok">Reply, then move the email to Archive</div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l7-email-canvas.webp" alt="Flow canvas: Get order file, Send test email, Wait for delivery (31 seconds), Get emails, Save each attachment loop, Reply to email, Move email" width="220" height="463" loading="lazy">
+<figcaption>The demo flow.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l7-email-summary.webp" alt="Summary output: Subject Contoso: order file for review, Attachments 1, First attachment website-demo-orders.xlsx" width="618" height="190" loading="lazy">
+<figcaption>What arrived.</figcaption></figure>
+
+<h2 id="send"><span class="ico ico-arrow"></span>Sending a file</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>File → attachment</p><div class="fl"><div class="nd">Get file content → <span class="chip ">{"$content-type":…, "$content":"…"}</span></div><div class="ar"></div><div class="nd ok">Send an email (V2) → Show all → Attachments: Name + Content <code>body('Get_order_file')?['$content']</code></div></div></div>
+
+<h2 id="save"><span class="ico ico-check"></span>Saving attachments that arrive</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Attachment → file</p><div class="fl"><div class="nd">Get emails (V3) / trigger with <strong>Include attachments</strong> = Yes</div><div class="ar"></div><div class="nd">Apply to each attachment</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Inline image (signature logo)? <code>isInline</code></div><div class="ar"></div><div class="br"><div><span class="lbl f">Yes</span><div class="nd mute">Skip it</div></div><div><span class="lbl t">No</span><div class="nd ok">Create file: name + <code>base64ToBinary(contentBytes)</code></div></div></div></div></div>
+<pre><code>base64ToBinary(items(&#x27;Save_each_attachment&#x27;)?[&#x27;contentBytes&#x27;])</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[&#x27;contentBytes&#x27;]</code></td><td>The attachment as Base64 text.</td></tr><tr><td><code>base64ToBinary(...)</code></td><td>Back to file bytes for Create file.</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Prefix names with a date or ID so files don't overwrite each other: <code>items('Save_each_attachment')?['name']</code>.</li><li>Signature logos count as attachments; skip <code>isInline</code> ones.</li></ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Base64</strong>: a file written as text so it can travel in a flow.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Saving <code>contentBytes</code> without <code>base64ToBinary()</code>: the file is unreadable.</li><li>Include attachments off.</li><li>Same file name every time.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-email-flows">Create flows to manage email</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="./">← All Power Automate topics</a><a href="reply-move-read-email.html">Reply, move and read email →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">One flow, both directions</a></li><li><a href="#send">Sending a file</a></li><li><a href="#save">Saving attachments that arrive</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

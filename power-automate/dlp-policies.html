@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data loss prevention (DLP) policies | Vinay Matsa</title>
+<meta name="description" content="Understand the admin rules that decide which connectors a flow may use, which may be combined, and what tenant isolation adds.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Data loss prevention (DLP) policies">
+<meta property="og:description" content="Understand the admin rules that decide which connectors a flow may use, which may be combined, and what tenant isolation adds.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 6</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 6 · ALM and governance · 6 of 7</li>
+      </ul>
+      <h1>Data loss prevention (DLP) policies</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Admins use <strong>data policies</strong> (DLP policies) to stop company data flowing where it shouldn't. A policy decides, per environment, which connectors are allowed and which may be used together.</p>
+
+<h2 id="error"><span class="ico ico-warn"></span>What it looks like</h2>
+<div class="cards"><div><strong>What</strong>Admin rules per environment: connector groups, or an allowlist.</div><div><strong>Why</strong>A flow can be perfect and still refuse to turn on. Knowing why saves hours.</div><div><strong>Demo</strong>The Approvals connector blocked in the demo environment.</div></div>
+<figure class="shot"><img src="../assets/img/pa/l3-dlp-error.webp" alt="Error banner: Admin data policy &#x27;Advanced Connector Policy&#x27; restricts use of these apis: /providers/Microsoft.PowerApps/apis/shared_approvals." width="770" height="30" loading="lazy">
+<figcaption>The flow saved but wouldn't turn on.</figcaption></figure>
+
+<h2 id="groups"><span class="ico ico-scope"></span>Classic policies: three groups</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>Can these connectors be in one flow?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Are they in the same group?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Both Business</span><div class="nd ok">Allowed</div></div><div><span class="lbl t">Both Non-Business</span><div class="nd ok">Allowed</div></div><div><span class="lbl f">Business + Non-Business</span><div class="nd mute">Not allowed together</div></div><div><span class="lbl f">Any Blocked</span><div class="nd mute">Not allowed at all</div></div></div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-scope"></span>Group</th><th>Meaning</th></tr></thead><tbody><tr><td>Business</td><td>Company data connectors; usable together</td></tr><tr><td>Non-Business</td><td>Personal or other data; not with Business in one flow</td></tr><tr><td>Blocked</td><td>Can't be used</td></tr></tbody></table></div>
+<p>New connectors land in the default group (Non-Business unless the admin changes it).</p>
+
+<h2 id="acp"><span class="ico ico-stop"></span>Advanced connector policies</h2>
+<p>The error above names an <strong>Advanced Connector Policy</strong>: a strict allowlist. Every connector that isn't explicitly allowed is blocked, so a connector that works in one environment can be refused in another.</p>
+
+<h2 id="maker"><span class="ico ico-check"></span>What to do as a maker</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Blocked connector</p><div class="fl"><div class="nd">Read the error: it names the policy and connector</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Can an allowed connector do the job?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">Use it</div></div><div><span class="lbl f">No</span><div class="nd ok">Ask the admin: business reason + environment</div></div></div></div></div>
+<p>Build in an environment whose policy matches production, so there are no surprises at deployment.</p>
+
+<h2 id="tenant-isolation"><span class="ico ico-stop"></span>Tenant isolation</h2>
+<div class="cards"><div><strong><span class="ico ico-scope"></span>Data policies</strong>Which connectors may be used.</div><div><strong><span class="ico ico-stop"></span>Tenant isolation</strong>Where they may connect: blocks connections to other organisations' tenants except an allow list. Off by default; an admin setting.</div></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Connector</strong>: the wrapper around a service that gives a flow its actions.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Rebuilding a flow that a policy blocks.</li><li>Developing with looser rules than production.</li><li>Mixing Business and Non-Business connectors.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification">Connector classification</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/advanced-connector-policies">Advanced connector policies</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/guidance/adoption/dlp-strategy">Implement a data policy strategy</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/cross-tenant-restrictions">Restrict cross-tenant inbound and outbound access</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="ownership-service-accounts.html">← Flow ownership and service accounts</a><a href="automation-center.html">Monitoring with Automation center →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#error">What it looks like</a></li><li><a href="#groups">Classic policies: three groups</a></li><li><a href="#acp">Advanced connector policies</a></li><li><a href="#maker">What to do as a maker</a></li><li><a href="#tenant-isolation">Tenant isolation</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

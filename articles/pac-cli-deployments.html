@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deploying solutions with PAC CLI: Dev to Stage to Prod | Vinay Matsa</title>
+<meta name="description" content="Authentication profiles, versioning, export, deployment settings files, staged upgrades and the checks that make scripted releases safe.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Deploying solutions with PAC CLI: Dev to Stage to Prod">
+<meta property="og:description" content="Authentication profiles, versioning, export, deployment settings files, staged upgrades and the checks that make scripted releases safe.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / ALM</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Platform Deep Dive</li>
+        <li>ALM</li>
+      </ul>
+      <h1>Deploying solutions with PAC CLI: Dev to Stage to Prod</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-10">10 November 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Manual export and import works once. For repeatable, controlled releases, the Power Platform CLI (<code>pac</code>) turns deployments into scripts you can run the same way every time.</p>
+
+<h2 id="root">Start from the root</h2>
+<p>A <strong>solution</strong> is the package that carries your apps, flows and tables between environments. <strong>Dev</strong> is where you build, <strong>Test/Stage</strong> is where you check, <strong>Prod</strong> is where people work. Deploying means exporting from one and importing into the next, with the right settings for each. Doing that by hand invites mistakes; a script does it the same way every time.</p>
+
+<h2 id="steps">The walkthrough</h2>
+<ol>
+<li><strong>Authentication profiles</strong>: interactive sign-in for local work; a service principal or workload identity federation for pipelines. <code>pac auth create</code>, then <code>pac auth select</code> to switch.</li>
+<li><strong>Set the version and publish</strong>: <code>pac solution version</code> or set it before export, so every build is identifiable.</li>
+<li><strong>Export</strong> both managed and unmanaged: unmanaged for source control, managed for Test and Prod.</li>
+<li><strong>Deployment settings file</strong>: <code>pac solution create-settings</code> generates a template for environment variables and connection references.</li>
+<li><strong>Import to Test</strong> with <code>--settings-file</code> and <code>--stage-and-upgrade</code>.</li>
+<li><strong>Stage for upgrade in Prod</strong>: import as a holding solution, migrate and validate data, then apply the upgrade.</li>
+</ol>
+
+<h2 id="points">Key points</h2>
+<ul>
+<li>The settings file is a template: fill in every value for each target environment.</li>
+<li>A <code>ConnectionId</code> must come from the <em>target</em> environment.</li>
+<li>Applying an upgrade removes components that aren't in the new version. Migrate and check data first.</li>
+<li><code>--activate-plugins</code> turns on flows and plug-ins, but verify each flow is on and working.</li>
+<li>Stop at the first failed step; don't push on and leave environments half-updated.</li>
+</ul>
+
+<h2 id="choose">Pipelines or PAC CLI?</h2>
+<p>Power Platform pipelines give makers guided, one-click deployments. PAC CLI gives full control in scripts and CI/CD. Both have a place in a healthy ALM strategy. The <a href="../power-automate/source-control-cli.html">source control</a> and <a href="../power-automate/cicd-devops-github.html">CI/CD</a> pages in the Learn section go further.</p>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution">pac solution command reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/conn-ref-env-variables-build-tools">Pre-populate connection references and environment variables</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/update-solutions-alm">Create and update custom solutions for ALM</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7525756907391918080/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="flowactiontimedout-agent-flows.html">← Handling FlowActionTimedOut in Copilot Studio agent flows</a><a href="connect-claude-code-power-platform.html">Connect Claude Code to Microsoft Power Platform in seven steps →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#steps">The walkthrough</a></li><li><a href="#points">Key points</a></li><li><a href="#choose">Pipelines or PAC CLI?</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7525756907391918080/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

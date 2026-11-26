@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Archival and audit logs | Vinay Matsa</title>
+<meta name="description" content="Move finished records out of the working list in a safe order, and keep a record of what each flow changed.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Archival and audit logs">
+<meta property="og:description" content="Move finished records out of the working list in a safe order, and keep a record of what each flow changed.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 8</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 8 · Real-world patterns · 5 of 8</li>
+      </ul>
+      <h1>Archival and audit logs</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Working lists slow down and get cluttered as finished items pile up. Archiving moves them out; an <strong>audit log</strong> records what each flow changed.</p>
+
+<h2 id="demo"><span class="ico ico-data"></span>Archive two completed requests</h2>
+<div class="cards"><div><strong>What</strong>Copy finished items to an archive list, log each change, then delete the original.</div><div><strong>Why</strong>Faster lists, a full history, and a way to trace any run's changes.</div><div><strong>Demo</strong>Two completed requests archived under one batch ID.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Per item, in this order</p><div class="fl"><div class="nd act">Batch ID: <code>guid()</code> once per run</div><div class="ar"></div><div class="nd">1. <strong>Copy to archive</strong></div><div class="ar"></div><div class="nd">2. <strong>Write audit entry</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Did both succeed?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">3. <strong>Delete original</strong></div></div><div><span class="lbl f">No</span><div class="nd mute">Keep the original; next run retries</div></div></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l8-archive-canvas.webp" alt="Flow canvas: Batch id, Create sample A, Create sample B, Get completed, Archive each loop with Copy to archive, Write audit entry, Delete original" width="165" height="530" loading="lazy">
+<figcaption>The demo flow.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l8-archive-summary.webp" alt="Summary output: Batch ID bc06d118-..., Archived 2, Archived titles Archive demo: old request A, Archive demo: old request B" width="618" height="155" loading="lazy">
+<figcaption>Two items archived.</figcaption></figure>
+<div class="callout"><strong>Never delete first.</strong> If the copy fails after a delete, the item is gone.</div>
+
+<h2 id="audit"><span class="ico ico-scope"></span>What an audit entry holds</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>One audit entry</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Column</th><th>Example</th></tr></thead><tbody><tr><td>RequestId</td><td><span class="chip ">42</span></td></tr><tr><td>Action</td><td><span class="chip ">Archived</span></td></tr><tr><td>OldValue / NewValue</td><td><span class="chip ">Completed</span> / <span class="chip ">Archived</span></td></tr><tr><td>BatchId</td><td><span class="chip ">bc06d118-…</span></td></tr><tr><td>Created / Created By</td><td>filled in by SharePoint</td></tr></tbody></table></div><p class="viz-note">The batch ID ties every entry from one run together.</p></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Audit log</strong>: an append-only list of changes; entries are added, never edited.</p></div></details>
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Create an archive list (key columns + OriginalId, ArchivedOn) and an audit list (RequestId, Action, OldValue, NewValue, BatchId).</li><li>Schedule a flow: Get items with <code>Status eq 'Completed'</code> and Modified older than 90 days.</li><li>Loop with concurrency 1: copy, log, then delete.</li><li>Let people read the audit list but not edit it.</li></ol></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Deleting before copying.</li><li>No batch ID.</li><li>Editable audit entries.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="status-workflows-approvers.html">← Status-driven workflows and approvers from data</a><a href="settings-feature-flags.html">Configurable templates and feature flags →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">Archive two completed requests</a></li><li><a href="#audit">What an audit entry holds</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

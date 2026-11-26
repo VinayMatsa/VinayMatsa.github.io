@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text functions: the complete guide | Vinay Matsa</title>
+<meta name="description" content="Split, cut, search, clean, pad and rebuild text: positions, case-insensitive search, safe substrings, line breaks, joins, templates and URLs.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Text functions: the complete guide">
+<meta property="og:description" content="Split, cut, search, clean, pad and rebuild text: positions, case-insensitive search, safe substrings, line breaks, joins, templates and URLs.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 2</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 2 · Working with data · 5 of 7</li>
+      </ul>
+      <h1>Text functions: the complete guide</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Text arrives messy: codes with parts you need, lists in one cell, line breaks, stray spaces, inconsistent capitals. A small set of functions handles almost all of it, once you know how positions are counted and where each one fails.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Section</th><th>You'll learn</th></tr></thead><tbody><tr><td>1 · Positions</td><td>Counting from 0, with a picture</td></tr><tr><td>2 · Splitting and joining</td><td>Text ↔ list, including line breaks</td></tr><tr><td>3 · Taking part of text</td><td><code>substring</code> vs <code>slice</code>, finding characters</td></tr><tr><td>4 · Searching</td><td><code>contains</code>, <code>startsWith</code>, case sensitivity</td></tr><tr><td>5 · Cleaning and formatting</td><td><code>trim</code>, case, padding numbers</td></tr><tr><td>6 · Real jobs</td><td>Email parts, IDs from subjects, templates, URLs</td></tr></tbody></table></div>
+
+<h2 id="positions"><span class="ico ico-expr"></span>1 · Positions start at 0</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Positions in INV-2026-0042</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr></thead><tbody><tr><td><span class="chip ">I</span></td><td><span class="chip ">N</span></td><td><span class="chip ">V</span></td><td><span class="chip ">-</span></td><td><span class="chip ">2</span></td><td><span class="chip ">0</span></td><td><span class="chip ">2</span></td><td><span class="chip ">6</span></td><td><span class="chip ">-</span></td><td><span class="chip ">0</span></td><td><span class="chip ">0</span></td><td><span class="chip ">4</span></td><td><span class="chip ">2</span></td></tr></tbody></table></div><p class="viz-note"><code>substring(text, 4, 4)</code> starts at position 4 and takes 4 characters: <em>2026</em>. <code>length</code> is 13; the last position is 12.</p></div>
+
+<h2 id="split"><span class="ico ico-data"></span>2 · Splitting and joining</h2>
+<div class="cards"><div><strong>What</strong><code>split</code> turns text into a list at a separator; <code>join</code> turns a list back into text.</div><div><strong>Why</strong>Lists in one cell, email addresses, codes and multi-line text all need splitting before you can use the parts.</div><div><strong>Demo</strong>An email address, a company list and three lines of text.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Splitting an email address</p><div class="fl"><div class="nd"><span class="chip ">"alex.johnson@contoso.com"</span></div><div class="ar"></div><div class="nd"><code>split(…, '@')</code> → <span class="chip ">["alex.johnson","contoso.com"]</span></div><div class="ar"></div><div class="br"><div><span class="lbl c">first(…)</span><div class="nd"><span class="chip ok">"alex.johnson"</span></div></div><div><span class="lbl c">last(…)</span><div class="nd"><span class="chip ok">"contoso.com"</span></div></div></div></div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The Text scope: lists</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td><code>join(createArray('Contoso','Fabrikam','Northwind'), ', ')</code></td><td><span class="chip ">"Contoso, Fabrikam, Northwind"</span></td></tr><tr><td><code>split(text, decodeUriComponent('%0A'))</code> on 3 lines</td><td><span class="chip ok">["Line one","Line two","Line three"]</span></td></tr><tr><td><code>split('Contoso; Fabrikam', ';')</code></td><td><span class="chip warn">["Contoso"," Fabrikam"]</span> leading space</td></tr><tr><td><code>split('Contoso; Fabrikam', '; ')</code></td><td><span class="chip ok">["Contoso","Fabrikam"]</span></td></tr></tbody></table></div></div>
+<p>A line break can't be typed into an expression. <code>decodeUriComponent('%0A')</code> produces one; use <code>'%0D%0A'</code> for text from Windows systems.</p>
+
+<h2 id="parts"><span class="ico ico-expr"></span>3 · Taking part of the text</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Expression</th><th>Result</th><th>Note</th></tr></thead><tbody><tr><td><code>substring('INV-2026-0042', 4, 4)</code></td><td><span class="chip ">2026</span></td><td>start, length</td></tr><tr><td><code>slice('INV-2026-0042', -4)</code></td><td><span class="chip ">0042</span></td><td>negative = count from the end</td></tr><tr><td><code>slice('abc', 1, 5)</code></td><td><span class="chip ok">bc</span></td><td>end past the text: no error</td></tr><tr><td><code>substring('abc', 1, 5)</code></td><td><span class="chip no">fails</span></td><td>past the end: error</td></tr><tr><td><code>indexOf('INV-2026-0042', '-')</code></td><td><span class="chip ">3</span></td><td>first match; -1 if none</td></tr><tr><td><code>lastIndexOf('A-B-C-D', '-')</code></td><td><span class="chip ">5</span></td><td>last match</td></tr><tr><td><code>nthIndexOf('A-B-C-D', '-', 2)</code></td><td><span class="chip ">3</span></td><td>the 2nd match</td></tr><tr><td><code>length('Contoso')</code></td><td><span class="chip ">7</span></td><td>characters</td></tr></tbody></table></div>
+<pre><code>The template language function &#x27;substring&#x27; parameters are out of range: &#x27;start index&#x27; and &#x27;length&#x27;
+must be non-negative integers and their sum must be no larger than the length of the string.</code></pre>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>substring or slice?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Can the text be shorter than I expect?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes / not sure</span><div class="nd ok"><code>slice(text, start, end)</code>: end position, never fails</div></div><div><span class="lbl f">No, fixed format</span><div class="nd ok"><code>substring(text, start, length)</code></div></div></div></div></div>
+
+<h2 id="search"><span class="ico ico-cond"></span>4 · Searching: mind the capitals</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Is “inv-” in “Invoice INV-42 attached”?</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td><code>contains('Invoice INV-42 attached', 'inv-')</code></td><td><span class="chip warn">false</span></td></tr><tr><td><code>contains(toLower('Invoice INV-42 attached'), 'inv-')</code></td><td><span class="chip ok">true</span></td></tr><tr><td><code>startsWith('RE: Order 101', 'RE:')</code></td><td><span class="chip ">true</span></td></tr><tr><td><code>endsWith('report.pdf', '.pdf')</code></td><td><span class="chip ">true</span></td></tr></tbody></table></div></div>
+<figure class="shot"><img src="../assets/img/pa/b1-text-results.webp" alt="Text_results raw output: formatNumber(42,&#x27;0000&#x27;) 0042, contains exact case false, contains any case true, join Contoso, Fabrikam, Northwind, nthIndexOf 2nd dash 3, lastIndexOf dash 5, slice(&#x27;abc&#x27;,1,5) bc, lines Line one Line two Line three, length(&#x27;Contoso&#x27;) 7" width="592" height="335" loading="lazy">
+<figcaption>All the Text scope's results from the run.</figcaption></figure>
+<p><code>contains</code>, <code>indexOf</code>, <code>replace</code>, <code>startsWith</code> and <code>endsWith</code> are all case-sensitive. Lower both sides when case doesn't matter.</p>
+
+<h2 id="clean"><span class="ico ico-check"></span>5 · Cleaning and formatting</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Expression</th><th>Result</th></tr></thead><tbody><tr><td><code>trim('   contoso ltd  ')</code></td><td><span class="chip ">"contoso ltd"</span></td></tr><tr><td><code>toUpper(…)</code> / <code>toLower(…)</code></td><td><span class="chip ">"CONTOSO LTD"</span></td></tr><tr><td><code>concat(toUpper(substring('alex',0,1)), substring('alex',1))</code></td><td><span class="chip ">"Alex"</span></td></tr><tr><td><code>formatNumber(42, '0000')</code></td><td><span class="chip ok">"0042"</span> padded</td></tr><tr><td><code>replace('Order 101 is late', 'late', 'on time')</code></td><td><span class="chip ">"Order 101 is on time"</span></td></tr></tbody></table></div>
+<figure class="shot"><img src="../assets/img/pa/l2-text-results.webp" alt="Results JSON: split into array, user name, domain, invoice year and number, replace, clean and upper, capitalise" width="514" height="264" loading="lazy">
+<figcaption>More results from the original Text functions demo.</figcaption></figure>
+
+<h2 id="jobs"><span class="ico ico-data"></span>6 · Real jobs</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Pull 1042 out of “RE: Request REQ-1042 needs review”</p><div class="fl"><div class="nd"><code>split(subject, 'REQ-')</code> → <span class="chip ">["RE: Request ","1042 needs review"]</span></div><div class="ar"></div><div class="nd"><code>last(…)</code> → <span class="chip ">"1042 needs review"</span></div><div class="ar"></div><div class="nd"><code>split(…, ' ')</code> → <span class="chip ">["1042","needs","review"]</span></div><div class="ar"></div><div class="nd ok"><code>first(…)</code> → <span class="chip ok">"1042"</span></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/ext-text-arrays.webp" alt="Request ID from subject 1042, filled template, uriComponent Contoso%20%26%20Co" width="514" height="300" loading="lazy">
+<figcaption>An ID from a subject, a filled template, and a URL-safe value.</figcaption></figure>
+<pre><code>replace(replace(&#x27;Hello ~Name~, request ~ID~ is ready.&#x27;, &#x27;~Name~&#x27;, &#x27;Alex&#x27;), &#x27;~ID~&#x27;, &#x27;REQ-1042&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>inner replace</code></td><td>Fills the name.</td></tr><tr><td><code>outer replace</code></td><td>Fills the ID.</td></tr></tbody></table></div>
+<p><code>uriComponent('Contoso &amp; Co')</code> → <em>Contoso%20%26%20Co</em>, so spaces and <code>&amp;</code> don't break a link or OData filter.</p>
+<h3>Watch out</h3><ul><li>If the separator is missing, <code>last(split(…))</code> returns the whole text; check with <code>contains</code> first.</li><li>Case-sensitive search misses real matches.</li><li><code>formatNumber</code> returns text: pad last.</li></ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>String</strong>: text. <strong>Position</strong>: characters counted from 0.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li><code>substring</code> on text that can be shorter.</li><li>Splitting on <code>','</code> when the data has <code>', '</code>.</li><li>Case-sensitive <code>contains</code> on user text.</li><li>Typing <code>\n</code> for a new line.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (string functions)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/expression-cookbook">Expression cookbook for cloud flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="dates-and-time-zones.html">← Dates, times and time zones: the complete guide</a><a href="handling-nulls.html">Handling nulls: coalesce, empty and ? →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#positions">1 · Positions start at 0</a></li><li><a href="#split">2 · Splitting and joining</a></li><li><a href="#parts">3 · Taking part of the text</a></li><li><a href="#search">4 · Searching: mind the capitals</a></li><li><a href="#clean">5 · Cleaning and formatting</a></li><li><a href="#jobs">6 · Real jobs</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

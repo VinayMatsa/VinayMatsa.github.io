@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitoring flows at scale | Vinay Matsa</title>
+<meta name="description" content="Report on every run in an environment from Dataverse, and the admin tools for finding and managing flows across a tenant.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Monitoring flows at scale">
+<meta property="og:description" content="Report on every run in an environment from Dataverse, and the admin tools for finding and managing flows across a tenant.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 10</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 10 · Enterprise ALM and admin · 6 of 6</li>
+      </ul>
+      <h1>Monitoring flows at scale</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Run history shows one flow at a time. Admins need every run in an environment: failures across all flows, the slowest ones. For solution flows, Dataverse stores this in the <strong>FlowRun</strong> table, and a flow can read it.</p>
+
+<h2 id="demo"><span class="ico ico-data"></span>A weekly health summary, built with a flow</h2>
+<div class="cards"><div><strong>What</strong>List rows on the <em>flowruns</em> table, then filter and count.</div><div><strong>Why</strong>One report for every flow, without opening run histories.</div><div><strong>Demo</strong>The last 7 days in the demo environment.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The demo flow</p><div class="fl"><div class="nd act"><strong>List flow runs</strong>: <code>starttime ge addDays(utcNow(),-7)</code></div><div class="ar"></div><div class="br"><div><span class="lbl c">Failed runs</span><div class="nd">Filter <code>status = Failed</code></div></div><div><span class="lbl c">Durations</span><div class="nd">Select <code>duration</code></div></div><div><span class="lbl c">Flows with failures</span><div class="nd">Select <code>_workflow_value</code></div></div></div><div class="ar"></div><div class="nd ok"><strong>Run summary</strong></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l10-runs-canvas.webp" alt="Flow canvas: Manually trigger a flow, List flow runs, Failed runs, Durations, Flows with failures, Run summary" width="220" height="514" loading="lazy">
+<figcaption>The flow.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l10-runs-code.webp" alt="Code view of List flow runs: ListRecords on entityName flowruns, $select status, starttime, duration, triggertype, _workflow_value, $filter starttime ge addDays(utcNow(),-7), $orderby starttime desc, $top 5000" width="600" height="178" loading="lazy">
+<figcaption>List rows on flowruns.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The summary</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Measure</th><th>Value</th><th class="hide-sm"></th></tr></thead><tbody><tr><td>Runs in last 7 days</td><td><span class="chip ">70</span></td><td class="hide-sm"><div class="bar"><i style="width:100%"></i></div></td></tr><tr><td>Failed</td><td><span class="chip warn">7</span></td><td class="hide-sm"><div class="bar"><i style="width:10%"></i></div></td></tr><tr><td>Flows with at least one failure</td><td><span class="chip ">6</span></td><td class="hide-sm"></td></tr><tr><td>Success rate</td><td><span class="chip ok">90%</span></td><td class="hide-sm"><div class="bar done"><i style="width:90%"></i></div></td></tr><tr><td>Longest run</td><td><span class="chip ">797,523 ms ≈ 13 min</span></td><td class="hide-sm"></td></tr></tbody></table></div></div>
+<figure class="shot"><img src="../assets/img/pa/l10-runs-summary.webp" alt="Run summary output: Runs in last 7 days 70, Failed 7, Flows with at least one failure 6, Success rate 90, Longest run 797523 ms" width="618" height="200" loading="lazy">
+<figcaption>The summary.</figcaption></figure>
+<pre><code>length(union(body(&#x27;Flows_with_failures&#x27;), body(&#x27;Flows_with_failures&#x27;)))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>union(x, x)</code></td><td>Removes duplicate flow IDs.</td></tr><tr><td><code>length(...)</code></td><td>How many different flows failed.</td></tr></tbody></table></div>
+<pre><code>div(mul(100, sub(total, failed)), total)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>mul(100, …) first</code></td><td>So integer division doesn't round to zero.</td></tr><tr><td><code>div(…, total)</code></td><td>Success rate as a whole percentage.</td></tr></tbody></table></div>
+
+<h2 id="facts"><span class="ico ico-clock"></span>What to know about FlowRun</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-clock"></span>Fact</th><th>Detail</th></tr></thead><tbody><tr><td>Which flows</td><td>Only <strong>solution</strong> flows</td></tr><tr><td>Retention</td><td>28 days by default (<code>FlowRunTimeToLiveInSeconds</code> on Organization)</td></tr><tr><td>Storage</td><td>Uses Dataverse database capacity</td></tr><tr><td>Table type</td><td>Elastic table; normal security roles apply</td></tr></tbody></table></div>
+
+<h2 id="tenant"><span class="ico ico-scope"></span>Across the tenant</h2>
+<div class="cards"><div><strong><span class="ico ico-data"></span>Automation center</strong>Failures and recommendations for flows you can see (Level 6).</div><div><strong><span class="ico ico-check"></span>Admin center analytics</strong>Usage and error trends per environment.</div><div><strong><span class="ico ico-scope"></span>CoE Starter Kit</strong>Inventories every flow, app and maker, with dashboards.</div><div><strong><span class="ico ico-expr"></span>PowerShell</strong>List, disable or reassign flows in bulk.</div></div>
+<pre><code># Admin module: Install-Module Microsoft.PowerApps.Administration.PowerShell
+Add-PowerAppsAccount
+
+# every flow in an environment, with owner and state
+Get-AdminFlow -EnvironmentName &lt;environment id&gt; |
+  Select-Object DisplayName, Enabled, CreatedTime, @{n=&#x27;Owner&#x27;;e={$_.CreatedBy.userId}}
+
+# turn off a flow that is misbehaving, without opening it
+Disable-AdminFlow -EnvironmentName &lt;environment id&gt; -FlowName &lt;flow id&gt;</code></pre>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Elastic table</strong>: a Dataverse table type for large, fast-growing data such as logs.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Expecting non-solution flows in FlowRun.</li><li>Raising retention without checking storage.</li><li>Reporting only failures: also check flows with no runs.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/cloud-flow-run-metadata">Manage cloud flow run history in Dataverse</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/analytics-flow">View analytics for cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/guidance/coe/starter-kit">Center of Excellence (CoE) Starter Kit</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/powerapps-powershell">PowerShell support for Power Apps and Power Automate</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="environment-strategy-managed.html">← Environment strategy and Managed Environments</a><a href="./">Back to all topics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">A weekly health summary, built with a flow</a></li><li><a href="#facts">What to know about FlowRun</a></li><li><a href="#tenant">Across the tenant</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

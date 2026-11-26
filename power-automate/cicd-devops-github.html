@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CI/CD with Azure DevOps and GitHub Actions | Vinay Matsa</title>
+<meta name="description" content="Automate export, checking and deployment of solutions with Microsoft's build tools, instead of clicking through the portal.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CI/CD with Azure DevOps and GitHub Actions">
+<meta property="og:description" content="Automate export, checking and deployment of solutions with Microsoft's build tools, instead of clicking through the portal.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 10</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 10 · Enterprise ALM and admin · 4 of 6</li>
+      </ul>
+      <h1>CI/CD with Azure DevOps and GitHub Actions</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>When IT wants deployments that run from a repository, with approvals, checks and audit trails, they use <strong>Azure DevOps</strong> or <strong>GitHub Actions</strong> with the Power Platform build tools.</p>
+
+<h2 id="shape"><span class="ico ico-arrow"></span>The pipeline shape</h2>
+<div class="cards"><div><strong>What</strong>Pipelines that export, check, pack and deploy solutions using a service principal.</div><div><strong>Why</strong>The same tested artifact reaches Prod, every time, with a record of who approved it.</div><div><strong>Demo</strong>Export to Git, build a managed zip, deploy to Test then Prod.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Export → build → release</p><div class="fl"><div class="nd act"><strong>Export</strong> unmanaged from Dev → unpack → commit</div><div class="ar"></div><div class="nd"><strong>Build</strong>: pack managed zip + solution checker</div><div class="ar"></div><div class="nd"><strong>Release to Test</strong> with test settings</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Approved?</div><div class="ar"></div><div class="nd ok"><strong>Release to Prod</strong>: the same zip</div></div></div>
+
+<h2 id="auth"><span class="ico ico-stop"></span>Signing in without a person</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-stop"></span>Pipeline identity</p><div class="fl"><div class="nd">App registration (service principal) in Entra ID</div><div class="ar"></div><div class="nd">Application user in each environment, minimal role</div><div class="ar"></div><div class="nd ok">Azure DevOps service connection / GitHub variables + secret</div></div><p class="viz-note">Prefer workload identity federation (no stored secret) where supported.</p></div>
+
+<h2 id="ado"><span class="ico ico-scope"></span>Azure DevOps</h2>
+<pre><code># azure-pipelines.yml: export, check and store a solution
+trigger: none
+pool:
+  vmImage: windows-latest
+steps:
+- task: PowerPlatformToolInstaller@2
+- task: PowerPlatformExportSolution@2
+  inputs:
+    authenticationType: PowerPlatformSPN
+    PowerPlatformSPN: Contoso-Dev        # service connection
+    SolutionName: ContosoRequests
+    SolutionOutputFile: $(Build.ArtifactStagingDirectory)/ContosoRequests.zip
+- task: PowerPlatformChecker@2
+  inputs:
+    PowerPlatformSPN: Contoso-Dev
+    FilesToAnalyze: $(Build.ArtifactStagingDirectory)/ContosoRequests.zip
+    RuleSet: &#x27;0ad12346-e108-40b8-a956-9a8f95ea18c9&#x27;   # Solution checker rule set
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: $(Build.ArtifactStagingDirectory)
+    artifact: solution</code></pre>
+<h2 id="github"><span class="ico ico-scope"></span>GitHub Actions</h2>
+<pre><code># .github/workflows/export-solution.yml
+name: Export solution to Git
+on: workflow_dispatch
+jobs:
+  export:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: microsoft/powerplatform-actions/actions-install@v1
+    - uses: microsoft/powerplatform-actions/export-solution@v1
+      with:
+        environment-url: ${{ vars.DEV_URL }}
+        app-id: ${{ vars.CLIENT_ID }}
+        client-secret: ${{ secrets.CLIENT_SECRET }}
+        tenant-id: ${{ vars.TENANT_ID }}
+        solution-name: ContosoRequests
+        solution-output-file: out/ContosoRequests.zip
+    - uses: microsoft/powerplatform-actions/unpack-solution@v1
+      with:
+        solution-file: out/ContosoRequests.zip
+        solution-folder: src/ContosoRequests
+        solution-type: Unmanaged
+        overwrite-files: true</code></pre>
+<p>The <code>${{ … }}</code> parts read repository variables and secrets, so no credentials sit in the file.</p>
+
+<h2 id="flows"><span class="ico ico-warn"></span>Flow-specific points</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-warn"></span>Point</th><th>Do</th></tr></thead><tbody><tr><td>Flows import off without connections</td><td>Use deployment settings, or turn them on after import</td></tr><tr><td>Imported flows are owned by the pipeline identity</td><td>Plan production ownership (Level 6)</td></tr><tr><td>Smoke test</td><td>Trigger a test flow and check the run succeeded</td></tr></tbody></table></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>CI/CD</strong>: every change built, checked and deployed automatically.</p><p><strong>Service principal</strong>: an identity for an app or pipeline.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>System Administrator for the service principal everywhere.</li><li>Building a different zip for Prod than the one tested.</li><li>Forgetting flows can arrive turned off.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/devops-build-tools">Power Platform Build Tools for Azure DevOps</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/devops-github-actions">GitHub Actions for Power Platform</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="source-control-cli.html">← Source control with Git and the Power Platform CLI</a><a href="environment-strategy-managed.html">Environment strategy and Managed Environments →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#shape">The pipeline shape</a></li><li><a href="#auth">Signing in without a person</a></li><li><a href="#ado">Azure DevOps</a></li><li><a href="#github">GitHub Actions</a></li><li><a href="#flows">Flow-specific points</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

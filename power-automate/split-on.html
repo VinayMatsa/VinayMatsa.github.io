@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split On and trigger batching | Vinay Matsa</title>
+<meta name="description" content="How triggers that return many items start one run per item, when to turn that off, and how to stop runs overlapping.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Split On and trigger batching">
+<meta property="og:description" content="How triggers that return many items start one run per item, when to turn that off, and how to stop runs overlapping.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 8</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 8 · Real-world patterns · 8 of 8</li>
+      </ul>
+      <h1>Split On and trigger batching</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Some triggers check for changes and find several new items at once. By default, <strong>Split On</strong> starts one run per item. Sometimes you want one run with all of them.</p>
+
+<h2 id="see"><span class="ico ico-data"></span>Where it shows up</h2>
+<div class="cards"><div><strong>What</strong>A trigger setting that splits an array of new items into separate runs.</div><div><strong>Why</strong>It decides whether you handle items one by one or as a batch, and how failures spread.</div><div><strong>Demo</strong>A SharePoint trigger that polls every minute.</div></div>
+<figure class="shot"><img src="../assets/img/pa/l8-spliton-code.webp" alt="Trigger code view: recurrence every 1 minute, conditions, splitOn @triggerOutputs()?[&#x27;body/value&#x27;]" width="468" height="172" loading="lazy">
+<figcaption>splitOn in the trigger's code.</figcaption></figure>
+<pre><code>&quot;splitOn&quot;: &quot;@triggerOutputs()?[&#x27;body/value&#x27;]&quot;</code></pre>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Three new items found in one check</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Split On?</div><div class="ar"></div><div class="br"><div><span class="lbl c">On (default)</span><div class="nd"><span class="chip ">run 1</span><span class="chip ">run 2</span><span class="chip ">run 3</span></div><div class="ar"></div><div class="nd ok">One run per item</div></div><div><span class="lbl c">Off</span><div class="nd"><span class="chip ">run 1: [item1, item2, item3]</span></div><div class="ar"></div><div class="nd ok">Loop over <code>triggerBody()?['value']</code></div></div></div></div></div>
+
+<h2 id="choose"><span class="ico ico-cond"></span>On or off?</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th>Split On (default)</th><th>Split On off</th></tr></thead><tbody><tr><td>Runs</td><td>One per item</td><td>One per check, with all items</td></tr><tr><td>In the flow</td><td>Fields directly from the trigger</td><td>Loop over the array</td></tr><tr><td>Failures</td><td>One bad item fails only its run</td><td>Plan per-item error handling</td></tr><tr><td>Good for</td><td>Item-by-item processes</td><td>One summary, bulk writes</td></tr></tbody></table></div>
+<p>With Split On, trigger conditions are evaluated per item, so they filter individual items.</p>
+
+<h2 id="concurrency"><span class="ico ico-until"></span>Runs at the same time</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>Ten new items, Split On on</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Must runs not overlap?</div><div class="ar"></div><div class="br"><div><span class="lbl c">No</span><div class="nd ok">Up to ten runs at once</div></div><div><span class="lbl c">Yes</span><div class="nd ok">Trigger concurrency = 1: runs queue</div></div></div></div></div>
+<h3>Watch out</h3><ul><li>Turning trigger concurrency on can't be undone without re-adding the trigger.</li><li>With trigger concurrency on, Split On is limited to 100 items.</li></ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Polling trigger</strong>: checks for changes on a schedule.</p><p><strong>Debatching</strong>: splitting an array into separate runs.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Expecting one run when ten items arrive at once.</li><li>Overlapping runs updating the same record.</li><li>Split On off without per-item error handling.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-workflow-actions-triggers">Schema reference for triggers and actions (Split On)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/triggers-introduction">Get started with triggers</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config">Limits and configuration (concurrency)</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="batch-counters-summary.html">← Batch counters and run summaries</a><a href="./">Back to all topics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#see">Where it shows up</a></li><li><a href="#choose">On or off?</a></li><li><a href="#concurrency">Runs at the same time</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

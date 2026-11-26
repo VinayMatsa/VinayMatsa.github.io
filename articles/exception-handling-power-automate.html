@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exception handling in Power Automate: the deep dive | Vinay Matsa</title>
+<meta name="description" content="Try, Catch and Finally scopes, configure run after, Terminate, retries, logging and the expressions that capture the real error.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Exception handling in Power Automate: the deep dive">
+<meta property="og:description" content="Try, Catch and Finally scopes, configure run after, Terminate, retries, logging and the expressions that capture the real error.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Power Automate</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Platform Deep Dive</li>
+        <li>Power Automate</li>
+      </ul>
+      <h1>Exception handling in Power Automate: the deep dive</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-04-29">29 April 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Without proper error handling, flows leave processes half-finished, cause failures in other systems, show <em>Succeeded</em> when something important failed, and cost hours of manual recovery.</p>
+
+<h2 id="root">Start from the root</h2>
+<p><strong>Exception handling</strong> is a plan for what happens when something goes wrong during a run: catch the error, respond to it, and tell someone. In Power Automate there's no try/catch keyword; you build the same idea from scopes and the <em>Configure run after</em> setting.</p>
+
+<h2 id="blocks">The building blocks</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Block</th><th>Role</th></tr></thead><tbody>
+<tr><td>Try scope</td><td>Holds the main actions that might fail.</td></tr>
+<tr><td>Catch scope</td><td>Runs only when Try failed or timed out (run after: has failed, has timed out).</td></tr>
+<tr><td>Finally scope</td><td>Runs whatever happened (run after: all four outcomes).</td></tr>
+<tr><td>Terminate</td><td>Ends the run with the right status (Failed, with your message).</td></tr>
+<tr><td>Retry policy</td><td>Recovers automatically from temporary failures; fixed or exponential intervals.</td></tr>
+<tr><td>Notifications</td><td>Tell an owner, with a link to the failed run.</td></tr>
+</tbody></table></div>
+
+<h2 id="expressions">Expressions to capture the error</h2>
+<pre><code>result('Try')                                   // status and errors of every action in the scope
+workflow()?['run']?['name']                     // this run's ID
+utcNow()                                        // timestamp for the log
+actions('Action_name')?['error']?['message']    // one action's exact error</code></pre>
+<p>Build a run link for the alert from <code>workflow()</code>, so whoever gets the message can open the failed run directly.</p>
+
+<h2 id="log">Where to log errors</h2>
+<ul>
+<li>A SharePoint list or Dataverse table, for a central error log across flows.</li>
+<li>Application Insights, for advanced monitoring.</li>
+<li>Email or Teams, with the run link, so someone acts quickly.</li>
+</ul>
+
+<h2 id="mistakes">Common mistakes</h2>
+<ul>
+<li>No scopes, so there's nowhere to catch errors.</li>
+<li>Forgetting run after on the catch steps.</li>
+<li>No retry on connector and API calls.</li>
+<li>No notification and no log, so failures go unnoticed.</li>
+<li>Catching the error and then letting the run show Succeeded. End the Catch with Terminate (Failed).</li>
+</ul>
+<p>The Learn section has demo flows for <a href="../power-automate/scopes-try-catch.html">scopes and try/catch</a> and <a href="../power-automate/error-alerts-terminate.html">error alerts with Terminate</a>.</p>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Error handling guidance for cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7455255001729470464/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><span></span><a href="sharepoint-file-lock.html">SharePoint file lock errors in Power Automate →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#blocks">The building blocks</a></li><li><a href="#expressions">Expressions to capture the error</a></li><li><a href="#log">Where to log errors</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7455255001729470464/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

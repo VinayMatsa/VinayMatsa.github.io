@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect Claude Code to Microsoft Power Platform in seven steps | Vinay Matsa</title>
+<meta name="description" content="The prerequisites, sign-ins and checks to let Claude Code build solutions, canvas apps and flows in your own dev environment, and the guardrails to keep.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Connect Claude Code to Microsoft Power Platform in seven steps">
+<meta property="og:description" content="The prerequisites, sign-ins and checks to let Claude Code build solutions, canvas apps and flows in your own dev environment, and the guardrails to keep.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Claude Code</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Copilot Studio &amp; AI Lab</li>
+        <li>Claude Code</li>
+      </ul>
+      <h1>Connect Claude Code to Microsoft Power Platform in seven steps</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-11">11 November 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>I connected Claude Code to Power Platform in my own development environment. Here's the setup, and the things worth knowing before an AI agent touches your environment.</p>
+
+<h2 id="root">Start from the root</h2>
+<p><strong>Claude Code</strong> is Anthropic's AI coding agent. It runs in your terminal, reads your project and runs commands. Connected to Power Platform, it can build solutions, canvas apps and Power Automate flows using the same command-line tools you would (<code>pac</code> and the Azure CLI) plus Microsoft's MCP servers.</p>
+<p>Two questions matter before you start: <strong>how does it get access</strong>, and <strong>what is it allowed to do</strong>? The answer to both is "through your sign-in".</p>
+
+<h2 id="steps">The setup in seven steps</h2>
+<ol>
+<li><strong>Install the prerequisites</strong>: Claude Code, the .NET SDK, the Power Platform CLI (<code>pac</code>), Node.js LTS and the Azure CLI. Git is optional, but useful for rolling back.</li>
+<li><strong>Verify each install</strong>, after reopening the terminal so the new paths load.</li>
+<li><strong>Sign in</strong> with <code>pac auth create</code> and <code>az login</code>, using the same work account for both.</li>
+<li><strong>Start Claude Code</strong> in your project folder.</li>
+<li><strong>Add Microsoft's power-platform-skills plugins</strong> from the official marketplace.</li>
+<li><strong>Check the MCP servers</strong> with <code>/mcp</code>.</li>
+<li><strong>Run a smoke test</strong>: "List the solutions in my environment."</li>
+</ol>
+
+<h2 id="learned">What I learned</h2>
+<ul>
+<li>The agent uses your sign-in, so it can do whatever you can do. Nothing more, nothing less.</li>
+<li>Canvas app work needs an existing saved app, coauthoring turned on and the Studio tab kept open.</li>
+<li>Keep approvals on and review every change before you publish.</li>
+<li>Some plugins send usage data to Microsoft by default; you can turn that off.</li>
+</ul>
+<div class="callout"><strong>Guardrails I'd add:</strong> a dedicated developer environment, an account without admin rights, Git for every change, and no production access from the agent at all.</div>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction">Install and configure the Power Platform CLI</a></li><li><a href="https://code.claude.com/docs/en/overview">Claude Code overview</a></li><li><a href="https://code.claude.com/docs/en/mcp">Connect Claude Code to tools via MCP</a></li><li><a href="https://github.com/microsoft/power-platform-skills">microsoft/power-platform-skills on GitHub</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7526117124587720704/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="pac-cli-deployments.html">← Deploying solutions with PAC CLI: Dev to Stage to Prod</a><a href="claude-code-plugins-installed.html">What really gets installed when you add Power Platform plugins to Claude Code →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#steps">The setup in seven steps</a></li><li><a href="#learned">What I learned</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7526117124587720704/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

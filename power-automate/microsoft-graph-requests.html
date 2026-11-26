@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calling Microsoft Graph from a flow | Vinay Matsa</title>
+<meta name="description" content="Reach Microsoft 365 data no connector action covers, using a standard connector's Send an HTTP request, with paging.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Calling Microsoft Graph from a flow">
+<meta property="og:description" content="Reach Microsoft 365 data no connector action covers, using a standard connector's Send an HTTP request, with paging.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 9</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 9 · Integration and AI · 3 of 10</li>
+      </ul>
+      <h1>Calling Microsoft Graph from a flow</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p><strong>Microsoft Graph</strong> is the API behind Microsoft 365: users, groups, Teams, mail, calendars, files. Connectors cover the common parts; for the rest, some standard connectors include <strong>Send an HTTP request</strong> that calls Graph with your sign-in.</p>
+
+<h2 id="which"><span class="ico ico-cond"></span>Which connector to use</h2>
+<div class="cards"><div><strong>What</strong>A Graph URL called through a connector's HTTP action, returning JSON.</div><div><strong>Why</strong>Reach data with no connector action, without the premium HTTP action or an app registration.</div><div><strong>Demo</strong>Count groups by visibility.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Pick by the data</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>What kind of Graph data?</div><div class="ar"></div><div class="br"><div><span class="lbl c">Groups, users</span><div class="nd ok">Office 365 Groups: Send an HTTP request</div></div><div><span class="lbl c">Mail, calendar</span><div class="nd ok">Office 365 Outlook: Send an HTTP request</div></div><div><span class="lbl c">Anything</span><div class="nd ok">HTTP with Microsoft Entra ID (premium)</div></div></div></div><p class="viz-note">Each action allows only the paths its connector is meant for.</p></div>
+
+<h2 id="demo"><span class="ico ico-data"></span>Counting groups by visibility</h2>
+<figure class="shot"><img src="../assets/img/pa/l9-graph-code.webp" alt="Code view of Graph get groups: Office 365 Groups HttpRequestV2 with Uri https://graph.microsoft.com/v1.0/groups?$select=visibility,groupTypes&amp;$top=50, Method GET, ContentType application/json" width="598" height="325" loading="lazy">
+<figcaption>The request.</figcaption></figure>
+<pre><code>https://graph.microsoft.com/v1.0/groups?$select=visibility,groupTypes&amp;$top=50</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>v1.0</code></td><td>The stable version (beta can change).</td></tr><tr><td><code>/groups</code></td><td>The resource.</td></tr><tr><td><code>$select</code></td><td>Only these fields.</td></tr><tr><td><code>$top=50</code></td><td>Up to 50 per page.</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The result</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Measure</th><th>Value</th></tr></thead><tbody><tr><td>Groups returned</td><td><span class="chip ">24</span></td></tr><tr><td>Public</td><td><span class="chip ">10</span></td></tr><tr><td>Private</td><td><span class="chip ">14</span></td></tr><tr><td>More pages</td><td><span class="chip no">false</span></td></tr></tbody></table></div></div>
+<figure class="shot"><img src="../assets/img/pa/l9-graph-summary.webp" alt="Group summary output: Groups returned 24, Public 10, Private 14, More pages false" width="618" height="175" loading="lazy">
+<figcaption>Counts only, no group names.</figcaption></figure>
+
+<h2 id="paging"><span class="ico ico-until"></span>Paging</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>Reading every page</p><div class="fl"><div class="nd">Call the URL</div><div class="ar"></div><div class="nd">Append <code>body/value</code> to an array variable</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span><code>@odata.nextLink</code> present?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd mute">↺ call the next link</div></div><div><span class="lbl f">No</span><div class="nd ok">Done</div></div></div></div></div>
+<pre><code>not(empty(outputs(&#x27;Graph_get_groups&#x27;)?[&#x27;body/@odata.nextLink&#x27;]))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>@odata.nextLink</code></td><td>Ready-made URL for the next page, if there is one.</td></tr></tbody></table></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Query options</strong>: <code>$select</code>, <code>$filter</code>, <code>$top</code> after the <code>?</code>.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>A path the connector doesn't allow.</li><li>Reporting the first page as the total.</li><li>No <code>$select</code>.</li><li>Tight loops that get throttled (429).</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/graph/overview">Overview of Microsoft Graph</a></li><li><a href="https://learn.microsoft.com/en-us/graph/paging">Paging Microsoft Graph data</a></li><li><a href="https://learn.microsoft.com/en-us/graph/throttling">Microsoft Graph throttling guidance</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/office365groups/">Office 365 Groups connector reference</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="office365-users.html">← Office 365 Users: profiles, managers and searches</a><a href="sharepoint-rest-batch.html">SharePoint REST API and $batch →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#which">Which connector to use</a></li><li><a href="#demo">Counting groups by visibility</a></li><li><a href="#paging">Paging</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

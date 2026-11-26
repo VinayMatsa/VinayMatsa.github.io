@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Understanding and debugging data formats in Power Platform | Vinay Matsa</title>
+<meta name="description" content="Base64, binary, URL encoding, escaped JSON, decimals, case and time zones: the formats behind most 'weird text' in flow runs.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Understanding and debugging data formats in Power Platform">
+<meta property="og:description" content="Base64, binary, URL encoding, escaped JSON, decimals, case and time zones: the formats behind most 'weird text' in flow runs.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Power Automate</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Platform Deep Dive</li>
+        <li>Power Automate</li>
+      </ul>
+      <h1>Understanding and debugging data formats in Power Platform</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-12">12 November 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>When I started with Power Automate, run outputs were full of strange text: <code>VmluYXk=</code>, <code>%2D</code>, <code>\"</code>, <code>$content-type</code>. I thought something was broken. Nothing was; each one was data in a different format.</p>
+
+<h2 id="root">Start from the root</h2>
+<p>Every value in a flow has a <strong>type</strong> (text, number, boolean, object, array) and often a <strong>format</strong> (how that value is written down). The same date can be <code>2026-11-12T10:00:00Z</code> or <code>12/11/2026</code>; the same file can be raw bytes or a Base64 string. Most "mystery" errors are a wrong type or a wrong format, not a wrong flow.</p>
+
+<h2 id="formats">The formats you'll meet</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>You see</th><th>It is</th><th>Functions to use</th></tr></thead><tbody>
+<tr><td><code>VmluYXk=</code></td><td>Base64: binary data written as text. It isn't encryption; anyone can decode it.</td><td><code>base64()</code>, <code>base64ToString()</code>, <code>base64ToBinary()</code></td></tr>
+<tr><td><code>{"$content-type": ..., "$content": ...}</code></td><td>File content (binary) wrapped for transport</td><td><code>body('Get_file_content')</code> as-is, or <code>base64ToBinary()</code></td></tr>
+<tr><td><code>%2D</code>, <code>%20</code></td><td>URL encoding: special characters made safe for a URL</td><td><code>encodeUriComponent()</code>, <code>decodeUriComponent()</code></td></tr>
+<tr><td><code>\"</code> inside a string</td><td>Escaped JSON: JSON stored as text</td><td><code>json()</code> to turn it back into an object</td></tr>
+<tr><td><code>0.30000000000000004</code></td><td>Floating-point rounding</td><td>Decimal columns for money; <code>formatNumber()</code> for display</td></tr>
+<tr><td>Times 5:30 off</td><td>UTC shown as local time, or the reverse</td><td><code>convertTimeZone()</code>, <code>convertFromUtc()</code></td></tr>
+</tbody></table></div>
+
+<h2 id="surprises">What surprised me most</h2>
+<ul>
+<li><strong>Base64 isn't security.</strong> It looks scrambled but is fully reversible.</li>
+<li><strong>"Binary" means file bytes</strong>, not literally 0s and 1s on screen.</li>
+<li><strong>One unencoded <code>&amp;</code></strong> in a URL quietly splits a parameter in two and breaks an API call.</li>
+<li><strong>Money needs decimal.</strong> With floating point, 0.1 + 0.2 isn't exactly 0.3.</li>
+<li><strong>"Approved" isn't "approved"</strong>: comparisons are case-sensitive. Use <code>toLower()</code> on both sides.</li>
+<li><strong>Dates off by 5:30</strong> (in India) means the time zone was never converted.</li>
+</ul>
+
+<h2 id="questions">Four questions before anything else</h2>
+<ol>
+<li>What <strong>type</strong> is this value?</li>
+<li>What <strong>format</strong> is it in?</li>
+<li>Is it <strong>encoded</strong>, once or twice?</li>
+<li>Which <strong>time zone</strong>?</li>
+</ol>
+<p>Most of the time, the answer to a failed run is in one of them. The Power Automate Learn section on this site covers <a href="../power-automate/data-types.html">data types</a>, <a href="../power-automate/text-functions.html">text functions</a> and <a href="../power-automate/dates-and-time-zones.html">dates and time zones</a> in more depth.</p>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7526628274353975296/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="claude-code-plugins-installed.html">← What really gets installed when you add Power Platform plugins to Claude Code</a><a href="claude-in-power-platform.html">Four ways to put Claude to work in Microsoft Power Platform →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#formats">The formats you'll meet</a></li><li><a href="#surprises">What surprised me most</a></li><li><a href="#questions">Four questions before anything else</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7526628274353975296/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

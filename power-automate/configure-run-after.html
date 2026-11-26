@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configure run after | Vinay Matsa</title>
+<meta name="description" content="Decide, step by step, whether an action runs after the previous one succeeded, failed, was skipped or timed out: the basis of every failure branch.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Configure run after">
+<meta property="og:description" content="Decide, step by step, whether an action runs after the previous one succeeded, failed, was skipped or timed out: the basis of every failure branch.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 4</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 4 · Reliable flows · 2 of 7</li>
+      </ul>
+      <h1>Configure run after</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Every action has a <strong>Run after</strong> setting. By default it's <em>is successful</em>: run only if the step before worked. Changing it is how you build failure branches, clean-up steps and try / catch.</p>
+
+<h2 id="what"><span class="ico ico-arrow"></span>The four outcomes</h2>
+<div class="cards"><div><strong>What</strong>A setting on each action that lists which outcomes of the previous step let it run.</div><div><strong>Why</strong>Without it, the first failure skips everything after it and nobody is told.</div><div><strong>Demo</strong>One risky step, then three steps: on success, on failure, always.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>One risky step, three branches</p><div class="fl"><div class="nd act"><strong>Risky step</strong> → fails with InvalidTemplate</div><div class="ar"></div><div class="br"><div><span class="lbl t">is successful</span><div class="nd mute"><strong>Only on success</strong>: skipped</div></div><div><span class="lbl f">has failed</span><div class="nd ok"><strong>Only on failure</strong>: ran</div></div><div><span class="lbl c">all four</span><div class="nd ok"><strong>Always</strong>: ran</div></div></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l4-runafter-canvas.webp" alt="Run view: Risky step failed with InvalidTemplate; Only on success was skipped; Only on failure succeeded; Always succeeded" width="400" height="430" loading="lazy">
+<figcaption>The run: the failure branch and Always ran.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Run after setting vs what happened</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Action</th><th>Runs after Risky step when…</th><th>Risky step failed, so…</th></tr></thead><tbody><tr><td>Only on success</td><td><span class="chip ">is successful</span></td><td><span class="lbl d">skipped</span></td></tr><tr><td>Only on failure</td><td><span class="chip ">has failed</span></td><td><span class="lbl t">ran</span></td></tr><tr><td>Always</td><td><span class="chip ">successful</span><span class="chip ">failed</span><span class="chip ">skipped</span><span class="chip ">timed out</span></td><td><span class="lbl t">ran</span></td></tr></tbody></table></div></div>
+
+<h2 id="setting"><span class="ico ico-scope"></span>Where the setting lives</h2>
+<figure class="shot"><img src="../assets/img/pa/l4-runafter-settings.webp" alt="Settings tab, Run after section for Only on failure: Risky step with Is successful, Has timed out and Is skipped unticked and Has failed ticked" width="490" height="310" loading="lazy">
+<figcaption>Action → Settings → Run after. Tick one or more outcomes.</figcaption></figure>
+<p>On the canvas, a dashed arrow with coloured dots marks a step whose run after isn't the default.</p>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>Why “Always” must tick <em>is skipped</em></p><div class="fl"><div class="nd">Step A fails</div><div class="ar"></div><div class="nd">Step B (runs on success of A) is <strong>skipped</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Does Step C (after B) tick <em>is skipped</em>?</div><div class="ar"></div><div class="br"><div><span class="lbl f">No</span><div class="nd mute">C is skipped too: skipped spreads</div></div><div><span class="lbl t">Yes</span><div class="nd ok">C runs</div></div></div></div></div>
+<h3>Watch out</h3><ul><li>A run whose failure was handled by a failure branch can still end as <strong>Succeeded</strong>. Use Terminate to mark it failed (see Error alerts and Terminate).</li><li>Run after can only point at steps at the same level; to react to a group, wrap it in a Scope.</li></ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Succeeded / Failed / Skipped / TimedOut</strong>: the four ways an action can finish.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Forgetting <em>is skipped</em> on a step that must always run.</li><li>Failure branches on every single action instead of one Scope.</li><li>Leaving a handled failure showing Succeeded with nobody told.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Employ robust error handling (Configure run after)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="scopes-try-catch.html">← Scopes and the try / catch pattern</a><a href="retry-policies-timeouts.html">Retry policies and timeouts →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#what">The four outcomes</a></li><li><a href="#setting">Where the setting lives</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

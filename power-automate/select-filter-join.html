@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Select, Filter array and Join | Vinay Matsa</title>
+<meta name="description" content="Reshape a list without a loop: keep the rows you want with Filter array, the columns you want with Select, then turn it into text with Join or an HTML table.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Select, Filter array and Join">
+<meta property="og:description" content="Reshape a list without a loop: keep the rows you want with Filter array, the columns you want with Select, then turn it into text with Join or an HTML table.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 2</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 2 · Working with data · 1 of 7</li>
+      </ul>
+      <h1>Select, Filter array and Join</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Beginners loop over a list with Apply to each to do almost anything. Three <strong>data operations</strong> do most of that work in one step each, and much faster.</p>
+
+<h2 id="pattern"><span class="ico ico-data"></span>The pattern: filter rows, pick columns, make text</h2>
+<div class="cards"><div><strong>What</strong><strong>Filter array</strong> keeps rows, <strong>Select</strong> keeps or reshapes columns, <strong>Join</strong> turns a list into one line of text.</div><div><strong>Why</strong>One action instead of a loop with variables: faster, fewer actions, easier to read.</div><div><strong>Demo</strong>Five orders → only the open ones → just customer and amount → one line for an email.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Filter → Select → Join</p><div class="fl"><div class="nd act"><strong>Orders</strong>: 5 rows (id, customer, amount, status)</div><div class="ar"></div><div class="nd"><strong>Filter array</strong>: keep status = Open → 3 rows</div><div class="ar"></div><div class="nd"><strong>Select</strong>: keep Order, Customer, Amount → 3 smaller rows</div><div class="ar"></div><div class="br"><div><span class="lbl c">text mode</span><div class="nd"><strong>Select as text</strong> → <strong>Join</strong> with <code>, </code></div></div><div><span class="lbl c">table</span><div class="nd"><strong>Create HTML table</strong> for an email</div></div></div><div class="ar"></div><div class="nd ok"><span class="chip ok">"Contoso (250), Northwind (80), Tailspin (430)"</span></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l2-select-canvas.webp" alt="A run of the flow: Orders, Filter open orders, Select columns, Select as text, Join with comma and Create HTML table, all succeeded" width="400" height="416" loading="lazy">
+<figcaption>The whole pattern in one run, with no loop.</figcaption></figure>
+
+<h2 id="filter"><span class="ico ico-cond"></span>Filter array: keep the rows you want</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Every row tested against the rule</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Order</th><th>Status</th><th><code>equals(item()?['status'], 'Open')</code></th><th>Kept?</th></tr></thead><tbody><tr><td>101 Contoso</td><td>Open</td><td><span class="chip ok">true</span></td><td><span class="lbl t">kept</span></td></tr><tr><td>102</td><td>Closed</td><td><span class="chip no">false</span></td><td><span class="lbl f">dropped</span></td></tr><tr><td>103 Northwind</td><td>Open</td><td><span class="chip ok">true</span></td><td><span class="lbl t">kept</span></td></tr><tr><td>104 Tailspin</td><td>Open</td><td><span class="chip ok">true</span></td><td><span class="lbl t">kept</span></td></tr><tr><td>105</td><td>Closed</td><td><span class="chip no">false</span></td><td><span class="lbl f">dropped</span></td></tr></tbody></table></div></div>
+<pre><code>@equals(item()?[&#x27;status&#x27;], &#x27;Open&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>item()</code></td><td>The row being checked. Filter array tests every row, one at a time.</td></tr><tr><td><code>?[&#x27;status&#x27;]</code></td><td>That row's status field.</td></tr><tr><td><code>equals(..., &#x27;Open&#x27;)</code></td><td>True keeps the row; false drops it. Case-sensitive.</td></tr></tbody></table></div>
+<figure class="shot"><img src="../assets/img/pa/l2-filter-output.webp" alt="Raw output of Filter open orders: three orders, 101 Contoso, 103 Northwind and 104 Tailspin, all with status Open" width="514" height="370" loading="lazy">
+<figcaption>Three open orders remain.</figcaption></figure>
+<p>Build simple rules with the three boxes; switch to <strong>Edit in advanced mode</strong> for <code>and</code> / <code>or</code>.</p>
+
+<h2 id="select"><span class="ico ico-data"></span>Select: keep or rename the columns</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>One row in, one row out</p><div class="fl"><div class="nd"><span class="chip ">{"id":101,"customer":"Contoso","amount":250,"status":"Open"}</span></div><div class="ar"></div><div class="br"><div><span class="lbl c">key/value mode</span><div class="nd"><span class="chip ">{"Order":101,"Customer":"Contoso","Amount":250}</span></div></div><div><span class="lbl c">text mode</span><div class="nd"><span class="chip ">"Contoso (250)"</span></div></div></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l2-select-output.webp" alt="Raw output of Select columns: three objects with only Order, Customer and Amount" width="514" height="336" loading="lazy">
+<figcaption>Key/value mode: each row becomes an object with the keys you typed.</figcaption></figure>
+<pre><code>@concat(item()?[&#x27;customer&#x27;], &#x27; (&#x27;, string(item()?[&#x27;amount&#x27;]), &#x27;)&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>item()?[&#x27;customer&#x27;]</code></td><td>The customer of the current row.</td></tr><tr><td><code>string(item()?[&#x27;amount&#x27;])</code></td><td>The amount as text, so it can be joined.</td></tr><tr><td><code>concat(...)</code></td><td>One line per row: <em>Contoso (250)</em>.</td></tr></tbody></table></div>
+<p>Text mode is the small toggle on the Map box. It turns each row into one value, which is what Join needs.</p>
+
+<h2 id="join"><span class="ico ico-expr"></span>Join and Create HTML table</h2>
+<figure class="shot"><img src="../assets/img/pa/l2-join-output.webp" alt="Join with comma: input is a three-item list, the Join with value is a comma and space, and the output is Contoso (250), Northwind (80), Tailspin (430)" width="505" height="425" loading="lazy">
+<figcaption>Join puts the separator between items, not after the last one.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Action</th><th>Input</th><th>Output</th><th>Use it for</th></tr></thead><tbody><tr><td>Join</td><td>A list of text values</td><td>One text with a separator</td><td>A line in an email or Teams message</td></tr><tr><td>Create HTML table</td><td>A list of objects (Select key/value)</td><td>An HTML table; keys become headers</td><td>An email body</td></tr><tr><td>Create CSV table</td><td>A list of objects</td><td>CSV text</td><td>A file attachment</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Filter array and Select read rows with <code>item()</code>; loops use <code>items('Loop_name')</code>.</li><li>Select keeps the order of the list. Sort first if order matters.</li><li>Filter, Select, Join replaces a loop that appends to a string variable, and runs in a fraction of the time.</li></ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Array</strong>: a list in square brackets <code>[ ]</code>.</p>
+<p><strong>Row and column</strong>: when a list holds objects, each object is a row and each field a column.</p></div></details>
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Add a Compose <em>Orders</em> with five order objects (id, customer, amount, status).</li><li>Add <strong>Filter array</strong> <em>Filter open orders</em>: From <code>outputs('Orders')</code>, rule status is equal to Open.</li><li>Add <strong>Select</strong> <em>Select columns</em> with keys Order, Customer, Amount.</li><li>Add <strong>Select</strong> <em>Select as text</em> in text mode with the concat formula, then <strong>Join</strong> with <code>, </code>.</li><li>Add <strong>Create HTML table</strong> from <em>Select columns</em>. Test.</li></ol></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Looping with Apply to each just to filter or reshape.</li><li>Using <code>items()</code> inside Select or Filter array instead of <code>item()</code>.</li><li>Joining a list of objects instead of text: switch Select to text mode first.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/data-operations">Use data operations</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/use-data-operations">Work with data operations (guidance)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/expression-cookbook">Expression cookbook for cloud flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="./">← All Power Automate topics</a><a href="parse-json.html">Parse JSON and schemas →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#pattern">The pattern: filter rows, pick columns, make text</a></li><li><a href="#filter">Filter array: keep the rows you want</a></li><li><a href="#select">Select: keep or rename the columns</a></li><li><a href="#join">Join and Create HTML table</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

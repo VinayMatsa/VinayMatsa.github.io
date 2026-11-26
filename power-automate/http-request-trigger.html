@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Starting a flow with an HTTP request | Vinay Matsa</title>
+<meta name="description" content="Turn a flow into a small web endpoint other systems can call, validate the body, and return a JSON response, securely.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Starting a flow with an HTTP request">
+<meta property="og:description" content="Turn a flow into a small web endpoint other systems can call, validate the body, and return a JSON response, securely.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 9</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 9 · Integration and AI · 5 of 10</li>
+      </ul>
+      <h1>Starting a flow with an HTTP request</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>The trigger <strong>When an HTTP request is received</strong> gives a flow its own URL. Another system sends a request and the flow starts; with a <strong>Response</strong> action it answers. This is a premium trigger.</p>
+
+<h2 id="setup"><span class="ico ico-arrow"></span>Request in, response out</h2>
+<div class="cards"><div><strong>What</strong>A trigger with a URL, a method and a JSON schema, plus a Response action.</div><div><strong>Why</strong>Websites, scripts and SaaS webhooks can start your flow and get an answer.</div><div><strong>Demo</strong>Post an order; get back the total.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>One call</p><div class="fl"><div class="nd act">Caller: <strong>POST</strong> to the flow's URL with JSON</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Does the body match the schema?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd">Order total = <code>mul(quantity, unitPrice)</code></div><div class="ar"></div><div class="nd ok">Response 200: <span class="chip ok">{"total": 148.5, …}</span></div></div><div><span class="lbl f">No / invalid</span><div class="nd mute">Respond 400 with a message</div></div></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l9-http-trigger.webp" alt="HTTP trigger settings: Who can trigger the flow set to Anyone, an HTTP URL on environment.api.powerplatform.com (redacted), and a request body JSON schema with orderId, customer, quantity and unitPrice" width="610" height="414" loading="lazy">
+<figcaption>The trigger. The URL is redacted.</figcaption></figure>
+<pre><code>POST &lt;the flow&#x27;s HTTP URL&gt;
+Content-Type: application/json
+
+{
+  &quot;orderId&quot;: &quot;ORD-1001&quot;,
+  &quot;customer&quot;: &quot;Contoso&quot;,
+  &quot;quantity&quot;: 3,
+  &quot;unitPrice&quot;: 49.5
+}</code></pre>
+<pre><code>HTTP/1.1 200 OK
+{
+  &quot;received&quot;: &quot;ORD-1001&quot;,
+  &quot;customer&quot;: &quot;Contoso&quot;,
+  &quot;total&quot;: 148.5,
+  &quot;message&quot;: &quot;Order accepted by the demo flow&quot;
+}</code></pre>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Values in the demo</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td>quantity</td><td><span class="chip ">3</span></td></tr><tr><td>unitPrice</td><td><span class="chip ">49.5</span></td></tr><tr><td>total</td><td><span class="chip ok">148.5</span></td></tr></tbody></table></div></div>
+
+<h2 id="who"><span class="ico ico-stop"></span>Who can trigger it</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-stop"></span>Setting</th><th>Caller needs</th><th>Use for</th></tr></thead><tbody><tr><td>Anyone</td><td>The URL (it contains a signature)</td><td>External webhooks; keep the URL secret</td></tr><tr><td>Any user in my tenant</td><td>A Microsoft Entra ID token</td><td>Internal apps and scripts</td></tr><tr><td>Specific users in my tenant</td><td>A token for listed users</td><td>Tightly controlled callers</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Treat an <em>Anyone</em> URL like a password: secret store or Secret environment variable, never in code or screenshots.</li><li>Callers must send <code>Content-Type: application/json</code>, or the body arrives as text.</li><li>Answer fast; for slow work respond 202 first.</li></ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Endpoint</strong>: a URL that accepts requests.</p><p><strong>Status code</strong>: 200 OK, 400 bad input, 500 server error.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Sharing the URL in chat or email.</li><li>No validation before using the body.</li><li>Long work before the Response.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/oauth-authentication">Add OAuth authentication for HTTP request triggers</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-http-endpoint">Create callable workflows with the Request trigger</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="sharepoint-rest-batch.html">← SharePoint REST API and $batch</a><a href="sql-server-gateway.html">SQL Server and the on-premises data gateway →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#setup">Request in, response out</a></li><li><a href="#who">Who can trigger it</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

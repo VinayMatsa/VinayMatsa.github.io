@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harnesses in Copilot Studio: the runtime behind every agent | Vinay Matsa</title>
+<meta name="description" content="What a harness is, how the harnesses differ, and why your choice affects billing, features and capabilities.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Harnesses in Copilot Studio: the runtime behind every agent">
+<meta property="og:description" content="What a harness is, how the harnesses differ, and why your choice affects billing, features and capabilities.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Copilot Studio</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Copilot Studio &amp; AI Lab</li>
+        <li>Copilot Studio</li>
+      </ul>
+      <h1>Harnesses in Copilot Studio: the runtime behind every agent</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-10-08">8 October 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>The harness you use in Copilot Studio is becoming an important design decision, because it affects the billing, features and capabilities of what you build.</p>
+<div class="callout"><strong>Update (November 2026):</strong> since the original post, Microsoft Learn has renamed the harnesses. It now describes the <strong>Microsoft Copilot harness</strong> (reasoning-heavy, multi-step work), the <strong>Customer Conversation harness</strong> (customer service over voice and chat) and the <strong>standard harness</strong> (rule-based agents and agent flows). The principles below still hold; check the harnesses overview for the current names and details.</div>
+
+<h2 id="root">Start from the root</h2>
+<p>You design the agent. The <strong>model</strong> provides reasoning and text. The <strong>harness</strong> is the runtime between the two: it decides when to call the model, what to send it, how to interpret what comes back, and which tools to call. Same model, different harness, different behaviour and cost.</p>
+
+<h2 id="types">The harnesses as I compared them in October 2026</h2>
+<ul>
+<li><strong>The reasoning harness</strong> (then called the GitHub Copilot harness, a Copilot Studio framework, not the GitHub Copilot service): takes a goal, breaks it into steps, calls tools across connectors, knowledge, MCP and connected agents, and adjusts when a step fails. Works with Office and PDF files and supports skills and memory.</li>
+<li><strong>The standard harness</strong>: a dependable runtime for rule-based agents, structured conversations and agent flows. You define the topics, prompts and paths, so behaviour stays predictable.</li>
+<li><strong>The Copilot Chat harness</strong>: extends Microsoft 365 Copilot Chat with enterprise knowledge (declarative agents).</li>
+</ul>
+
+<h2 id="points">Points that matter when choosing</h2>
+<ul>
+<li>Connectors or MCP servers alone don't require the reasoning harness.</li>
+<li>Reasoning models and some newer agentic features are only available on the reasoning harness.</li>
+<li>A more capable harness can overwork a simple problem, raising credit use and latency without improving the result.</li>
+<li>You choose the harness when you create the agent. Moving between harnesses is a re-architecture, not a setting.</li>
+</ul>
+
+<h2 id="lab">From my own lab</h2>
+<p>My agents are short, bounded and rule-based. They use topics, agent flows and a child agent, so the standard harness is the right fit. The activity map in the test pane shows the harness at work: interpreting tool intent, preparing inputs, running the tool and processing the result.</p>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/harnesses-overview">Harnesses in Copilot Studio</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/agents-experience/overview">About agents powered by the Microsoft Copilot harness</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management">Billing rates and management</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7513820257149644800/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="custom-connectors.html">← Custom connectors in Power Platform: why you need them and how to build one</a><a href="dataverse-lookup-error.html">Fixing the Dataverse lookup error in Power Automate →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#types">The harnesses as I compared them in October 2026</a></li><li><a href="#points">Points that matter when choosing</a></li><li><a href="#lab">From my own lab</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7513820257149644800/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

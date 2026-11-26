@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source control with Git and the Power Platform CLI | Vinay Matsa</title>
+<meta name="description" content="Keep every version of your solution in Git, with the built-in Git integration or the pac command line, and per-environment settings.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Source control with Git and the Power Platform CLI">
+<meta property="og:description" content="Keep every version of your solution in Git, with the built-in Git integration or the pac command line, and per-environment settings.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 10</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 10 · Enterprise ALM and admin · 3 of 6</li>
+      </ul>
+      <h1>Source control with Git and the Power Platform CLI</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>A solution zip is one file you can't compare. <strong>Source control</strong> turns it into readable files in Git, so you can see what changed, review it and rebuild any version.</p>
+
+<h2 id="options"><span class="ico ico-data"></span>Two ways in</h2>
+<div class="cards"><div><strong>What</strong>Git integration in the maker portal, or export/unpack with <code>pac</code>.</div><div><strong>Why</strong>History, reviews and rollback for low-code work.</div><div><strong>Demo</strong>A solution committed to a repository folder.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Which way?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Who works on it?</div><div class="ar"></div><div class="br"><div><span class="lbl c">Makers, no command line</span><div class="nd ok"><strong>Git integration</strong>: Source control in the solution</div></div><div><span class="lbl c">Developers / pipelines</span><div class="nd ok"><strong>pac CLI</strong>: export, unpack, commit</div></div></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l10-git-connect.webp" alt="Source control page of a solution: Publish your customizations, commit your changes to Git, check for updates to pull others&#x27; changes. Connect this solution to Git, with a Connect button" width="940" height="510" loading="lazy">
+<figcaption>Git integration: connect to an Azure DevOps or GitHub folder.</figcaption></figure>
+
+<h2 id="cli"><span class="ico ico-expr"></span>The pac loop</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Each change</p><div class="fl"><div class="nd"><code>pac solution export</code></div><div class="ar"></div><div class="nd"><code>pac solution unpack --packagetype Both</code></div><div class="ar"></div><div class="nd">Review the Git diff (each flow is a JSON file)</div><div class="ar"></div><div class="nd ok">Commit</div><div class="ar"></div><div class="nd">Later: <code>pac solution pack --packagetype Managed</code></div></div></div>
+<pre><code># sign in once per environment (opens a browser sign-in)
+pac auth create --environment https://contoso-dev.crm.dynamics.com
+
+# export the unmanaged solution from development
+pac solution export --name ContosoRequests --path ./out/ContosoRequests.zip
+
+# unpack it into readable files for Git
+pac solution unpack --zipfile ./out/ContosoRequests.zip --folder ./src/ContosoRequests --packagetype Both
+
+# later: pack the folder back into a managed zip for test or production
+pac solution pack --zipfile ./out/ContosoRequests_managed.zip --folder ./src/ContosoRequests --packagetype Managed</code></pre>
+
+<h2 id="settings"><span class="ico ico-data"></span>Different values per environment</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Deployment settings file</p><div class="fl"><div class="nd"><code>pac solution create-settings</code> → template</div><div class="ar"></div><div class="nd">Fill values per target (test.settings.json, prod.settings.json)</div><div class="ar"></div><div class="nd ok"><code>pac solution import --settings-file …</code>: connections and variables set on import</div></div></div>
+<pre><code>pac solution create-settings --solution-zip ./out/ContosoRequests.zip --settings-file ./deploy/test.settings.json
+pac solution import --path ./out/ContosoRequests_managed.zip --settings-file ./deploy/test.settings.json --environment https://contoso-test.crm.dynamics.com</code></pre>
+<pre><code>{
+  &quot;EnvironmentVariables&quot;: [
+    { &quot;SchemaName&quot;: &quot;contoso_RequestsSiteUrl&quot;, &quot;Value&quot;: &quot;https://contoso.sharepoint.com/sites/Requests-Test&quot; }
+  ],
+  &quot;ConnectionReferences&quot;: [
+    {
+      &quot;LogicalName&quot;: &quot;contoso_sharepoint&quot;,
+      &quot;ConnectionId&quot;: &quot;&lt;connection id in the test environment&gt;&quot;,
+      &quot;ConnectorId&quot;: &quot;/providers/Microsoft.PowerApps/apis/shared_sharepointonline&quot;
+    }
+  ]
+}</code></pre>
+<p>Keep secrets out of the file; use the pipeline's secret store.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Git</strong>: records every version of a set of files.</p><p><strong>Commit</strong>: a saved snapshot with a message.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Committing the zip instead of unpacked files.</li><li>Production connection IDs or secrets in the repo.</li><li>Several people in one shared Dev environment.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/git-integration/overview">Overview of Dataverse Git integration</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction">Install and configure the Power Platform CLI</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution">pac solution command reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/conn-ref-env-variables-build-tools">Pre-populate connection references and environment variables</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="solution-flow-checker.html">← Solution checker and flow checker</a><a href="cicd-devops-github.html">CI/CD with Azure DevOps and GitHub Actions →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#options">Two ways in</a></li><li><a href="#cli">The pac loop</a></li><li><a href="#settings">Different values per environment</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

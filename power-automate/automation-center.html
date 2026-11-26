@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitoring with Automation center | Vinay Matsa</title>
+<meta name="description" content="See runs, failures and trends across all your flows in one place instead of opening each run history.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Monitoring with Automation center">
+<meta property="og:description" content="See runs, failures and trends across all your flows in one place instead of opening each run history.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 6</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 6 · ALM and governance · 7 of 7</li>
+      </ul>
+      <h1>Monitoring with Automation center</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Run history shows one flow at a time. Once you look after many flows you need one view: what ran, what failed, what needs attention. <strong>Automation center</strong> gives that view for the current environment.</p>
+
+<h2 id="overview"><span class="ico ico-data"></span>The Runs overview</h2>
+<div class="cards"><div><strong>What</strong>A dashboard of runs, errors and recommendations across every flow in the environment.</div><div><strong>Why</strong>Spot failing flows and common root causes without opening runs one by one.</div><div><strong>Demo</strong>The demo environment: 33 flows, 48 runs, 10% error rate.</div></div>
+<figure class="shot"><img src="../assets/img/pa/l6-automation-center.webp" alt="Automation Center Runs overview: Recommendations (1) Fix failing automations; Activity filters Last 7 days, All flows, All run statuses, All errors, All trigger types; tiles Top-level flows 33, Total runs 48, Flow runs error rate 10%" width="1317" height="538" loading="lazy">
+<figcaption>The overview. The 10% comes from Level 4 demos that fail on purpose.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Area</th><th>Use it to</th></tr></thead><tbody><tr><td>Recommendations</td><td>See suggested fixes, such as failing automations</td></tr><tr><td>Activity filters</td><td>Narrow by time, flow, status, error, trigger type</td></tr><tr><td>Tiles</td><td>Spot trends: flows, runs, error rate</td></tr><tr><td>Run history tab</td><td>One list of runs across flows</td></tr><tr><td>Errors</td><td>Group failures by error, so one cause doesn't look like many</td></tr></tbody></table></div>
+
+<h2 id="routine"><span class="ico ico-check"></span>A simple monitoring routine</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Each morning</p><div class="fl"><div class="nd">Open Automation center: check error rate and recommendations</div><div class="ar"></div><div class="nd">Open <strong>Errors</strong>: fix the most common error first</div><div class="ar"></div><div class="nd ok">Critical flows also alert from inside (Error alerts and Terminate)</div></div></div>
+<p>For reports across all runs, see Monitoring flows at scale (Level 10).</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Top-level flow</strong>: triggered directly, not called as a child.</p><p><strong>Error rate</strong>: the share of runs that failed.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Relying on the owner's failure emails alone.</li><li>Treating every failed run as a new problem.</li><li>Monitoring only production.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/automation-center-overview">Automation center overview</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-checker">Find and fix errors with Flow checker</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="dlp-policies.html">← Data loss prevention (DLP) policies</a><a href="./">Back to all topics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#overview">The Runs overview</a></li><li><a href="#routine">A simple monitoring routine</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

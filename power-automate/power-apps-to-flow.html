@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calling a flow from Power Apps | Vinay Matsa</title>
+<meta name="description" content="Pass values from a canvas app into a flow, do the work there, and send a result back to the app.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Calling a flow from Power Apps">
+<meta property="og:description" content="Pass values from a canvas app into a flow, do the work there, and send a result back to the app.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 9</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 9 · Integration and AI · 1 of 10</li>
+      </ul>
+      <h1>Calling a flow from Power Apps</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>A canvas app is good at screens and forms. Some work belongs on the server: sending mail as a shared mailbox, writing to several lists, calling an API the app can't reach. The app can hand that work to a cloud flow and wait for the answer.</p>
+
+<h2 id="demo"><span class="ico ico-arrow"></span>App → flow → app</h2>
+<div class="cards"><div><strong>What</strong>A flow with the <strong>When Power Apps calls a flow (V2)</strong> trigger and a <strong>Respond to a Power App or flow</strong> action.</div><div><strong>Why</strong>Server-side work from an app, with typed inputs and a result the app can show.</div><div><strong>Demo</strong>The app sends a name and a quantity; the flow returns a message and a request ID.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>One call</p><div class="fl"><div class="nd act">App: <code>LogRequest.Run("Alex", 3)</code></div><div class="ar"></div><div class="nd">Flow trigger receives Name <span class="chip ">Alex</span> and Quantity <span class="chip ">3</span></div><div class="ar"></div><div class="nd">Compose <strong>Greeting</strong></div><div class="ar"></div><div class="nd"><strong>Respond to Power Apps</strong>: message + requestid</div><div class="ar"></div><div class="nd ok">App: <code>varResult.message</code> → <span class="chip ok">Hello Alex, your request for 3 items is logged.</span></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l9-powerapps-inputs.webp" alt="Run flow panel with two required inputs: Name (Requester name) set to Alex, Quantity (How many) set to 3" width="340" height="240" loading="lazy">
+<figcaption>The V2 trigger's typed inputs.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l9-powerapps-response.webp" alt="Raw inputs of Respond to Power Apps: statusCode 200, a schema with message and requestid as strings, body with message Hello Alex, your request for 3 items is logged. and a generated request id" width="592" height="415" loading="lazy">
+<figcaption>The response the app receives.</figcaption></figure>
+<pre><code>concat(&#x27;Hello &#x27;, triggerBody()?[&#x27;text&#x27;], &#x27;, your request for &#x27;, triggerBody()?[&#x27;number&#x27;], &#x27; items is logged.&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>triggerBody()?[&#x27;text&#x27;]</code></td><td>The first text input (inputs are named by type: text, text_1, number…).</td></tr><tr><td><code>triggerBody()?[&#x27;number&#x27;]</code></td><td>The number input.</td></tr></tbody></table></div>
+
+<h2 id="app"><span class="ico ico-expr"></span>The app side</h2>
+<pre><code>// OnSelect of a Submit button
+Set(
+    varResult,
+    LogRequest.Run(txtName.Text, Value(txtQty.Text))
+);
+Notify(varResult.message, NotificationType.Success)</code></pre>
+<p><code>varResult</code> is a record with the response fields (<code>message</code>, <code>requestid</code>), lower-cased in the app.</p>
+
+<h2 id="rules"><span class="ico ico-warn"></span>Things that matter in real apps</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-warn"></span>Rule</th><th>Why</th></tr></thead><tbody><tr><td>Respond early; do slow work after the Respond action</td><td>The app waits for the response</td></tr><tr><td>Connections run as the app user by default</td><td>Each user needs access to the data the flow uses</td></tr><tr><td>Re-add the flow in the app after changing inputs</td><td>The old signature stays cached</td></tr><tr><td>Pass tables as JSON (<code>JSON(colItems)</code>) and Parse JSON in the flow</td><td>Inputs are single values</td></tr></tbody></table></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Canvas app</strong>: a Power Apps app whose screens you design.</p><p><strong>Response</strong>: data the flow returns; without it the app gets nothing.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>The old V1 trigger with “Ask in PowerApps”.</li><li>Long loops before the Respond action.</li><li>Forgetting users need the flow's data permissions.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/working-with-flows">Use the Power Automate pane in Power Apps</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/triggers-introduction">Get started with triggers</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="./">← All Power Automate topics</a><a href="office365-users.html">Office 365 Users: profiles, managers and searches →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">App → flow → app</a></li><li><a href="#app">The app side</a></li><li><a href="#rules">Things that matter in real apps</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

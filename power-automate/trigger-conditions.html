@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trigger conditions | Vinay Matsa</title>
+<meta name="description" content="Decide whether a flow should run at all, before it starts, so unneeded runs never happen, with the conditions you'll use most.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Trigger conditions">
+<meta property="og:description" content="Decide whether a flow should run at all, before it starts, so unneeded runs never happen, with the conditions you'll use most.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 3</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 3 · Triggers and connectors · 3 of 7</li>
+      </ul>
+      <h1>Trigger conditions</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>A <em>created or modified</em> trigger fires for every change: a typo fix, a new comment, a status change. Usually you care about one kind of change. A <strong>trigger condition</strong> stops the others before the run even starts.</p>
+
+<h2 id="vs"><span class="ico ico-cond"></span>Trigger condition vs Condition action</h2>
+<div class="cards"><div><strong>What</strong>An expression in the trigger's settings that must be true for the flow to start.</div><div><strong>Why</strong>A Condition action still creates a run (and uses an action) every time. A trigger condition means no run at all.</div><div><strong>Demo</strong>Run only when a request's Status becomes Approved.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>The same rule, two places</p><div class="fl"><div class="br"><div><span class="lbl f">Condition action</span><div class="nd">Item changes → <strong>run starts</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Status = Approved?</div><div class="ar"></div><div class="nd mute">No → run ends, but it counted</div></div><div><span class="lbl t">Trigger condition</span><div class="nd dec"><span class="ico ico-cond"></span>Status = Approved?</div><div class="ar"></div><div class="nd ok">Yes → run starts; no → nothing happens</div></div></div></div></div>
+
+<h2 id="condition"><span class="ico ico-expr"></span>The condition</h2>
+<figure class="shot"><img src="../assets/img/pa/l3-tc-condition.webp" alt="Trigger conditions setting with the expression @equals(triggerOutputs()?[&#x27;body/Status/Value&#x27;], &#x27;Approved&#x27;)" width="460" height="90" loading="lazy">
+<figcaption>Trigger settings → Trigger conditions.</figcaption></figure>
+<pre><code>@equals(triggerOutputs()?[&#x27;body/Status/Value&#x27;], &#x27;Approved&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>@</code></td><td>Required at the start of every trigger condition.</td></tr><tr><td><code>triggerOutputs()?[&#x27;body/Status/Value&#x27;]</code></td><td>The changed item's Choice value.</td></tr><tr><td><code>equals(..., &#x27;Approved&#x27;)</code></td><td>True only for Approved.</td></tr></tbody></table></div>
+
+<h2 id="result"><span class="ico ico-check"></span>Four changes, one run</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>What each change did</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Change</th><th>Status</th><th>Condition</th><th>Run?</th></tr></thead><tbody><tr><td>Office chairs (x4)</td><td>Approved</td><td><span class="chip ok">true</span></td><td><span class="lbl t">ran</span></td></tr><tr><td>Conference room screen</td><td>Rejected</td><td><span class="chip no">false</span></td><td><span class="lbl f">no run</span></td></tr><tr><td>New request 1</td><td>New</td><td><span class="chip no">false</span></td><td><span class="lbl f">no run</span></td></tr><tr><td>New request 2</td><td>New</td><td><span class="chip no">false</span></td><td><span class="lbl f">no run</span></td></tr></tbody></table></div></div>
+<figure class="shot"><img src="../assets/img/pa/l3-tc-history.webp" alt="28-day run history with a single succeeded run" width="768" height="165" loading="lazy">
+<figcaption>Run history shows one run, not four.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l3-tc-output.webp" alt="Approved request output: Office chairs (x4) was approved (620)" width="505" height="260" loading="lazy">
+<figcaption>The run that did happen.</figcaption></figure>
+
+<h2 id="more"><span class="ico ico-expr"></span>More useful conditions</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-cond"></span>Run only when</th><th>Trigger condition</th></tr></thead><tbody><tr><td>Amount is over 1,000</td><td><code>@greater(triggerOutputs()?['body/Amount'], 1000)</code></td></tr><tr><td>A field isn't empty</td><td><code>@not(empty(triggerOutputs()?['body/Department']))</code></td></tr><tr><td>Not changed by the flow's own account</td><td><code>@not(equals(triggerOutputs()?['body/Editor/Email'], 'flow.account@contoso.com'))</code></td></tr><tr><td>Both of two rules (AND)</td><td>Two separate condition lines</td></tr><tr><td>Either rule (OR)</td><td><code>@or(equals(…), equals(…))</code> on one line</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Every condition line must start with <code>@</code> and return true or false.</li><li>Several lines are combined with AND.</li><li>Skipped changes leave no trace in run history. Test conditions on a copy first.</li><li>Trigger conditions can't tell what a field <em>was</em>; for “changed to” logic see Trigger loops and column changes (Level 8).</li></ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>triggerOutputs()</strong>: the data the trigger received. <code>body/…</code> holds the item's fields.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Forgetting the <code>@</code>.</li><li>Writing a condition that's never true, so the flow silently never runs.</li><li>Reading a Choice column without <code>/Value</code>.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/customize-triggers">Customize your triggers with conditions</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (logical functions)</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="dataverse-triggers.html">← Dataverse triggers and row actions</a><a href="outlook-teams-notifications.html">Outlook and Teams notifications →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#vs">Trigger condition vs Condition action</a></li><li><a href="#condition">The condition</a></li><li><a href="#result">Four changes, one run</a></li><li><a href="#more">More useful conditions</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

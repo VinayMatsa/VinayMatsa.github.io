@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OData filter queries | Vinay Matsa</title>
+<meta name="description" content="Ask Dataverse (and SharePoint) for only the rows and columns you need, instead of fetching everything and filtering in the flow.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OData filter queries">
+<meta property="og:description" content="Ask Dataverse (and SharePoint) for only the rows and columns you need, instead of fetching everything and filtering in the flow.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 2</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 2 · Working with data · 7 of 7</li>
+      </ul>
+      <h1>OData filter queries</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Filter array works on data already in the flow. For data in Dataverse or SharePoint, it's far better to ask the source for only what you need: which columns, which rows, in what order, how many.</p>
+
+<h2 id="why"><span class="ico ico-data"></span>Filter at the source</h2>
+<div class="cards"><div><strong>What</strong>An <strong>OData query</strong> in List rows (or Get items) that the server runs before sending data back.</div><div><strong>Why</strong>Less data, fewer actions, faster runs, and readable run history.</div><div><strong>Demo</strong>Accounts in Seattle, or with revenue over 70,000.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Two ways to get the same rows</p><div class="fl"><div class="br"><div><span class="lbl f">Without a query</span><div class="nd">List rows: <strong>every</strong> row and column</div><div class="ar"></div><div class="nd">Filter array in the flow</div><div class="ar"></div><div class="nd mute">Slow; reads everything</div></div><div><span class="lbl t">With OData</span><div class="nd">List rows with <strong>Filter rows</strong> and <strong>Select columns</strong></div><div class="ar"></div><div class="nd ok">Only matching rows, only needed columns</div></div></div></div></div>
+
+<h2 id="query"><span class="ico ico-expr"></span>The query</h2>
+<figure class="shot"><img src="../assets/img/pa/l2-odata-parameters.webp" alt="List rows parameters: entityName accounts, select name,address1_city,revenue, filter address1_city eq &#x27;Seattle&#x27; or revenue gt 70000" width="434" height="162" loading="lazy">
+<figcaption>The four boxes in List rows.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Box</th><th>Demo value</th><th>Meaning</th></tr></thead><tbody><tr><td>Select columns</td><td><code>name,address1_city,revenue</code></td><td>Return only these columns</td></tr><tr><td>Filter rows</td><td><code>address1_city eq 'Seattle' or revenue gt 70000</code></td><td>Seattle, or revenue over 70,000</td></tr><tr><td>Sort by</td><td><code>revenue desc</code></td><td>Highest first</td></tr><tr><td>Row count</td><td><code>10</code></td><td>At most 10 rows</td></tr></tbody></table></div>
+
+<h2 id="result"><span class="ico ico-check"></span>The result, row by row</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Which rows match</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Account</th><th>City</th><th>Revenue</th><th>city eq 'Seattle'</th><th>revenue gt 70000</th><th>Returned</th></tr></thead><tbody><tr><td>Contoso Ltd</td><td>Seattle</td><td>120000</td><td><span class="chip ok">true</span></td><td><span class="chip ok">true</span></td><td><span class="lbl t">yes</span></td></tr><tr><td>Northwind Traders</td><td>London</td><td>98000</td><td><span class="chip no">false</span></td><td><span class="chip ok">true</span></td><td><span class="lbl t">yes</span></td></tr><tr><td>Tailspin Toys</td><td>London</td><td>75000</td><td><span class="chip no">false</span></td><td><span class="chip ok">true</span></td><td><span class="lbl t">yes</span></td></tr><tr><td>Adventure Works</td><td>Seattle</td><td>30000</td><td><span class="chip ok">true</span></td><td><span class="chip no">false</span></td><td><span class="lbl t">yes</span></td></tr></tbody></table></div><p class="viz-note">Sorted by revenue, highest first. Change <code>or</code> to <code>and</code> and only Contoso Ltd matches.</p></div>
+<figure class="shot"><img src="../assets/img/pa/l2-odata-output.webp" alt="Names found: Contoso Ltd - Seattle - 120000, Northwind Traders - London - 98000, Tailspin Toys - London - 75000, Adventure Works - Seattle - 30000" width="514" height="177" loading="lazy">
+<figcaption>The four rows the server sent back.</figcaption></figure>
+
+<h2 id="operators"><span class="ico ico-cond"></span>Operators</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-cond"></span>OData</th><th>Flow equivalent</th><th>Example</th></tr></thead><tbody><tr><td><code>eq</code> / <code>ne</code></td><td><code>equals</code> / <code>not(equals)</code></td><td><code>statecode eq 0</code> (active rows)</td></tr><tr><td><code>gt ge lt le</code></td><td><code>greater</code> …</td><td><code>revenue ge 50000</code></td></tr><tr><td><code>and</code> / <code>or</code> / <code>not</code></td><td><code>and</code> / <code>or</code> / <code>not</code></td><td><code>address1_city eq 'London' and revenue gt 70000</code></td></tr><tr><td><code>contains</code> / <code>startswith</code> / <code>endswith</code></td><td><code>contains</code> / <code>startsWith</code></td><td><code>startswith(name, 'Contoso')</code></td></tr><tr><td><code>eq null</code></td><td><code>empty()</code></td><td><code>emailaddress1 eq null</code></td></tr></tbody></table></div>
+
+<h2 id="dynamic"><span class="ico ico-expr"></span>Putting flow values in a filter</h2>
+<pre><code>address1_city eq &#x27;@{triggerBody()?[&#x27;text&#x27;]}&#x27; and revenue gt @{variables(&#x27;MinRevenue&#x27;)}</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>&#x27;@{...}&#x27;</code></td><td>Text values go inside single quotes.</td></tr><tr><td><code>@{variables(&#x27;MinRevenue&#x27;)}</code></td><td>Numbers go without quotes.</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Use <strong>logical names</strong> (<code>address1_city</code>), not display names. Lookups are <code>_columnname_value</code>.</li><li>OData uses single quotes: <code>name eq 'Contoso Ltd'</code>.</li><li>List rows returns one page (up to 5,000 rows); turn on pagination when you need more (Level 5).</li></ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>OData</strong>: a standard way of writing queries that Dataverse, SharePoint and many Microsoft APIs understand.</p>
+<p><strong>Logical name</strong>: the internal lower-case column name, shown in the column's properties in Power Apps.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Double quotes around text values.</li><li>Leaving Select columns empty.</li><li>Assuming you get every row without pagination.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/list-rows">Use lists of rows in flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/developer/data-platform/webapi/query/overview">Use OData to query data</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/work-with-relevant-data">Work only with relevant data</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="handling-nulls.html">← Handling nulls: coalesce, empty and ?</a><a href="./">Back to all topics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#why">Filter at the source</a></li><li><a href="#query">The query</a></li><li><a href="#result">The result, row by row</a></li><li><a href="#operators">Operators</a></li><li><a href="#dynamic">Putting flow values in a filter</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

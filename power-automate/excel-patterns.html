@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Excel processing patterns | Vinay Matsa</title>
+<meta name="description" content="Match rows between two workbooks without loops, process Excel files that arrive by email, and export data to Excel.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Excel processing patterns">
+<meta property="og:description" content="Match rows between two workbooks without loops, process Excel files that arrive by email, and export data to Excel.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 7</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 7 · Files, email and documents · 4 of 7</li>
+      </ul>
+      <h1>Excel processing patterns</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Once you can read a table, most Excel work falls into three patterns: comparing two files, handling a workbook that arrives as an attachment, and producing an Excel file people can download.</p>
+
+<h2 id="match"><span class="ico ico-data"></span>Matching rows between two files</h2>
+<div class="cards"><div><strong>What</strong>Select the IDs from one table, then Filter array the other with <code>contains()</code>.</div><div><strong>Why</strong>No loop, no nested loop: three actions however many rows.</div><div><strong>Demo</strong>Which orders have no payment?</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Unpaid orders in three actions</p><div class="fl"><div class="nd"><strong>List payments</strong></div><div class="ar"></div><div class="nd"><strong>Paid order IDs</strong> (Select): <span class="chip ">101</span><span class="chip ">103</span><span class="chip ">105</span></div><div class="ar"></div><div class="nd"><strong>Unpaid orders</strong> (Filter array on Orders): <code>not(contains(paid IDs, OrderId))</code></div><div class="ar"></div><div class="nd ok"><span class="chip ok">Fabrikam (102)</span><span class="chip ok">Tailspin (104)</span></div></div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Each order checked</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>OrderId</th><th>In paid IDs?</th><th>Kept</th></tr></thead><tbody><tr><td>101</td><td><span class="chip ok">yes</span></td><td><span class="lbl d">dropped</span></td></tr><tr><td>102</td><td><span class="chip no">no</span></td><td><span class="lbl f">unpaid</span></td></tr><tr><td>103</td><td><span class="chip ok">yes</span></td><td><span class="lbl d">dropped</span></td></tr><tr><td>104</td><td><span class="chip no">no</span></td><td><span class="lbl f">unpaid</span></td></tr><tr><td>105</td><td><span class="chip ok">yes</span></td><td><span class="lbl d">dropped</span></td></tr></tbody></table></div></div>
+<pre><code>not(contains(body(&#x27;Paid_order_IDs&#x27;), item()?[&#x27;OrderId&#x27;]))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>body(&#x27;Paid_order_IDs&#x27;)</code></td><td>The list of paid IDs.</td></tr><tr><td><code>contains(list, value)</code></td><td>Is this order's ID in it?</td></tr><tr><td><code>not(...)</code></td><td>Keep the ones that aren't.</td></tr></tbody></table></div>
+<figure class="shot"><img src="../assets/img/pa/l7-excel-summary.webp" alt="Summary output including Orders with no payment: Fabrikam (102), Tailspin (104)" width="618" height="185" loading="lazy">
+<figcaption>The result.</figcaption></figure>
+<p>To return a value (such as a name) rather than yes/no, use the lookup object from Avoiding nested loops.</p>
+
+<h2 id="from-email"><span class="ico ico-arrow"></span>Excel files that arrive by email</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Attachment → rows</p><div class="fl"><div class="nd">Save the attachment to a library (Create file)</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Does it have a table?</div><div class="ar"></div><div class="br"><div><span class="lbl f">No</span><div class="nd"><strong>Create table</strong> with a range, e.g. <code>A1:D50</code></div></div><div><span class="lbl t">Yes</span><div class="nd mute">–</div></div></div><div class="ar"></div><div class="nd ok"><strong>List rows</strong>, using the new file's path</div></div><p class="viz-note">Add a short Delay if you get “file not found” or locked errors.</p></div>
+
+<h2 id="export"><span class="ico ico-check"></span>Exporting data to Excel</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-check"></span>Approach</th><th>How</th><th>Best for</th></tr></thead><tbody><tr><td>CSV file</td><td>Create CSV table → Create file <code>.csv</code></td><td>Quick downloads</td></tr><tr><td>Template workbook</td><td>Copy a template with an empty table → Add a row per record</td><td>Formatted reports</td></tr><tr><td>Office Script</td><td><em>Run script</em> writes many rows in one call</td><td>Hundreds of rows</td></tr></tbody></table></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>contains()</strong>: on a list, is the value in it; on text, is the piece of text in it.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Nested loops to compare two tables.</li><li>Reading an attachment straight from email (the connector needs SharePoint/OneDrive).</li><li>One Add a row per record for thousands of rows.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/excelonlinebusiness/">Excel Online (Business) connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/data-operations">Use data operations</a></li><li><a href="https://learn.microsoft.com/en-us/office/dev/scripts/develop/power-automate-integration">Run Office Scripts with Power Automate</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="excel-online.html">← Excel Online basics</a><a href="word-template-pdf.html">Word templates and PDF conversion →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#match">Matching rows between two files</a></li><li><a href="#from-email">Excel files that arrive by email</a></li><li><a href="#export">Exporting data to Excel</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

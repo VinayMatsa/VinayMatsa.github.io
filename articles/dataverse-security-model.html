@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Dataverse security model: who sees what | Vinay Matsa</title>
+<meta name="description" content="Business units, security roles, access levels, teams, sharing, hierarchy and column security, and how they combine.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Dataverse security model: who sees what">
+<meta property="og:description" content="Business units, security roles, access levels, teams, sharing, hierarchy and column security, and how they combine.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Dataverse</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Platform Deep Dive</li>
+        <li>Dataverse</li>
+      </ul>
+      <h1>The Dataverse security model: who sees what</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-10-12">12 October 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Every canvas app, model-driven app and Power Automate flow on Dataverse runs on one security model. It decides which records a user can open and which fields stay hidden.</p>
+
+<h2 id="root">Start from the root</h2>
+<p>Dataverse stores data in <strong>tables</strong> made of <strong>rows</strong> (records) and <strong>columns</strong> (fields). Security answers two questions for every user and every row: <em>can they reach this row at all?</em> and <em>if so, which columns can they see?</em> Apps don't decide this; Dataverse does, so the same rules apply whether someone uses an app, a flow or the API.</p>
+
+<h2 id="pieces">The pieces</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody>
+<tr><td>Business units</td><td>Group users, like departments. Every user belongs to exactly one.</td></tr>
+<tr><td>Security roles</td><td>Decide which actions (create, read, write, delete, append, assign, share) a user can do on each table.</td></tr>
+<tr><td>Access levels</td><td>Decide how wide each privilege reaches: User, Business Unit, Parent: Child Business Units, or Organization.</td></tr>
+<tr><td>Teams</td><td>Give a role to a group of users at once.</td></tr>
+<tr><td>Sharing</td><td>Grants access to one specific row, as an exception.</td></tr>
+<tr><td>Hierarchy security</td><td>Lets managers see their reports' rows.</td></tr>
+<tr><td>Column security</td><td>Hides sensitive columns inside rows a user can otherwise see.</td></tr>
+</tbody></table></div>
+
+<h2 id="approach">Recommended approach</h2>
+<ul>
+<li>Start with the narrowest access level that works.</li>
+<li>Assign roles to teams, not user by user.</li>
+<li>Use sharing only for exceptions.</li>
+<li>Use column security for fields like salary or medical notes.</li>
+</ul>
+
+<h2 id="watch">Important to know</h2>
+<ul>
+<li><strong>Roles add up.</strong> A user gets the broadest access from all their roles and teams combined; one generous role undoes careful ones.</li>
+<li><strong>System Administrator can see all data</strong>, not just configuration. Don't hand it out for convenience.</li>
+<li><strong>Column security never grants a row.</strong> Row access must come first; column security only narrows it.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/wp-security-cds">Security concepts in Microsoft Dataverse</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/security-roles-privileges">Security roles and privileges</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/field-level-security">Column-level security</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7515264193663623168/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="dataverse-lookup-error.html">← Fixing the Dataverse lookup error in Power Automate</a><a href="copilot-studio-ai-billing.html">AI billing in Copilot Studio: tokens, credits and limits →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#pieces">The pieces</a></li><li><a href="#approach">Recommended approach</a></li><li><a href="#watch">Important to know</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7515264193663623168/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

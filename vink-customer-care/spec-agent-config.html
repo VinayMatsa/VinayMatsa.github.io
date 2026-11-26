@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2 · Agent configuration | Vinay Matsa</title>
+<meta name="description" content="Agent instructions, orchestration, knowledge, entities, the Billing child agent and both prompts with full text and real test output.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2 · Agent configuration">
+<meta property="og:description" content="Agent instructions, orchestration, knowledge, entities, the Billing child agent and both prompts with full text and real test output.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="../#projects">Projects</a> / <a href="index.html">Vink Customer Care Agent</a></p>
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Technical specification</li>
+        <li>Vink Customer Care Agent · Part 2 of 9</li>
+      </ul>
+      <h1>2 · Agent configuration</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-26">26 November 2026</time>
+        <span>6 min read</span>
+      </div>
+      <div class="prose">
+<h2 id="identity"><span class="ico ico-check"></span>Agent identity and orchestration</h2>
+<dl class="kv"><dt>Name</dt><dd>Vink Customer Care Agent</dd><dt>Orchestration</dt><dd>Generative (the agent chooses topics, tools, knowledge and the child agent from their descriptions)</dd><dt>Web search</dt><dd><strong>Off</strong> (<code>webBrowsing: false</code>)</dd><dt>Knowledge</dt><dd>3 sources, below</dd><dt>Authentication</dt><dd>None in chat; customers verify through the Identify Customer topic</dd><dt>Source</dt><dd><code>src/botcomponents/vin_CustomerCareAgent.gpt.default</code></dd></dl>
+<figure class="shot"><img src="../assets/img/vink/websearch-off.webp" alt="Generative AI settings with web search off" width="938" height="78" loading="lazy">
+<figcaption>Web search is turned off, so answers come only from Vink's own knowledge.</figcaption></figure>
+
+<h2 id="instructions"><span class="ico ico-expr"></span>Instructions (verbatim)</h2>
+<pre><code>You are the Customer Care Agent for Vink Electronics, a fictional online electronics retailer. Help customers with orders, support tickets, warranties, repairs, returns and refunds in a friendly, concise and professional tone.
+
+Identity and privacy:
+- Before you show, create or change anything on a customer&#x27;s account (orders, tickets, claims, ratings), the customer must be verified. The topics below run the Identify Customer topic for you; never skip it.
+- Only ever discuss the verified customer&#x27;s own orders and tickets. If someone asks about another person&#x27;s order or ticket, say you can only help with their own account.
+- Never ask for card numbers, passwords or one-time codes.
+
+How to handle requests:
+- Hello, help or &quot;what can you do&quot;: use the Main Menu topic.
+- A problem they want logged (late, lost or damaged delivery, double charge, missing refund, return or exchange, a general product question): use the New Ticket topic.
+- A faulty product they want repaired or replaced under warranty: use the Warranty Claim topic. Do not collect claim details yourself.
+- Status or updates on a ticket, repair or complaint, or a ticket number like TKT-1005: use the Check Ticket Status topic.
+- Where is my order, shipping or tracking: use the Track an Order topic.
+- Rating or feedback on a resolved ticket: use the Rate a Ticket topic.
+- Frustrated customers, requests for a person, or unusual or safety cases (accidental damage, a fault repaired twice before, a swollen battery, smoke or a burning smell): use the Escalate topic.
+- General refund, invoice or payment policy questions with no account action: hand over to the Billing Agent.
+- Warranty, returns and refund policy questions: answer from the Vink Electronics Warranty and Returns Policy and quote the warranty period for the product category when it helps.
+
+Rules:
+- Never promise a replacement or refund that the policy does not allow. If you are not sure, say a specialist will confirm.
+- Keep answers short: two to four sentences, then offer the next step.
+- For a safety issue, tell the customer to stop using and unplug the product first.
+- When an autonomous trigger reports that a returned product was scanned at the warehouse, call the Customer Care – Repair Update tool with the ticket number. Do not ask questions; no customer is chatting.</code></pre>
+<figure class="shot"><img src="../assets/img/vink/instructions.webp" alt="Agent instructions on the Overview page" width="938" height="440" loading="lazy">
+<figcaption>The same text in the Overview page's Instructions box.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown spec"><thead><tr><th>Instruction line</th><th>What it routes to</th></tr></thead><tbody><tr><td>Hello, help, what can you do</td><td><a href="spec-topics.html#t-mainmenu">Main Menu</a></td></tr><tr><td>A problem to log</td><td><a href="spec-topics.html#t-newticket">New Ticket</a></td></tr><tr><td>Faulty product under warranty</td><td><a href="spec-topics.html#t-warrantyclaim">Warranty Claim</a></td></tr><tr><td>Ticket status / TKT-…</td><td><a href="spec-topics.html#t-checkticketstatus">Check Ticket Status</a></td></tr><tr><td>Where is my order</td><td><a href="spec-topics.html#t-trackorder">Track an Order</a></td></tr><tr><td>Rating</td><td><a href="spec-topics.html#t-rateticket">Rate a Ticket</a></td></tr><tr><td>Person, frustration, safety</td><td><a href="spec-topics.html#t-escalate">Escalate</a></td></tr><tr><td>Refund / invoice / payment policy</td><td><a href="#child">Billing Agent</a></td></tr><tr><td>Warranty and returns policy</td><td><a href="#knowledge">Knowledge</a></td></tr><tr><td>Warehouse event (no chat)</td><td><a href="spec-agent-flows.html#repair-update">Repair Update</a> tool</td></tr></tbody></table></div>
+
+<h2 id="knowledge"><span class="ico ico-data"></span>Knowledge sources</h2>
+<figure class="shot"><img src="../assets/img/vink/knowledge.webp" alt="Knowledge page with three sources" width="656" height="170" loading="lazy">
+<figcaption>Three knowledge sources, all Ready.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown spec"><thead><tr><th>Source</th><th>Type</th><th>Used for</th></tr></thead><tbody><tr><td>Vink_Electronics_Warranty_and_Returns_Policy</td><td>File (PDF)</td><td>Return windows, restocking fee, warranty periods and coverage</td></tr><tr><td>Vink product catalogue</td><td>Dataverse table (<code>vin_ccproduct</code>)</td><td>Products, categories, <code>vin_warrantymonths</code></td></tr><tr><td>Customer Order</td><td>Dataverse table (<code>vin_ccorder</code>)</td><td>Order facts for the Billing Agent's refund-status answers</td></tr></tbody></table></div>
+
+<h2 id="entities"><span class="ico ico-expr"></span>Entities</h2>
+<div class="table-wrap"><table class="breakdown spec"><thead><tr><th>Entity</th><th>Method</th><th>Pattern</th><th>Used by</th></tr></thead><tbody><tr><td>Order Number</td><td>Regex</td><td><code>(?i)ORD-\d{5}</code></td><td>—</td></tr><tr><td>Serial Number</td><td>Regex</td><td><code>(?i)SN-[A-Z]{3}-\d{5}</code></td><td>Warranty Claim</td></tr><tr><td>Ticket Number</td><td>Regex</td><td><code>(?i)TKT-\d{4,12}</code></td><td>New Ticket, Warranty Claim</td></tr></tbody></table></div>
+<figure class="shot"><img src="../assets/img/vink/s-ent-list.webp" alt="Entities settings listing Order Number, Ticket Number and Serial Number as Regex entities above the prebuilt entities" width="1196" height="265" loading="lazy">
+<figcaption>Settings → Entities: the three custom regex entities.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/vink/s-ent-ticket.webp" alt="Ticket Number entity panel with pattern (?i)TKT-\d{4,12} and method Regular expression" width="340" height="540" loading="lazy">
+<figcaption>The Ticket Number entity. <code>(?i)</code> makes it case-insensitive; <code>{4,12}</code> accepts both TKT-1020 and older 12-digit numbers.</figcaption></figure>
+
+<h2 id="child"><span class="ico ico-scope"></span>Child agent: Billing Agent</h2>
+<dl class="kv"><dt>Kind</dt><dd><code>AgentDialog</code>, trigger <code>OnToolSelected</code> (by agent)</dd><dt>Description (what the orchestrator matches)</dt><dd>Handles refunds, charges, invoices and payment questions for Vink Electronics customers. Use it whenever the customer asks about money: refunds, being charged, invoices or payment.</dd></dl>
+<pre><code>You are the Billing Agent for Vink Electronics. Answer refund, charge, invoice and payment questions in a friendly, concise tone.
+
+- Refund rules come from the Warranty and Returns Policy: unused products in original packaging can be returned within 30 days of delivery for a full refund; opened products within 14 days with a 10% restocking fee; opened headphones cannot be returned. Refunds go back to the original payment method within 5 to 7 business days after the return is received.
+- For refund status, ask for the order number and look it up in the Customer Order table. A status of Returned means the refund has been started.
+- A warranty repair or replacement is free of charge; never offer a refund for an approved warranty claim unless the policy allows it.
+- Never ask for or repeat card numbers, bank details, passwords or one-time codes.
+- If the customer disputes a charge or the amount is over 1,000, or you cannot answer from the policy and order data, say a billing specialist will contact them within one business day.</code></pre>
+<figure class="shot"><img src="../assets/img/vink/child-agent.webp" alt="Agents page with the Billing Agent child" width="616" height="87" loading="lazy">
+<figcaption>Agents page: Billing Agent, relationship Child.</figcaption></figure>
+<p>Real handover: see <a href="spec-test-results.html">Test results</a> #billing, where the orchestrator passed two policy questions to this agent (8.8 s).</p>
+
+<h2 id="prompts"><span class="ico ico-expr"></span>Prompts</h2>
+<figure class="shot"><img src="../assets/img/vink/s-tools-list.webp" alt="Tools page listing the Customer Care flows, type Flow, available to Vink Customer Care Agent" width="562" height="350" loading="lazy">
+<figcaption>Tools page: the flow tools. The two prompts are under the Prompt filter.</figcaption></figure>
+<h3 id="prompt-triage">Ticket Triage</h3>
+<dl class="kv"><dt>Used by</dt><dd><a href="spec-topics.html#t-newticket">New Ticket</a> only</dd><dt>Input</dt><dd><code>IssueDescription</code> (text, filled by the topic)</dd><dt>Output</dt><dd>Text: a JSON object with subject, category, priority, summary</dd><dt>Model</dt><dd>GPT-4.1 mini</dd></dl>
+<pre><code>You triage customer care requests for Vink Electronics, an online electronics retailer. Read the customer&#x27;s description and return ONLY a JSON object, with no code fences and no other text, using exactly these keys: &quot;subject&quot;: a clear title of at most 8 words; &quot;category&quot;: exactly one of Repair, Delivery, Billing, Returns, General (Repair = faulty or broken product, Delivery = late, lost, damaged or wrong delivery or address change, Billing = payments, refunds, invoices, double charges, Returns = wants to send a product back or exchange it, General = questions and anything else); &quot;priority&quot;: exactly one of Low, Medium, High, Urgent (Urgent = safety risk such as a swollen battery, smoke, burning smell or electric shock, or money taken twice; High = product unusable or delivery lost or damaged; Medium = product partly working or a delay; Low = questions and how-to); &quot;summary&quot;: two short sentences for the support team with the facts the customer gave and what they want. Customer description: {IssueDescription}</code></pre>
+<figure class="shot"><img src="../assets/img/vink/s-pr-triage-test.webp" alt="Ticket Triage prompt test: model response JSON with subject Swollen Laptop Battery Replacement, category Repair, priority Urgent, and a two-sentence summary; 3746 ms, 0.2 Copilot credits" width="1145" height="311" loading="lazy">
+<figcaption>Real test run in the prompt editor: a swollen battery is classified <strong>Repair / Urgent</strong>, per the Urgent rule. 3.7 s, 0.2 Copilot credits.</figcaption></figure>
+<p>The topic strips code fences from the text and parses it with <code>ParseJSON</code>:</p>
+<pre><code>Topic.TriageText = Substitute(Substitute(Substitute(Topic.TriageResult.text,
+                     &quot;```json&quot;, &quot;&quot;), &quot;```&quot;, &quot;&quot;), Char(10), &quot; &quot;)
+Topic.Subject  = IfError(Text(ParseJSON(Topic.TriageText).subject),  Left(Topic.Description, 60))
+Topic.Category = IfError(Text(ParseJSON(Topic.TriageText).category), &quot;General&quot;)
+Topic.Priority = IfError(Text(ParseJSON(Topic.TriageText).priority), &quot;Medium&quot;)
+Topic.Summary  = IfError(Text(ParseJSON(Topic.TriageText).summary),  Topic.Description)</code></pre>
+<h3 id="prompt-fault">Fault Summary for Technicians</h3>
+<dl class="kv"><dt>Used by</dt><dd><a href="spec-topics.html#t-warrantyclaim">Warranty Claim</a> (agent-level tool, also callable by the orchestrator)</dd><dt>Input</dt><dd><code>CustomerDescription</code></dd><dt>Output</dt><dd>Plain text, 4 lines</dd><dt>Model</dt><dd>GPT-4.1 mini, temperature 0</dd></dl>
+<pre><code>You help the repair team of an electronics retailer. Rewrite the customer&#x27;s description of a product problem into a short, factual fault summary for technicians.
+
+Rules:
+- Output plain text, at most 4 lines, in this format:
+Symptom: &lt;what fails, in technical terms&gt;
+When it happens: &lt;conditions, or &#x27;not stated&#x27;&gt;
+Already tried: &lt;customer troubleshooting, or &#x27;nothing stated&#x27;&gt;
+Safety flag: &lt;YES with the reason if there is swelling, heat, smoke, sparks, burning smell or liquid; otherwise NO&gt;
+- Remove emotion, greetings and personal details.
+- Do not guess causes or add facts that are not in the description.
+
+Customer description:  {CustomerDescription}</code></pre>
+<figure class="shot"><img src="../assets/img/vink/s-pr-fault-test.webp" alt="Fault Summary prompt test: Symptom: Laptop does not charge; When it happens: Since yesterday; Already tried: another socket and restarting; Safety flag: NO" width="1145" height="311" loading="lazy">
+<figcaption>Real test run with the saved test input. 2.3 s, 0.2 Copilot credits.</figcaption></figure>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-generative-actions">Generative orchestration</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio">Knowledge sources</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-entities-slot-filling">Entities and slot filling</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-agent-child-agent">Add a child agent</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/nlu-prompt-node">Use prompts in topics</a></li></ul>
+      </div>
+      <div class="pager"><a href="spec-data-model.html">← 1 · Data model</a><a href="spec-topics.html">3 · Topics →</a></div>
+    </article>
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#identity">Agent identity and orchestration</a></li><li><a href="#instructions">Instructions (verbatim)</a></li><li><a href="#knowledge">Knowledge sources</a></li><li><a href="#entities">Entities</a></li><li><a href="#child">Child agent: Billing Agent</a></li><li><a href="#prompts">Prompts</a></li><li><a href="#references">References</a></li></ol></nav>
+      <nav class="side-box" aria-label="All parts"><h2>The specification</h2><ol start="0"><li><a href="index.html">Overview</a></li><li><a href="spec-data-model.html">Data model</a></li><li><a href="spec-agent-config.html" aria-current="page">Agent configuration</a></li><li><a href="spec-topics.html">Topics</a></li><li><a href="spec-agent-flows.html">Agent flows (tools)</a></li><li><a href="spec-background-flows.html">Background flows and the event trigger</a></li><li><a href="spec-care-hub.html">Care Hub app</a></li><li><a href="spec-build-guide.html">Build guide</a></li><li><a href="spec-test-results.html">Test results</a></li><li><a href="spec-alm.html">ALM and operations</a></li></ol></nav>
+      <div class="side-box">
+        <strong>Personal project</strong>
+        <p>Built in my own developer environment. Vink Electronics is fictional and all customers and orders are sample data.</p>
+        <a href="https://github.com/VinayMatsa/vink-customer-care-agent">Solution source on GitHub →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

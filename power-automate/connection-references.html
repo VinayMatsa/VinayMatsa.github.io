@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connection references | Vinay Matsa</title>
+<meta name="description" content="Let a flow say which connector it needs, and decide whose connection it uses separately in each environment.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Connection references">
+<meta property="og:description" content="Let a flow say which connector it needs, and decide whose connection it uses separately in each environment.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 6</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 6 · ALM and governance · 2 of 7</li>
+      </ul>
+      <h1>Connection references</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>An action needs a <strong>connection</strong>: a signed-in account for SharePoint, Outlook, Dataverse. If the flow pointed straight at your connection, production would carry your account with it. A <strong>connection reference</strong> sits in between.</p>
+
+<h2 id="how"><span class="ico ico-arrow"></span>Flow → reference → connection</h2>
+<div class="cards"><div><strong>What</strong>A solution component that names a connector and points to one connection in the current environment.</div><div><strong>Why</strong>The same flow uses a different account in each environment, without editing it.</div><div><strong>Demo</strong>Every demo flow that posts to Teams uses one Teams reference.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Same flow, different accounts</p><div class="fl"><div class="nd act">Flow action: <em>Post message in Teams</em></div><div class="ar"></div><div class="nd">→ Connection reference: <strong>Teams</strong></div><div class="ar"></div><div class="br"><div><span class="lbl c">In Dev</span><div class="nd">→ your connection</div></div><div><span class="lbl c">In Test</span><div class="nd">→ test service account</div></div><div><span class="lbl c">In Prod</span><div class="nd ok">→ production service account</div></div></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l6-connection-references.webp" alt="Website Demos &gt; Connection references: Website Demos approvals, office365, sharepointonline and teams" width="810" height="220" loading="lazy">
+<figcaption>The demo solution's references: one per connector.</figcaption></figure>
+<pre><code>&quot;connectionReferenceLogicalName&quot;: &quot;vm_websitedemos_teams&quot;</code></pre>
+<p>In the flow's definition the action names the <em>reference</em>, not a person.</p>
+
+<h2 id="import"><span class="ico ico-check"></span>What happens on import</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Import wizard</p><div class="fl"><div class="nd">Import the solution into Test or Prod</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>A connection for each reference?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Pick or create one</span><div class="nd ok">Flows can be turned on</div></div><div><span class="lbl f">Skip</span><div class="nd mute">Flows stay off until it's set</div></div></div></div></div>
+<p>Choose connections owned by the right account there, usually a service account (see Flow ownership and service accounts).</p>
+
+<h2 id="share"><span class="ico ico-data"></span>One reference or many?</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Situation</th><th>Use</th></tr></thead><tbody><tr><td>All flows run as the same account</td><td>One reference per connector per solution</td></tr><tr><td>Some flows act as a different account (e.g. a shared mailbox)</td><td>A separate reference for those</td></tr></tbody></table></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Connection</strong>: a stored sign-in to a service; it belongs to one account.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>A new reference for every flow, so every import has dozens to fix.</li><li>Your own connection in production.</li><li>Deleting a reference flows still use.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/create-connection-reference">Use a connection reference in a solution</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/overview-solution-flows">Overview of solution-aware cloud flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="solutions.html">← Solutions and solution-aware flows</a><a href="environment-variables.html">Environment variables →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#how">Flow → reference → connection</a></li><li><a href="#import">What happens on import</a></li><li><a href="#share">One reference or many?</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

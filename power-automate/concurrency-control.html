@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concurrency control | Vinay Matsa</title>
+<meta name="description" content="Run loop iterations in parallel to save time, limit how many runs happen at once, and know when one at a time is the safer choice.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Concurrency control">
+<meta property="og:description" content="Run loop iterations in parallel to save time, limit how many runs happen at once, and know when one at a time is the safer choice.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 4</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 4 · Reliable flows · 4 of 7</li>
+      </ul>
+      <h1>Concurrency control</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>An Apply to each processes items one at a time by default. If the items don't depend on each other, the loop can process several at once. The same loop of ten 2-second waits took 26 seconds one at a time and 3 seconds in parallel.</p>
+
+<h2 id="demo"><span class="ico ico-clock"></span>Same loop, two settings</h2>
+<div class="cards"><div><strong>What</strong>A loop setting (degree 1 to 50) and a trigger setting (how many runs at once).</div><div><strong>Why</strong>Parallel iterations save time on slow, independent work; one-at-a-time protects shared data.</div><div><strong>Demo</strong>Ten items, each waiting 2 seconds.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>Ten 2-second items</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Setting</th><th>How they run</th><th>Time</th></tr></thead><tbody><tr><td>Default (1)</td><td><div class="bar"><i style="width:100%"></i></div></td><td><span class="chip ">25–26 s</span></td></tr><tr><td>Degree 10</td><td><div class="bar done"><i style="width:12%"></i></div></td><td><span class="chip ok">3 s</span></td></tr></tbody></table></div><p class="viz-note">In parallel, all ten start together, so the loop takes about as long as one item.</p></div>
+<figure class="shot"><img src="../assets/img/pa/l4-concurrency-canvas.webp" alt="Run view: One at a time loop took 26s, Ten in parallel loop took 3s" width="400" height="350" loading="lazy">
+<figcaption>Both loops in one run.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l4-concurrency-seconds.webp" alt="Seconds taken output: sequential 25, parallel 3" width="514" height="110" loading="lazy">
+<figcaption>Measured with utcNow() before and after each loop.</figcaption></figure>
+
+<h2 id="setting"><span class="ico ico-scope"></span>The setting</h2>
+<p>Select the loop → <strong>Settings</strong> → turn on <strong>Concurrency control</strong> → <strong>Degree of parallelism</strong> 1 to 50. (See Conditions, Switch and loops for the screenshot.)</p>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Should I turn it on?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Does any iteration depend on another, or change a shared variable?</div><div class="ar"></div><div class="br"><div><span class="lbl t">No</span><div class="nd dec"><span class="ico ico-cond"></span>Can the target service take the load?</div><div class="ar"></div><div class="nd ok">Yes → turn it on (start around 5–20)</div></div><div><span class="lbl f">Yes</span><div class="nd mute">Keep it at 1 (one at a time)</div></div></div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th><span class="ico ico-check"></span>Turn it on when</th><th><span class="ico ico-warn"></span>Keep it off when</th></tr></thead><tbody><tr><td>Dependence</td><td>Each item is independent</td><td>A later item reads what an earlier one wrote</td></tr><tr><td>Speed</td><td>Each item waits on a slow service</td><td>Order matters (running totals, numbering)</td></tr><tr><td>Target</td><td>The service handles the load</td><td>It throttles quickly (many 429s)</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Variables in a parallel loop give wrong totals. Collect Compose outputs after the loop instead.</li><li>In nested loops, only the outer loop runs in parallel.</li></ul>
+
+<h2 id="trigger"><span class="ico ico-until"></span>Trigger concurrency</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>Many runs at once vs a queue</p><div class="fl"><div class="br"><div><span class="lbl c">Off (default)</span><div class="nd">Runs start as soon as triggered, in parallel</div></div><div><span class="lbl c">On, limit 1</span><div class="nd">Runs queue and go one by one</div><div class="ar"></div><div class="nd ok">Safe when each run updates the same record or file</div></div></div></div></div>
+<h3>Watch out</h3><ul><li>Once turned on, trigger concurrency can't be turned off without deleting and re-adding the trigger.</li><li>Split on is limited to 100 items when trigger concurrency is on.</li></ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Degree of parallelism</strong>: the most iterations allowed at the same time.</p><p><strong>Throttling</strong>: a service refusing requests (429) because you sent too many.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Parallel loops that set variables.</li><li>Degree 50 against a service that throttles.</li><li>Expecting numbered output in order from a parallel loop.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/implement-parallel-execution">Optimize flows with parallel execution and concurrency</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/apply-to-each">Use the Apply to each action</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="retry-policies-timeouts.html">← Retry policies and timeouts</a><a href="pagination-thresholds.html">Pagination and thresholds →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">Same loop, two settings</a></li><li><a href="#setting">The setting</a></li><li><a href="#trigger">Trigger concurrency</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

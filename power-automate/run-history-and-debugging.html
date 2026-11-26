@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Run history and basic debugging | Vinay Matsa</title>
+<meta name="description" content="Find a run, read each step's inputs and outputs, fix the first failure, resubmit, and use tracked properties and secure inputs.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Run history and basic debugging">
+<meta property="og:description" content="Find a run, read each step's inputs and outputs, fix the first failure, resubmit, and use tracked properties and secure inputs.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 1</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 1 · Foundations · 7 of 7</li>
+      </ul>
+      <h1>Run history and basic debugging</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Every run records what each step received and returned. That record is your main debugging tool: most problems are solved by opening the run and reading the inputs of the <strong>first</strong> step that went wrong.</p>
+
+<h2 id="method"><span class="ico ico-check"></span>The debugging loop</h2>
+<div class="cards"><div><strong>What</strong>Run history lists every run for 28 days. Each run shows every step's status, inputs and outputs.</div><div><strong>Why</strong>You see the exact values a step received, after every expression was worked out, so you don't have to guess.</div><div><strong>Demo</strong>Break the first flow on purpose, find the error, fix it and resubmit.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>From failure to fix</p><div class="fl"><div class="nd">Open the flow → <strong>28-day run history</strong> → select the failed run</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Which is the <strong>first</strong> red card?</div><div class="ar"></div><div class="nd">Read its <strong>Inputs</strong>: the real values it received</div><div class="ar"></div><div class="nd">Read the <strong>error</strong> under Outputs: it names the field or type</div><div class="ar"></div><div class="nd">Fix the step in the designer and save</div><div class="ar"></div><div class="nd ok"><strong>Resubmit</strong> the failed run: same trigger data, new run</div></div></div>
+
+<h2 id="find"><span class="ico ico-clock"></span>Find the run</h2>
+<figure class="shot"><img src="../assets/img/pa/run-history.webp" alt="The 28-day run history table with Start, Duration and Status columns and one Succeeded run" width="768" height="175" loading="lazy">
+<figcaption>The flow's details page lists runs from the last 28 days. Select the start time to open one.</figcaption></figure>
+<p>Older runs are removed after 28 days. For a longer audit trail, write key results to a log list or table yourself.</p>
+
+<h2 id="read"><span class="ico ico-data"></span>Read the run</h2>
+<figure class="shot"><img src="../assets/img/pa/first-flow-run-view.webp" alt="Run view with three steps, each marked with a green tick and a duration of 0 seconds" width="460" height="310" loading="lazy">
+<figcaption>Each card shows a status and a duration.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Icon</th><th>Status</th><th>Meaning</th></tr></thead><tbody><tr><td><span class="chip ok">✓</span></td><td>Succeeded</td><td>The step worked</td></tr><tr><td><span class="chip warn">✕</span></td><td>Failed</td><td>Read its inputs and error</td></tr><tr><td><span class="chip no">–</span></td><td>Skipped</td><td>A branch or run-after setting didn't run it; normal</td></tr><tr><td><span class="chip ">…</span></td><td>Running / Waiting</td><td>Still working, or waiting for an approval</td></tr></tbody></table></div>
+
+<h2 id="demo"><span class="ico ico-warn"></span>The demo: break it, then fix it</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>One error, start to finish</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Step</th><th>What you do</th><th>What you see</th></tr></thead><tbody><tr><td>1</td><td>Change <em>Name length</em> to <code>length(triggerBody()['missing'])</code></td><td>Saved</td></tr><tr><td>2</td><td>Test with <em>Alex</em></td><td><span class="lbl f">Failed</span></td></tr><tr><td>3</td><td>Open the red card</td><td><em>property 'missing' doesn't exist</em></td></tr><tr><td>4</td><td>Correct to <code>length(triggerBody()?['text'])</code></td><td>Saved</td></tr><tr><td>5</td><td>Resubmit the failed run</td><td><span class="lbl t">Succeeded</span> → <span class="chip ok">4</span></td></tr></tbody></table></div></div>
+
+<h2 id="errors"><span class="ico ico-warn"></span>Errors you'll meet first</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-warn"></span>Message contains</th><th>Usually means</th><th>Fix</th></tr></thead><tbody><tr><td><code>InvalidTemplate</code></td><td>An expression failed: wrong type, missing field, or null passed to a function</td><td>Check the inputs; add <code>?</code>, <code>coalesce()</code> or a conversion</td></tr><tr><td><em>property … doesn't exist</em></td><td>A field name is wrong or missing</td><td>Use <code>?['field']</code>, check the spelling</td></tr><tr><td>401 / 403 Unauthorized</td><td>The connection lacks permission or needs signing in again</td><td>Fix the connection before changing logic</td></tr><tr><td>429 / throttled</td><td>Too many requests</td><td>It retries itself; check retry settings and loops</td></tr></tbody></table></div>
+<div class="callout"><strong>Tip:</strong> add a temporary Compose before a failing step with the value you suspect. The run shows exactly what it was.</div>
+
+<h2 id="tracked"><span class="ico ico-scope"></span>Tracked properties and secure inputs</h2>
+<div class="cards"><div><strong><span class="ico ico-data"></span>Tracked properties</strong>In an action's Settings, name values to record with its run, such as <code>orderId</code> = <code>triggerBody()?['id']</code>. They make it easy to find which record a run handled.</div><div><strong><span class="ico ico-stop"></span>Secure inputs / outputs</strong>Also in Settings. They hide an action's values in run history. Use them for passwords, keys and personal data.</div></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Run</strong>: one execution. Statuses are Succeeded, Failed, Cancelled and Running.</p>
+<p><strong>Inputs / Outputs</strong>: what a step received and returned. <strong>Show raw inputs</strong> shows the full JSON.</p>
+<p><strong>Resubmit</strong>: reruns with the same trigger data after you fix the flow.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Fixing the last red step instead of the first.</li><li>Rebuilding a flow when only a connection expired.</li><li>Leaving debug Compose actions with sensitive data in production. Remove them or turn on secure inputs/outputs.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/fix-flow-failures">Troubleshoot a cloud flow</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/troubleshoot-flow-errors">Troubleshoot cloud flow errors</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/how-tos-use-sensitive-input">Manage sensitive input like passwords</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="conditions-switch-loops.html">← Conditions, Switch and loops: the complete guide</a><a href="./">Back to all topics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#method">The debugging loop</a></li><li><a href="#find">Find the run</a></li><li><a href="#read">Read the run</a></li><li><a href="#demo">The demo: break it, then fix it</a></li><li><a href="#errors">Errors you'll meet first</a></li><li><a href="#tracked">Tracked properties and secure inputs</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

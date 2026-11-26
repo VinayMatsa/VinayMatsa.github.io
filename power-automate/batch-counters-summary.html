@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batch counters and run summaries | Vinay Matsa</title>
+<meta name="description" content="Count valid and invalid rows, keep going when some fail, slice large inputs into batches, and end with one clear summary.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Batch counters and run summaries">
+<meta property="og:description" content="Count valid and invalid rows, keep going when some fail, slice large inputs into batches, and end with one clear summary.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 8</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 8 · Real-world patterns · 7 of 8</li>
+      </ul>
+      <h1>Batch counters and run summaries</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Processing many rows means some will be bad. A good flow keeps going, counts what happened, and ends with one clear summary instead of failing on the first problem.</p>
+
+<h2 id="demo"><span class="ico ico-data"></span>Eight rows, three problems</h2>
+<div class="cards"><div><strong>What</strong>Validate each row, count valid/invalid, process in batches, then send one summary with a batch ID.</div><div><strong>Why</strong>One bad row shouldn't stop the other seven, and someone needs to know which rows failed.</div><div><strong>Demo</strong>8 rows: 5 valid, 3 invalid, processed in batches of 3.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The demo flow</p><div class="fl"><div class="nd act">Batch ID <code>guid()</code>, counters Valid = 0, Invalid = 0</div><div class="ar"></div><div class="nd"><strong>Validate each</strong> (concurrency 1)</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Row valid?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd">Valid + 1</div></div><div><span class="lbl f">No</span><div class="nd">Invalid + 1, append name to Problems</div></div></div><div class="ar"></div><div class="nd"><strong>Process in batches</strong> (Do until) of 3</div><div class="ar"></div><div class="nd ok"><strong>Run summary</strong></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l8-batch-canvas.webp" alt="Flow canvas: Rows, Validate each loop, Process in batches Do until loop, Run summary" width="160" height="285" loading="lazy">
+<figcaption>The demo flow.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>Batches of 3</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Pass (iterationIndexes)</th><th><code>skip</code></th><th>Rows</th><th></th></tr></thead><tbody><tr><td>0</td><td>0</td><td>1–3</td><td><div class="bar"><i style="width:37.5%"></i></div></td></tr><tr><td>1</td><td>3</td><td>4–6</td><td><div class="bar"><i style="width:75%"></i></div></td></tr><tr><td>2</td><td>6</td><td>7–8</td><td><div class="bar done"><i style="width:100%"></i></div></td></tr></tbody></table></div></div>
+<pre><code>take(skip(outputs(&#x27;Rows&#x27;), mul(iterationIndexes(&#x27;Process_in_batches&#x27;), 3)), 3)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>iterationIndexes(...)</code></td><td>The pass number: 0, 1, 2.</td></tr><tr><td><code>mul(..., 3)</code></td><td>How many rows to skip.</td></tr><tr><td><code>skip(rows, n)</code></td><td>Drop rows already done.</td></tr><tr><td><code>take(..., 3)</code></td><td>The next 3.</td></tr></tbody></table></div>
+<figure class="shot"><img src="../assets/img/pa/l8-batch-summary.webp" alt="Run summary output: Batch ID, Rows received 8, Valid 5, Invalid 3, Invalid rows Trade show stand, Refund, Plants, Batches of 3: Batch 1: 3 rows, Batch 2: 3 rows, Batch 3: 2 rows" width="618" height="280" loading="lazy">
+<figcaption>One summary for the whole run.</figcaption></figure>
+
+<h2 id="counting"><span class="ico ico-check"></span>Counting safely</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-check"></span>Do</th><th>Why</th></tr></thead><tbody><tr><td>Increment Valid / Invalid in each branch</td><td>Counts per outcome</td></tr><tr><td>Append failing row names to Problems</td><td>The summary can list them</td></tr><tr><td>Concurrency 1 on the loop</td><td>Shared counters and parallel loops don't mix</td></tr></tbody></table></div>
+<p>If anything was invalid, also write it to an error list so it can be fixed and re-run.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Batch ID</strong>: a <code>guid()</code> created once per run and stored with every record it touches.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Failing the whole run on one bad row.</li><li>Counters in a parallel loop.</li><li>A summary per row instead of one per run.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference (iterationIndexes, take, skip)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-variable-store-values">Store and manage values in variables</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="settings-feature-flags.html">← Configurable templates and feature flags</a><a href="split-on.html">Split On and trigger batching →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">Eight rows, three problems</a></li><li><a href="#counting">Counting safely</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

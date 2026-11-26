@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handling FlowActionTimedOut in Copilot Studio agent flows | Vinay Matsa</title>
+<meta name="description" content="Why an agent flow that waits for an approval fails, why that creates duplicates, and the respond-early design that fixed it.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Handling FlowActionTimedOut in Copilot Studio agent flows">
+<meta property="og:description" content="Why an agent flow that waits for an approval fails, why that creates duplicates, and the respond-early design that fixed it.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Copilot Studio</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Copilot Studio &amp; AI Lab</li>
+        <li>Copilot Studio</li>
+      </ul>
+      <h1>Handling FlowActionTimedOut in Copilot Studio agent flows</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-10-22">22 October 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>I added a Copilot Studio agent to my Leave Management lab solution, and the first version failed. The agent flow created the leave request and then waited for the approval to finish.</p>
+
+<h2 id="root">Start from the root</h2>
+<p>When an agent uses a flow as a <strong>tool</strong>, it calls the flow and waits for a response, like a function call. Microsoft Learn states that an agent flow used this way must respond within <strong>100 seconds</strong>. An approval can take hours. So a flow that creates a request and then waits for the approver can never answer in time.</p>
+
+<h2 id="problem">Why this is worse than an error message</h2>
+<p>When the limit passes, the agent returns <code>FlowActionTimedOut</code>, but the flow <strong>keeps running</strong> in the background. So:</p>
+<ul>
+<li>The employee sees an error.</li>
+<li>The leave request may actually have been created.</li>
+<li>They try again, and now there's a duplicate request.</li>
+</ul>
+
+<h2 id="fix">The design that fixed it</h2>
+<ol>
+<li><strong>Respond early.</strong> The agent flow creates the request and returns a confirmation immediately.</li>
+<li><strong>Let Dataverse trigger the approval.</strong> A separate flow, triggered when the request row is created, runs the approval. The same logic now serves the canvas app, the model-driven app and the agent.</li>
+<li><strong>Notify asynchronously.</strong> When the approval finishes, the employee gets the decision by email.</li>
+<li><strong>Prevent duplicates.</strong> Don't rely on the agent's error. Use a request ID, status checks or duplicate checks so a retry can't create a second request.</li>
+<li><strong>Use the signed-in identity.</strong> The agent finds the employee's email from their sign-in, never from an address typed into the chat.</li>
+</ol>
+
+<h2 id="results">What changed</h2>
+<ul>
+<li>Agent response time: about 0.9 seconds, with no more timeouts.</li>
+<li>One shared approval process across three experiences.</li>
+<li>The agent no longer waits for long-running work.</li>
+</ul>
+<div class="callout"><strong>The lesson:</strong> moving logic into Power Automate doesn't fix a timeout if the agent still waits for it. Let the agent respond quickly and let long-running processes run on their own.</div>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow">Use agent flows with your agent</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/flows-overview">Agent flows overview</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7518995957103943680/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="knowledge-vs-tools.html">← Knowledge or tools? How Copilot Studio agents use your data</a><a href="pac-cli-deployments.html">Deploying solutions with PAC CLI: Dev to Stage to Prod →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#problem">Why this is worse than an error message</a></li><li><a href="#fix">The design that fixed it</a></li><li><a href="#results">What changed</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7518995957103943680/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

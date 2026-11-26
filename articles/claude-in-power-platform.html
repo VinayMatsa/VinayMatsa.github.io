@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Four ways to put Claude to work in Microsoft Power Platform | Vinay Matsa</title>
+<meta name="description" content="Claude Code, VS Code, Claude Desktop with the Dataverse MCP server, the browser extension, and Claude models inside Copilot Studio: which fits which job.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Four ways to put Claude to work in Microsoft Power Platform">
+<meta property="og:description" content="Claude Code, VS Code, Claude Desktop with the Dataverse MCP server, the browser extension, and Claude models inside Copilot Studio: which fits which job.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Claude</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Copilot Studio &amp; AI Lab</li>
+        <li>Claude</li>
+      </ul>
+      <h1>Four ways to put Claude to work in Microsoft Power Platform</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-13">13 November 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Same model, four ways in. Each one fits a different kind of Power Platform work.</p>
+
+<h2 id="root">Start from the root</h2>
+<p>Claude is Anthropic's family of AI models. You can reach it through different apps, and each app gives it different abilities: some can run commands on your machine, some can read your data through connectors, some can see the web page you're on. Choosing the right entry point is mostly about <em>what you want it to touch</em>.</p>
+
+<h2 id="options">The four options</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Option</th><th>Best for</th></tr></thead><tbody>
+<tr><td>1. Claude Code (terminal)</td><td>Building apps, flows and Power Pages with Microsoft's power-platform-skills plugins, using pac and the Azure CLI</td></tr>
+<tr><td>2. Claude Code in VS Code</td><td>The same engine, but every change shows as a diff you review before accepting</td></tr>
+<tr><td>3. Claude Desktop with the Dataverse MCP server</td><td>Asking questions of your Dataverse data in plain language (also works in Claude Code)</td></tr>
+<tr><td>4. Claude in Chrome (browser extension)</td><td>Working inside Copilot Studio, Power Apps and Power Automate pages</td></tr>
+</tbody></table></div>
+<p><strong>Bonus:</strong> inside Copilot Studio you can choose a Claude model as an agent's primary model, if your admin allows it.</p>
+
+<h2 id="identity">It signs in as you</h2>
+<p>Whichever option you use, Claude acts with <strong>your</strong> identity. Microsoft Entra ID checks who you are, and your Dataverse security roles and the admin's policies decide what it can do. That makes a few habits essential:</p>
+<ul>
+<li>Work in a development or sandbox environment first.</li>
+<li>Use an account with the least privilege that does the job.</li>
+<li>Approve deletes and other destructive actions yourself.</li>
+<li>Follow your organisation's data policies and AI policy.</li>
+</ul>
+
+<h2 id="cost">A note on cost</h2>
+<p>At the time of writing, Dataverse MCP calls from non-Microsoft AI apps use Copilot Credits, with some licences exempt. Check the current Dataverse MCP documentation for your licence before rolling it out.</p>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-mcp">Connect to Dataverse with Model Context Protocol</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-select-agent-model">Select a primary AI model for your agent</a></li><li><a href="https://code.claude.com/docs/en/overview">Claude Code overview</a></li><li><a href="https://code.claude.com/docs/en/vs-code">Use Claude Code in VS Code</a></li><li><a href="https://github.com/microsoft/power-platform-skills">microsoft/power-platform-skills on GitHub</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7527003653908385792/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="data-formats-power-platform.html">← Understanding and debugging data formats in Power Platform</a><a href="mcp-explained.html">MCP explained: host, client, server and tools, with a Dataverse example →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#options">The four options</a></li><li><a href="#identity">It signs in as you</a></li><li><a href="#cost">A note on cost</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7527003653908385792/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solution checker and flow checker | Vinay Matsa</title>
+<meta name="description" content="Catch broken flows and missing dependencies before you deploy, with the two built-in checkers.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Solution checker and flow checker">
+<meta property="og:description" content="Catch broken flows and missing dependencies before you deploy, with the two built-in checkers.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 10</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 10 · Enterprise ALM and admin · 2 of 6</li>
+      </ul>
+      <h1>Solution checker and flow checker</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Two free checkers look at your work before it goes anywhere: <strong>flow checker</strong> for one flow in the designer, and <strong>solution checker</strong> for a whole solution, including its metadata.</p>
+
+<h2 id="which"><span class="ico ico-check"></span>Two checkers, two scopes</h2>
+<div class="cards"><div><strong>What</strong>Static analysis: errors and warnings found without running anything.</div><div><strong>Why</strong>A missing dependency found in Dev costs minutes; found at import, it costs a failed deployment.</div><div><strong>Demo</strong>A removed value in one flow, and a connection reference missing from the solution.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Before every export</p><div class="fl"><div class="nd act">Each changed flow: <strong>Flow checker</strong> → fix errors</div><div class="ar"></div><div class="nd">Solution: <strong>Solution checker → Run</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Critical/High issues or missing dependencies?</div><div class="ar"></div><div class="br"><div><span class="lbl f">Yes</span><div class="nd mute">Fix, run again</div></div><div><span class="lbl t">No</span><div class="nd ok">Export (with “Run solution checker on export”)</div></div></div></div></div>
+
+<h2 id="flow"><span class="ico ico-warn"></span>Flow checker</h2>
+<figure class="shot"><img src="../assets/img/pa/l10-flow-checker.webp" alt="Flow checker panel: Errors 1, Operation errors, Failed runs, Parameter errors: &#x27;From&#x27; is required. The Failed runs card on the canvas shows Invalid parameters" width="875" height="320" loading="lazy">
+<figcaption>Removing a required value (not saved) shows an error with Open operation.</figcaption></figure>
+<p><strong>Errors</strong> stop the flow saving or working; <strong>warnings</strong> are better-practice hints.</p>
+
+<h2 id="solution"><span class="ico ico-data"></span>Solution checker</h2>
+<figure class="shot"><img src="../assets/img/pa/l10-checker-results.webp" alt="Solution checker results: four Medium issues in category Design, type Configuration, reference meta-include-missingunmanageddependencies. The solution.xml contains an unmanaged dependency" width="1425" height="320" loading="lazy">
+<figcaption>Four findings, one rule.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>What it found and what export said</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Where</th><th>Finding</th></tr></thead><tbody><tr><td>Solution checker</td><td><span class="chip warn">Medium</span> unmanaged dependency on a connection reference not in the solution</td></tr><tr><td>Export wizard</td><td>Missing required component: a Dataverse connection reference</td></tr><tr><td>Fix</td><td>Add existing → Connection reference (or Add required objects), run again</td></tr></tbody></table></div></div>
+<figure class="shot"><img src="../assets/img/pa/l10-export-missing.webp" alt="Missing required unmanaged components: Microsoft Dataverse connection reference, used by Demo – Dataverse row trigger, with Add to solution and Skip step buttons" width="644" height="245" loading="lazy">
+<figcaption>Export catches the same problem.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l10-export-dependencies.webp" alt="Managed solution dependencies: Power Automate Online, MicrosoftFlowExtensionsOnline 1.10.24.1. Import will fail if these managed solutions do not exist in the target" width="644" height="220" loading="lazy">
+<figcaption>Managed solutions the target must already have.</figcaption></figure>
+
+<h2 id="enforce"><span class="ico ico-stop"></span>Making it mandatory</h2>
+<p>In a <strong>Managed Environment</strong>, admins can set solution checker enforcement to Warn or Block on import. Pipelines' checker task can fail a build.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Dependency</strong>: something an object needs to work.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Skipping the missing-components step.</li><li>Connection references created outside the solution.</li><li>Treating no errors as “the logic is right”.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/error-checker">Find and fix errors with flow checker</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/use-powerapps-checker">Use solution checker</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="managed-unmanaged-layers.html">← Managed and unmanaged solutions, layers and upgrades</a><a href="source-control-cli.html">Source control with Git and the Power Platform CLI →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#which">Two checkers, two scopes</a></li><li><a href="#flow">Flow checker</a></li><li><a href="#solution">Solution checker</a></li><li><a href="#enforce">Making it mandatory</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

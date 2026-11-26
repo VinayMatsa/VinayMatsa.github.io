@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Office 365 Users: profiles, managers and searches | Vinay Matsa</title>
+<meta name="description" content="Look up people in your directory: a user's profile, their manager, their reports, or a search by name.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Office 365 Users: profiles, managers and searches">
+<meta property="og:description" content="Look up people in your directory: a user's profile, their manager, their reports, or a search by name.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 9</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 9 · Integration and AI · 2 of 10</li>
+      </ul>
+      <h1>Office 365 Users: profiles, managers and searches</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Many flows need to know something about a person: a display name for a greeting, a manager for an approval, a department for routing. The <strong>Office 365 Users</strong> connector (standard) reads that from Microsoft Entra ID.</p>
+
+<h2 id="actions"><span class="ico ico-data"></span>The actions you'll use</h2>
+<div class="cards"><div><strong>What</strong>Actions that read profiles, managers, direct reports and search results from the directory.</div><div><strong>Why</strong>Routing and personalisation without hard-coding people.</div><div><strong>Demo</strong>Search users, then count disabled accounts and those with a job title.</div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Action</th><th>Typical use</th></tr></thead><tbody><tr><td>Get my profile (V2)</td><td>The person running the flow</td></tr><tr><td>Get user profile (V2)</td><td>Name, job title, department, office of a given user</td></tr><tr><td>Get manager (V2)</td><td>“Send to my manager” approvals</td></tr><tr><td>Get direct reports (V2)</td><td>Everyone reporting to a user</td></tr><tr><td>Search for users (V2)</td><td>People whose name or email starts with a term</td></tr></tbody></table></div>
+
+<h2 id="demo"><span class="ico ico-check"></span>A search and a few counts</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>The demo</p><div class="fl"><div class="nd"><strong>Search for users (V2)</strong>, top 25</div><div class="ar"></div><div class="br"><div><span class="lbl c">Filter array</span><div class="nd"><code>AccountEnabled</code> = false</div></div><div><span class="lbl c">Filter array</span><div class="nd">JobTitle not empty</div></div></div><div class="ar"></div><div class="nd ok">Summary: counts only (no names on this page)</div></div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The results</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Measure</th><th>Value</th></tr></thead><tbody><tr><td>Users found</td><td><span class="chip ">2</span></td></tr><tr><td>Disabled accounts</td><td><span class="chip ">0</span></td></tr><tr><td>With a job title</td><td><span class="chip ">2</span></td></tr><tr><td>Fields per user</td><td><span class="chip ">16</span></td></tr></tbody></table></div></div>
+<figure class="shot"><img src="../assets/img/pa/l9-users-summary.webp" alt="Summary output: Users found 2, Disabled accounts 0, With a job title 2, Fields returned per user 16" width="618" height="175" loading="lazy">
+<figcaption>The summary.</figcaption></figure>
+<pre><code>@equals(item()?[&#x27;AccountEnabled&#x27;], false)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[&#x27;AccountEnabled&#x27;]</code></td><td>False for people who left or are blocked. Check before assigning work.</td></tr></tbody></table></div>
+
+<h2 id="manager"><span class="ico ico-warn"></span>Getting a manager safely</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>Manager with a fallback</p><div class="fl"><div class="nd"><strong>Get manager (V2)</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Did it fail (no manager)?</div><div class="ar"></div><div class="br"><div><span class="lbl t">No</span><div class="nd ok">Use the manager's email</div></div><div><span class="lbl f">Yes</span><div class="nd ok">Use a default approver</div></div></div></div></div>
+<pre><code>coalesce(outputs(&#x27;Get_manager_(V2)&#x27;)?[&#x27;body/mail&#x27;], &#x27;approvals@contoso.com&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>coalesce(..., default)</code></td><td>The default mailbox when there's no manager.</td></tr></tbody></table></div>
+<p>Set the next step's <strong>run after</strong> to include <em>has failed</em> so it still runs.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>UPN</strong>: the sign-in name, usually like an email; most actions accept it as the user ID.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Looking up the same person inside a loop.</li><li>Assuming everyone has a manager.</li><li>Names and emails in shared logs and screenshots.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365users/">Office 365 Users connector reference</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="power-apps-to-flow.html">← Calling a flow from Power Apps</a><a href="microsoft-graph-requests.html">Calling Microsoft Graph from a flow →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#actions">The actions you'll use</a></li><li><a href="#demo">A search and a few counts</a></li><li><a href="#manager">Getting a manager safely</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

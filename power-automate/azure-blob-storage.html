@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Azure Blob Storage for files | Vinay Matsa</title>
+<meta name="description" content="Store large files, archives and exports in Azure Blob Storage from a flow, with dated paths and secure sharing.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Azure Blob Storage for files">
+<meta property="og:description" content="Store large files, archives and exports in Azure Blob Storage from a flow, with dated paths and secure sharing.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 9</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 9 · Integration and AI · 7 of 10</li>
+      </ul>
+      <h1>Azure Blob Storage for files</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p><strong>Azure Blob Storage</strong> is cheap, large-scale file storage. Flows use it to archive attachments, keep exports too big or too many for SharePoint, and hand files to other systems. Premium, and needs an Azure subscription, so no live demo.</p>
+
+<h2 id="terms"><span class="ico ico-data"></span>How it's organised</h2>
+<div class="cards"><div><strong>What</strong>Storage account → containers → blobs (files), with virtual folders in blob names.</div><div><strong>Why</strong>Large volumes of files at low cost, with fine-grained access.</div><div><strong>Demo</strong>Archive email attachments into year/month folders.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Account, container, blob</p><div class="fl"><div class="nd act">Storage account <em>contosoarchive</em></div><div class="ar"></div><div class="nd">Container <em>attachments</em></div><div class="ar"></div><div class="nd ok">Blob <code>archive/2026/11/invoice-2048.pdf</code></div></div></div>
+
+<h2 id="actions"><span class="ico ico-expr"></span>The actions</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Action</th><th>Use</th></tr></thead><tbody><tr><td>Create blob (V2)</td><td>Write content to a path (e.g. <code>base64ToBinary(contentBytes)</code>)</td></tr><tr><td>Get blob content (using path) (V2)</td><td>Read a file</td></tr><tr><td>Lists blobs (V2)</td><td>What's in a folder, with paging</td></tr><tr><td>Create SAS URI by path (V2)</td><td>A time-limited download link</td></tr><tr><td>When a blob is added or modified (V2)</td><td>React to new files</td></tr></tbody></table></div>
+<pre><code>concat(&#x27;archive/&#x27;, formatDateTime(utcNow(), &#x27;yyyy/MM&#x27;), &#x27;/&#x27;, items(&#x27;Apply_to_each&#x27;)?[&#x27;Name&#x27;])</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>&#x27;archive/&#x27;</code></td><td>Top-level folder.</td></tr><tr><td><code>formatDateTime(..., &#x27;yyyy/MM&#x27;)</code></td><td>Year/month folders: <em>2026/11</em>.</td></tr><tr><td><code>?[&#x27;Name&#x27;]</code></td><td>The attachment's name.</td></tr></tbody></table></div>
+
+<h2 id="security"><span class="ico ico-stop"></span>Access</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-stop"></span>Sharing a file safely</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Does someone without an account need it?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">SAS URI with a short expiry</div></div><div><span class="lbl f">No</span><div class="nd ok">Entra ID + a data role on the container</div></div></div></div></div>
+<p>Prefer Entra ID authentication with <em>Storage Blob Data Contributor</em> on just the needed containers; avoid account keys (they open the whole account).</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>SAS</strong>: a signed link with an expiry and limited permissions.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Everything in the container root.</li><li>Public containers.</li><li>The same file name every run.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/azureblob/">Azure Blob Storage connector reference</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="sql-server-gateway.html">← SQL Server and the on-premises data gateway</a><a href="ai-builder-documents.html">AI Builder document processing and human review →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#terms">How it's organised</a></li><li><a href="#actions">The actions</a></li><li><a href="#security">Access</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

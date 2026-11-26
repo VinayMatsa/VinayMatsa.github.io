@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avoiding nested loops | Vinay Matsa</title>
+<meta name="description" content="Replace a loop inside a loop with a lookup object, so matching two lists takes one step instead of hundreds.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Avoiding nested loops">
+<meta property="og:description" content="Replace a loop inside a loop with a lookup object, so matching two lists takes one step instead of hundreds.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 5</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 5 · Performance and scale · 3 of 6</li>
+      </ul>
+      <h1>Avoiding nested loops</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>A common need: orders hold a customer ID, customers hold the name, and you want each order with its customer name. A loop inside a loop works, but the actions multiply: one list's size times the other's.</p>
+
+<h2 id="demo"><span class="ico ico-loop"></span>The same answer, 24 seconds against 0</h2>
+<div class="cards"><div><strong>What</strong>Build a <strong>lookup object</strong> (ID → name) once, then read names from it in a Select.</div><div><strong>Why</strong>Nested loops grow as rows × rows: 1,000 × 1,000 is a million actions.</div><div><strong>Demo</strong>30 orders and 5 customers.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-loop"></span>Two ways to add customer names</p><div class="fl"><div class="br"><div><span class="lbl f">Nested loop</span><div class="nd">For each of 30 orders</div><div class="ar"></div><div class="nd">Filter 5 customers for its ID</div><div class="ar"></div><div class="nd mute">≈ 30 × several actions, 24 s</div></div><div><span class="lbl t">Lookup object</span><div class="nd">Build <code>{"1":"Contoso",…}</code> once</div><div class="ar"></div><div class="nd">Select over orders, read the name by key</div><div class="ar"></div><div class="nd ok">3 actions, 0 s</div></div></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l5-nested-canvas.webp" alt="Flow canvas: For each order loop (24 seconds), End nested, Customer pairs, Customer lookup, Orders with names, each 0 seconds" width="400" height="389" loading="lazy">
+<figcaption>Both versions in one flow.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l5-nested-comparison.webp" alt="Comparison output: Nested loop seconds 24, Lookup seconds 0, Same first line true, Lines produced 30" width="514" height="140" loading="lazy">
+<figcaption>Same output, 24 seconds vs 0.</figcaption></figure>
+
+<h2 id="lookup"><span class="ico ico-data"></span>Building the lookup object in three steps</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>From list to dictionary</p><div class="fl"><div class="nd">Customers <span class="chip ">[{"id":1,"name":"Contoso"}, …]</span></div><div class="ar"></div><div class="nd">1. <strong>Customer pairs</strong> (Select, text mode) → <span class="chip ">"1":"Contoso"</span><span class="chip ">"2":"Fabrikam"</span>…</div><div class="ar"></div><div class="nd">2. <strong>Customer lookup</strong> (Compose) → <span class="chip ">{"1":"Contoso","2":"Fabrikam",…}</span></div><div class="ar"></div><div class="nd ok">3. <strong>Orders with names</strong> (Select) → read <code>lookup['3']</code> = <span class="chip ok">Northwind</span></div></div></div>
+<pre><code>concat(&#x27;&quot;&#x27;, string(item()?[&#x27;id&#x27;]), &#x27;&quot;:&quot;&#x27;, item()?[&#x27;name&#x27;], &#x27;&quot;&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>concat(...)</code></td><td>Each customer becomes a fragment <code>"1":"Contoso"</code>.</td></tr></tbody></table></div>
+<pre><code>json(concat(&#x27;{&#x27;, join(body(&#x27;Customer_pairs&#x27;), &#x27;,&#x27;), &#x27;}&#x27;))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>join(..., &#x27;,&#x27;)</code></td><td>Joins the fragments with commas.</td></tr><tr><td><code>concat(&#x27;{&#x27;, ..., &#x27;}&#x27;)</code></td><td>Wraps them in braces.</td></tr><tr><td><code>json(...)</code></td><td>Turns the text into a real object.</td></tr></tbody></table></div>
+<figure class="shot"><img src="../assets/img/pa/l5-lookup.webp" alt="Customer_lookup output: an object with keys 1 to 5 mapped to Contoso, Fabrikam, Northwind, Tailspin, Adventure Works" width="514" height="150" loading="lazy">
+<figcaption>The lookup object.</figcaption></figure>
+<pre><code>outputs(&#x27;Customer_lookup&#x27;)?[string(item()?[&#x27;customerId&#x27;])]</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>item()?[&#x27;customerId&#x27;]</code></td><td>The order's customer ID, e.g. 3.</td></tr><tr><td><code>string(...)</code></td><td>Keys are text, so convert.</td></tr><tr><td><code>lookup?[&#x27;3&#x27;]</code></td><td>One read: <em>Northwind</em>.</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Names containing quotes break the JSON; clean them with <code>replace()</code> first.</li><li>Duplicate IDs: the last one wins.</li><li>Unknown IDs return null; wrap with <code>coalesce()</code>.</li></ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Lookup object</strong>: a JSON object used like a dictionary: read a value by its key in one step.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Apply to each inside Apply to each for matching.</li><li>Numeric keys not converted with <code>string()</code>.</li><li>Building the lookup inside the loop.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/data-operations">Use data operations (Select, Filter array, Join)</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Reference guide to workflow expression functions</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="do-until-loops.html">← Do until loops and their limits</a><a href="batch-operations.html">Batch operations and changesets →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">The same answer, 24 seconds against 0</a></li><li><a href="#lookup">Building the lookup object in three steps</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

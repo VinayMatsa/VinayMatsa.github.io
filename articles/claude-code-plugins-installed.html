@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What really gets installed when you add Power Platform plugins to Claude Code | Vinay Matsa</title>
+<meta name="description" content="Skills, agents, hooks and MCP servers: what each part of a plugin does, and what to check before you trust one.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="What really gets installed when you add Power Platform plugins to Claude Code">
+<meta property="og:description" content="Skills, agents, hooks and MCP servers: what each part of a plugin does, and what to check before you trust one.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="./" aria-current="page">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Articles</a> / Claude Code</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Copilot Studio &amp; AI Lab</li>
+        <li>Claude Code</li>
+      </ul>
+      <h1>What really gets installed when you add Power Platform plugins to Claude Code</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-12">12 November 2026</time>
+        <span>2 min read</span>
+      </div>
+
+      <div class="prose">
+<p>I installed three of Microsoft's Power Platform plugins into Claude Code and reloaded once. The counts changed like this:</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Part</th><th>Before</th><th>After</th></tr></thead><tbody>
+<tr><td>Skills</td><td>0</td><td>19</td></tr>
+<tr><td>Agents</td><td>7</td><td>20</td></tr>
+<tr><td>Hooks</td><td>0</td><td>8</td></tr>
+<tr><td>MCP servers</td><td>0</td><td>4</td></tr>
+</tbody></table></div>
+<p>That's a lot more than "one plugin". Most people install a plugin without knowing what's inside.</p>
+
+<h2 id="root">Start from the root</h2>
+<p>Claude Code is an AI coding agent that runs on your computer. A <strong>plugin</strong> is a package that adds abilities to it. The important thing is that a plugin isn't one thing: it can bring several kinds of component, and they behave very differently.</p>
+
+<h2 id="parts">The parts of a plugin</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Part</th><th>What it does</th><th>When it runs</th></tr></thead><tbody>
+<tr><td>Marketplace</td><td>A repository that lists plugins you can install</td><td>Only when you browse or install</td></tr>
+<tr><td>Plugin</td><td>The package that delivers everything below</td><td>Installed once</td></tr>
+<tr><td>Skill</td><td>Written instructions the agent loads only when a request needs them</td><td>When the AI decides it's relevant</td></tr>
+<tr><td>MCP server</td><td>Tools that actually read or change Power Apps and Power Automate</td><td>When the AI decides to call a tool</td></tr>
+<tr><td>Agent (subagent)</td><td>A separate helper that takes one focused job</td><td>When the AI hands work to it</td></tr>
+<tr><td>Hook</td><td>Fixed code that runs automatically on an event</td><td><strong>Every time</strong> the event happens, with no AI decision</td></tr>
+</tbody></table></div>
+<p>The part that surprised me: skills, agents and MCP tools run when the AI decides they're needed, but hooks run every time their event fires. That's why where a plugin comes from really matters.</p>
+
+<h2 id="trust">Before you trust a plugin</h2>
+<ul>
+<li>Install only from the official source (for these, <code>microsoft/power-platform-skills</code>).</li>
+<li>Install only the plugins you need.</li>
+<li>Remember that auto-update changes what runs on your PC.</li>
+<li>Turn telemetry off if you don't want usage data sent.</li>
+<li>After installing, check <code>/reload-plugins</code> and <code>/mcp</code> to see what was added.</li>
+</ul>
+
+<h2 id="references">References</h2>
+<ul><li><a href="https://code.claude.com/docs/en/plugins">Claude Code plugins overview</a></li><li><a href="https://code.claude.com/docs/en/skills">Extend Claude with skills</a></li><li><a href="https://code.claude.com/docs/en/hooks">Claude Code hooks reference</a></li><li><a href="https://code.claude.com/docs/en/sub-agents">Create custom subagents</a></li><li><a href="https://github.com/microsoft/power-platform-skills">microsoft/power-platform-skills on GitHub</a></li></ul>
+
+        <div class="li-cta">
+          <p><strong>Read the original post on LinkedIn.</strong> It has the visual carousel and the discussion in the comments.</p>
+          <a class="btn btn-primary" href="https://www.linkedin.com/feed/update/urn:li:activity:7526480644873314306/">Read on LinkedIn →</a>
+        </div>
+      </div>
+
+      <div class="pager"><a href="connect-claude-code-power-platform.html">← Connect Claude Code to Microsoft Power Platform in seven steps</a><a href="data-formats-power-platform.html">Understanding and debugging data formats in Power Platform →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#root">Start from the root</a></li><li><a href="#parts">The parts of a plugin</a></li><li><a href="#trust">Before you trust a plugin</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical deep dives from hands-on labs.</p>
+        <a href="https://www.linkedin.com/feed/update/urn:li:activity:7526480644873314306/">Read this post on LinkedIn →</a>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

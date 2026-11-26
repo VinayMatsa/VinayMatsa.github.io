@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SharePoint attachments, folders and moving files | Vinay Matsa</title>
+<meta name="description" content="Add and read list item attachments, create folders, and move or copy files between libraries and sites.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SharePoint attachments, folders and moving files">
+<meta property="og:description" content="Add and read list item attachments, create folders, and move or copy files between libraries and sites.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 7</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 7 · Files, email and documents · 7 of 7</li>
+      </ul>
+      <h1>SharePoint attachments, folders and moving files</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>Lists and libraries store files differently: a <strong>list item</strong> can carry attachments; a <strong>library</strong> holds files in folders. The SharePoint connector has actions for both.</p>
+
+<h2 id="demo"><span class="ico ico-data"></span>The demo</h2>
+<div class="cards"><div><strong>What</strong>Attachment actions for list items; folder and move/copy actions for libraries.</div><div><strong>Why</strong>Requests carry evidence files; documents need filing in the right folder.</div><div><strong>Demo</strong>Attach a note to a request, build an .eml, file it in a new archive folder.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The demo flow</p><div class="fl"><div class="nd"><strong>Add attachment</strong> to a list item</div><div class="ar"></div><div class="nd"><strong>Get attachments</strong> → 1</div><div class="ar"></div><div class="nd">Build and save an .eml</div><div class="ar"></div><div class="nd"><strong>Create folder</strong> <em>Website demo archive</em></div><div class="ar"></div><div class="nd ok"><strong>Move file</strong> into the folder</div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l7-files-canvas.webp" alt="Flow canvas: Add attachment, Get attachments, Build eml, Save eml file, Create folder, Move eml into folder, Result" width="180" height="390" loading="lazy">
+<figcaption>The demo flow.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/l7-files-result.webp" alt="Result output: Attachments on the item 1, First attachment note-20261122100604.txt, .eml file moved to /Shared Documents/Website demo archive/..." width="618" height="155" loading="lazy">
+<figcaption>The result.</figcaption></figure>
+
+<h2 id="attachments"><span class="ico ico-scope"></span>List item attachments</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-scope"></span>Action</th><th>Inputs</th></tr></thead><tbody><tr><td>Add attachment</td><td>Site, list, item ID, file name, content</td></tr><tr><td>Get attachments</td><td>Site, list, item ID → name, ID, link each</td></tr><tr><td>Get attachment content</td><td>The attachment ID, to read or forward it</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>Email every attachment of an item</p><div class="fl"><div class="nd">Get attachments</div><div class="ar"></div><div class="nd">Apply to each: Get attachment content</div><div class="ar"></div><div class="nd">Append to array <code>{"Name": …, "ContentBytes": …}</code></div><div class="ar"></div><div class="nd ok">Send an email: Attachments = the array</div></div></div>
+
+<h2 id="folders"><span class="ico ico-arrow"></span>Folders and moving files</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-arrow"></span>Need</th><th>Action</th></tr></thead><tbody><tr><td>Create a folder (also nested, e.g. <code>2026/November</code>)</td><td>Create new folder</td></tr><tr><td>Move a file (folder, library or site)</td><td>Move file: source file ID, destination, name-conflict behaviour</td></tr><tr><td>Copy a file</td><td>Copy file: same inputs; original stays</td></tr><tr><td>Move a whole folder</td><td>Move folder</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Moving keeps version history; download and re-upload doesn't.</li><li>Moves between sites can take seconds (9 s in the demo); check the action finished before reading the file at its new place.</li><li>File actions use the <strong>file identifier</strong>, not the item ID number.</li></ul>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Name conflict behaviour</strong>: fail, replace, or keep both with a number added.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Using the item ID where a file ID is needed.</li><li>Download + re-upload instead of Move.</li><li>Reading a moved file immediately across sites.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="eml-files.html">← Building .eml files</a><a href="./">Back to all topics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">The demo</a></li><li><a href="#attachments">List item attachments</a></li><li><a href="#folders">Folders and moving files</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

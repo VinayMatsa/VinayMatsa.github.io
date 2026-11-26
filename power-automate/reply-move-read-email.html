@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reply, move and read email | Vinay Matsa</title>
+<meta name="description" content="Reply to the right person, file processed mail into a folder so it isn't processed twice, and read the body as plain text.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Reply, move and read email">
+<meta property="og:description" content="Reply to the right person, file processed mail into a folder so it isn't processed twice, and read the body as plain text.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 7</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 7 · Files, email and documents · 2 of 7</li>
+      </ul>
+      <h1>Reply, move and read email</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>After a flow processes an email it usually replies to the sender, moves the email out of the Inbox, and reads the body to find details. Each has one catch.</p>
+
+<h2 id="demo"><span class="ico ico-arrow"></span>Reply and move</h2>
+<div class="cards"><div><strong>What</strong>Reply to email (V3) and Move email (V2), both using the email's Message Id.</div><div><strong>Why</strong>Replying confirms receipt; moving stops the same email being processed again.</div><div><strong>Demo</strong>Reply to the test email, then move it to Archive.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>After processing an email</p><div class="fl"><div class="nd act">Message Id from the trigger or Get emails</div><div class="ar"></div><div class="nd"><strong>Reply to email (V3)</strong>: text, Reply All yes/no, To</div><div class="ar"></div><div class="nd ok"><strong>Move email (V2)</strong> → Archive</div></div></div>
+<figure class="shot"><img src="../assets/img/pa/l7-email-canvas-end.webp" alt="Flow canvas: Send test email, Wait for delivery, Get emails, Save each attachment, Reply to email, Move email, Summary" width="175" height="420" loading="lazy">
+<figcaption>Reply and Move at the end of the demo.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>A real failure from the demo</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Run</th><th>Reply's To</th><th>Result</th></tr></thead><tbody><tr><td>1</td><td>(empty: reply to sender)</td><td><span class="lbl f">Failed</span> <em>A message needs to have at least one recipient</em></td></tr><tr><td>2</td><td><code>first(outputs('Get_emails')?['body/value'])?['from']</code></td><td><span class="lbl t">Succeeded</span></td></tr></tbody></table></div><p class="viz-note">The sender and the replying account were the same, and Outlook leaves you out of your own reply. Common with shared mailboxes and tests.</p></div>
+
+<h2 id="read-body"><span class="ico ico-expr"></span>Reading the body as text</h2>
+<figure class="shot"><img src="../assets/img/pa/l7-email-summary.webp" alt="Summary output: Body preview (plain text) Hello, The order file for this week is at..., Body (HTML) starts with &lt;html&gt;&lt;head&gt;&lt;meta http-equiv=..." width="618" height="190" loading="lazy">
+<figcaption>The body is HTML; bodyPreview is plain text.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Which way to get plain text?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Is the first ~255 characters enough?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok"><code>bodyPreview</code>: no extra connector</div></div><div><span class="lbl f">No</span><div class="nd dec"><span class="ico ico-cond"></span>Is the Content Conversion connector allowed?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok"><strong>Html to text</strong></div></div><div><span class="lbl f">No</span><div class="nd ok">Text functions between known markers</div></div></div></div></div></div></div>
+<p>In the demo environment the data policy blocks Content Conversion, so the demo uses <code>bodyPreview</code>.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Message Id</strong>: the unique ID of one email; reply, move and flag actions need it.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Not moving processed mail, so it's handled twice.</li><li>Parsing HTML with fixed positions.</li><li>Reply All by default on external mail.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/conversionservice/">Content Conversion connector (Html to text)</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/advanced-connector-policies">Advanced connector policies</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="email-attachments.html">← Email attachments and file content</a><a href="excel-online.html">Excel Online basics →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#demo">Reply and move</a></li><li><a href="#read-body">Reading the body as text</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batch operations and changesets | Vinay Matsa</title>
+<meta name="description" content="Write many records in fewer calls, and group Dataverse changes so they all succeed or all roll back.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Batch operations and changesets">
+<meta property="og:description" content="Write many records in fewer calls, and group Dataverse changes so they all succeed or all roll back.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="../#projects">Projects</a>
+      <a href="./" aria-current="page">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="./">Power Automate</a> / Level 5</p>
+
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Power Automate</li>
+        <li>Level 5 · Performance and scale · 4 of 6</li>
+      </ul>
+      <h1>Batch operations and changesets</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-21">21 November 2026</time>
+        <span>3 min read</span>
+      </div>
+
+      <div class="prose">
+<p>When a flow writes many rows, the usual pattern is a loop with one Create or Update per item: one request and one round trip each. <strong>Batching</strong> sends several operations in one call; <strong>changesets</strong> make a group of writes all or nothing.</p>
+
+<h2 id="options"><span class="ico ico-data"></span>Ways to reduce write calls</h2>
+<div class="cards"><div><strong>What</strong>Techniques that cut the number of write requests, or make a group of writes one transaction.</div><div><strong>Why</strong>Fewer calls means faster runs and fewer requests; transactions keep related data consistent.</div><div><strong>Demo</strong>Saving an order with its order lines.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Which approach?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Must the writes all succeed or all fail together?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok"><strong>Dataverse changeset</strong></div></div><div><span class="lbl f">No</span><div class="nd dec"><span class="ico ico-cond"></span>Large volumes, comfortable with REST?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok"><strong>$batch</strong> request (Level 9)</div></div><div><span class="lbl f">No</span><div class="nd ok">Lean loop + concurrency</div></div></div></div></div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Approach</th><th>What it does</th><th>When</th></tr></thead><tbody><tr><td>Prepare data before the loop</td><td>Select / Filter first so the loop only writes</td><td>Always</td></tr><tr><td>Loop concurrency</td><td>Several passes at once (up to 50)</td><td>Independent writes; same request count</td></tr><tr><td>Dataverse changeset</td><td>Add/Update/Delete row actions as one transaction</td><td>Rows that must stay consistent</td></tr><tr><td>$batch through HTTP</td><td>Many operations in one Web API / REST call</td><td>Large volumes</td></tr><tr><td>Outside the flow</td><td>Dataflow, import or stored procedure</td><td>Thousands of rows on a schedule</td></tr></tbody></table></div>
+
+<h2 id="changeset"><span class="ico ico-check"></span>What a changeset gives you</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Five writes, the third fails</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Write</th><th>Without changeset</th><th>In a changeset</th></tr></thead><tbody><tr><td>1 Order header</td><td><span class="lbl t">saved</span></td><td><span class="lbl d">rolled back</span></td></tr><tr><td>2 Line 1</td><td><span class="lbl t">saved</span></td><td><span class="lbl d">rolled back</span></td></tr><tr><td>3 Line 2</td><td><span class="lbl f">failed</span></td><td><span class="lbl f">failed</span></td></tr><tr><td>4 Line 3</td><td><span class="lbl d">skipped</span></td><td><span class="lbl d">not run</span></td></tr><tr><td>Result</td><td><span class="chip warn">half-saved order</span></td><td><span class="chip ok">nothing saved</span></td></tr></tbody></table></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-warn"></span>Rule</th><th>Detail</th></tr></thead><tbody><tr><td>Actions allowed</td><td>Only Dataverse Add a new row, Update a row and Delete a row</td></tr><tr><td>No chaining</td><td>You can't use an output of one action in a later action of the same changeset</td></tr><tr><td>Designer</td><td>Microsoft lists changesets as not yet supported in the new designer; build them in the classic designer</td></tr></tbody></table></div>
+<p>That's also why this page has no demo screenshot: the environment used here runs the new designer.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Batch</strong>: many operations in one call; each can still succeed or fail on its own.</p>
+<p><strong>Transaction / rollback</strong>: changes saved together or not at all.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Expecting a batch to roll back. Only a changeset does.</li><li>Concurrency on writes that depend on each other.</li><li>Referencing a row created earlier in the same changeset.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/change-set">Perform changesets in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/developer/data-platform/webapi/execute-batch-operations-using-web-api">Execute batch operations using the Web API</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+      </div>
+
+      <div class="pager"><a href="avoid-nested-loops.html">← Avoiding nested loops</a><a href="large-files.html">Working with large files →</a></div>
+    </article>
+
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page">
+        <h2>On this page</h2>
+        <ol><li><a href="#options">Ways to reduce write calls</a></li><li><a href="#changeset">What a changeset gives you</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+      </nav>
+      <div class="side-box">
+        <strong>How to read these</strong>
+        <p>Read the main text first. Open <em>Start from the basics</em> if a term is new, and <em>Build it step by step</em> to recreate the example yourself.</p>
+      </div>
+      <div class="side-box">
+        <strong>Vinay Matsa</strong>
+        <p>Power Platform &amp; Copilot Studio Developer, PL-400 certified. I write practical guides from hands-on labs.</p>
+        <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">Follow on LinkedIn →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

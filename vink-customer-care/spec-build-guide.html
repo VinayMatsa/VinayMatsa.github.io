@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7 · Build guide | Vinay Matsa</title>
+<meta name="description" content="Step-by-step order to rebuild the solution, with a checkpoint after every step.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="7 · Build guide">
+<meta property="og:description" content="Step-by-step order to rebuild the solution, with a checkpoint after every step.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="../#projects">Projects</a> / <a href="index.html">Vink Customer Care Agent</a></p>
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Technical specification</li>
+        <li>Vink Customer Care Agent · Part 7 of 9</li>
+      </ul>
+      <h1>7 · Build guide</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-26">26 November 2026</time>
+        <span>4 min read</span>
+      </div>
+      <div class="prose">
+<p>This is the order to rebuild the solution from an empty environment. Each step ends with a checkpoint: something you can see that proves the step worked before you build on it. The fastest route is to import <code>CustomerCareAgent_1_0_0_1.zip</code> from the repository; the steps below are for building it yourself.</p>
+<h2 id="prereq"><span class="ico ico-check"></span>Prerequisites</h2>
+<div class="table-wrap"><table class="breakdown spec"><thead><tr><th>Need</th><th>Why</th></tr></thead><tbody><tr><td>A developer or sandbox environment with Dataverse</td><td>Tables, flows and the agent live there</td></tr><tr><td>Copilot Studio and Power Automate access</td><td>Agent, agent flows, prompts</td></tr><tr><td>An Outlook mailbox for the connection</td><td>Customer and support emails</td></tr><tr><td>A solution and publisher (prefix <code>vin</code>)</td><td>Everything is created inside the solution from step 1</td></tr></tbody></table></div>
+<h2 id="step1"><span class="ico ico-arrow"></span>Step 1: Solution, publisher, environment variables</h2><ol><li>Create publisher <em>Vink</em> with prefix <code>vin</code>, then solution <em>Customer Care Agent</em>.</li><li>Add environment variables <code>vin_CCSupportMailbox</code> (text) and <code>vin_CCCustomerEmailOverride</code> (text, empty in production).</li><li>Add connection references <em>Customer Care – Dataverse</em> and <em>Customer Care – Office 365 Outlook</em>.</li></ol><div class="cards"><div><strong><span class="ico ico-check"></span>Checkpoint</strong>Both variables and both connection references show in the solution.</div></div><h2 id="step2"><span class="ico ico-arrow"></span>Step 2: Tables and columns</h2><ol><li>Create the six custom tables and add the three Contact columns exactly as in <a href="spec-data-model.html">the data model</a>.</li><li>Autonumbers: <code>TKT-{SEQNUM:4}</code> on Service Ticket, <code>CUST-{SEQNUM:4}</code> on Contact.</li><li>Choices with the listed values, so flows can use the numbers (Open = 949870000…).</li><li>Add the lookups (Service Ticket → Contact, Order, Support Team, Warranty Claim; Ticket Update → Service Ticket).</li></ol><div class="cards"><div><strong><span class="ico ico-check"></span>Checkpoint</strong>Add a test ticket by hand: it gets a TKT number and its lookups resolve.</div></div><figure class="shot"><img src="../assets/img/vink/care-hub-ticket.webp" alt="Care Hub ticket form" width="1336" height="591" loading="lazy">
+<figcaption>Checkpoint: a ticket row with number and lookups.</figcaption></figure><h2 id="step3"><span class="ico ico-arrow"></span>Step 3: Sample data</h2><ol><li>Add Support Teams Repairs, Billing, Logistics with team emails.</li><li>Add products with <code>vin_warrantymonths</code>.</li><li>Add a demo customer (Contact) and orders with serial numbers.</li></ol><div class="cards"><div><strong><span class="ico ico-check"></span>Checkpoint</strong>The customer has orders and the orders have products.</div></div><h2 id="step4"><span class="ico ico-arrow"></span>Step 4: Background flows</h2><ol><li>Build Ticket Created (Dataverse <em>Added</em>, Service Tickets) with Try/Catch, the SLA Compose and the timeline row.</li><li>Build Ticket Status Changed (<em>Modified</em>, Select columns <code>vin_ticketstatus</code>).</li><li>Build Daily SLA Check (Recurrence daily 03:00 UTC).</li></ol><div class="cards"><div><strong><span class="ico ico-check"></span>Checkpoint</strong>Create a ticket by hand: a <em>Ticket created</em> Ticket Update row appears within seconds.</div></div><figure class="shot"><img src="../assets/img/vink/ticketcreated-run.webp" alt="Ticket Created run" width="340" height="345" loading="lazy">
+<figcaption>Checkpoint: a successful Ticket Created run.</figcaption></figure><h2 id="step5"><span class="ico ico-arrow"></span>Step 5: Agent and instructions</h2><ol><li>Create the agent in the solution, paste the instructions from <a href="spec-agent-config.html">Agent configuration</a>.</li><li>Turn web search off; add the three knowledge sources; add the three regex entities.</li></ol><div class="cards"><div><strong><span class="ico ico-check"></span>Checkpoint</strong>Ask <em>How long is the laptop warranty?</em> in the test chat: a cited answer from the policy.</div></div><figure class="shot"><img src="../assets/img/vink/knowledge.webp" alt="Knowledge sources" width="656" height="170" loading="lazy">
+<figcaption>Checkpoint: three knowledge sources Ready.</figcaption></figure><h2 id="step6"><span class="ico ico-arrow"></span>Step 6: Agent flows (tools)</h2><ol><li>Create each flow in <a href="spec-agent-flows.html">Agent flows</a> with the exact input names and output names.</li><li>Start with Find Customer and Register Customer, then List Orders/Tickets, Create Ticket, Get Ticket Details, Add Reply, Escalate, Record CSAT, RMA Process, Repair Update.</li><li>Publish each flow; add it to the agent as a tool with the description from the spec.</li></ol><div class="cards"><div><strong><span class="ico ico-check"></span>Checkpoint</strong>Use each flow's <em>Test</em> with sample inputs: Respond returns every output.</div></div><figure class="shot"><img src="../assets/img/vink/s-ct-respond.webp" alt="Respond to the agent action" width="1210" height="544" loading="lazy">
+<figcaption>Checkpoint: the Respond action returns every output name the topic will bind.</figcaption></figure><h2 id="step7"><span class="ico ico-arrow"></span>Step 7: Prompts</h2><ol><li>Create Ticket Triage and Fault Summary for Technicians with the text in <a href="spec-agent-config.html">Agent configuration</a>.</li><li>Test each in the prompt editor.</li></ol><div class="cards"><div><strong><span class="ico ico-check"></span>Checkpoint</strong>Triage returns JSON with the four keys.</div></div><figure class="shot"><img src="../assets/img/vink/s-pr-triage-test.webp" alt="Triage prompt test" width="1145" height="311" loading="lazy">
+<figcaption>Checkpoint: the triage test output.</figcaption></figure><h2 id="step8"><span class="ico ico-arrow"></span>Step 8: Topics</h2><ol><li>Build Identify Customer first and set the globals.</li><li>Build the other topics, each starting with the guard.</li><li>Bind every flow input and <strong>every output</strong>; run Topic checker until it shows no errors.</li></ol><div class="cards"><div><strong><span class="ico ico-check"></span>Checkpoint</strong>Topic checker: 0 errors on every topic.</div></div><figure class="shot"><img src="../assets/img/vink/s-tp-status-action.webp" alt="Flow action in a topic" width="760" height="477" loading="lazy">
+<figcaption>Checkpoint: inputs and outputs bound on the action node.</figcaption></figure><h2 id="step9"><span class="ico ico-arrow"></span>Step 9: Child agent and event trigger</h2><ol><li>Add the Billing Agent child with its description and instructions.</li><li>Add the event trigger <em>Warehouse scan received</em> (Dataverse, filter <code>vin_ticketstatus eq 949870002</code>).</li></ol><div class="cards"><div><strong><span class="ico ico-check"></span>Checkpoint</strong>Set a ticket to Scanned at warehouse: the agent's Activity shows an autonomous run calling Repair Update.</div></div><figure class="shot"><img src="../assets/img/vink/trigger.webp" alt="Event trigger" width="938" height="109" loading="lazy">
+<figcaption>Checkpoint: the trigger on the Overview page.</figcaption></figure><h2 id="step10"><span class="ico ico-arrow"></span>Step 10: Care Hub app and publish</h2><ol><li>Create the model-driven app with the areas in <a href="spec-care-hub.html">Care Hub</a>.</li><li>Publish all customisations; publish the agent.</li></ol><div class="cards"><div><strong><span class="ico ico-check"></span>Checkpoint</strong>Run the eight scenarios in <a href="spec-test-results.html">Test results</a>.</div></div>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/create-solution">Create a solution</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/fundamentals-get-started">Create an agent</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-test-bot">Test your agent</a></li></ul>
+      </div>
+      <div class="pager"><a href="spec-care-hub.html">← 6 · Care Hub app</a><a href="spec-test-results.html">8 · Test results →</a></div>
+    </article>
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#prereq">Prerequisites</a></li><li><a href="#step1">Step 1: Solution, publisher, environment variables</a></li><li><a href="#step2">Step 2: Tables and columns</a></li><li><a href="#step3">Step 3: Sample data</a></li><li><a href="#step4">Step 4: Background flows</a></li><li><a href="#step5">Step 5: Agent and instructions</a></li><li><a href="#step6">Step 6: Agent flows (tools)</a></li><li><a href="#step7">Step 7: Prompts</a></li><li><a href="#step8">Step 8: Topics</a></li><li><a href="#step9">Step 9: Child agent and event trigger</a></li><li><a href="#step10">Step 10: Care Hub app and publish</a></li><li><a href="#references">References</a></li></ol></nav>
+      <nav class="side-box" aria-label="All parts"><h2>The specification</h2><ol start="0"><li><a href="index.html">Overview</a></li><li><a href="spec-data-model.html">Data model</a></li><li><a href="spec-agent-config.html">Agent configuration</a></li><li><a href="spec-topics.html">Topics</a></li><li><a href="spec-agent-flows.html">Agent flows (tools)</a></li><li><a href="spec-background-flows.html">Background flows and the event trigger</a></li><li><a href="spec-care-hub.html">Care Hub app</a></li><li><a href="spec-build-guide.html" aria-current="page">Build guide</a></li><li><a href="spec-test-results.html">Test results</a></li><li><a href="spec-alm.html">ALM and operations</a></li></ol></nav>
+      <div class="side-box">
+        <strong>Personal project</strong>
+        <p>Built in my own developer environment. Vink Electronics is fictional and all customers and orders are sample data.</p>
+        <a href="https://github.com/VinayMatsa/vink-customer-care-agent">Solution source on GitHub →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

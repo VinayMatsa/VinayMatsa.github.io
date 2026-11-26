@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Outlook and Teams notifications | Vinay Matsa</title>
-<meta name="description" content="Send an email and a Teams message from a flow, and choose who the message comes from.">
+<meta name="description" content="Send an email and a Teams message from a flow, choose who it comes from, and use shared mailboxes and message options.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Outlook and Teams notifications">
-<meta property="og:description" content="Send an email and a Teams message from a flow, and choose who the message comes from.">
+<meta property="og:description" content="Send an email and a Teams message from a flow, choose who it comes from, and use shared mailboxes and message options.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,60 +49,34 @@
       </div>
 
       <div class="prose">
-<p>Most flows end by telling someone something. The two everyday channels are an email through <strong>Office 365 Outlook</strong> and a message through <strong>Microsoft Teams</strong>. Both took one action each in this demo.</p>
+<p>Most flows end by telling someone something. The two everyday channels are an email through <strong>Office 365 Outlook</strong> and a message through <strong>Microsoft Teams</strong>.</p>
 
-<h2 id="flow">The demo flow</h2>
+<h2 id="flow"><span class="ico ico-arrow"></span>The demo flow</h2>
+<div class="cards"><div><strong>What</strong>One action sends an email, one posts a Teams message.</div><div><strong>Why</strong>Notifications are how people learn a flow did something; the channel and sender decide whether they read it.</div><div><strong>Demo</strong>Tell the team that 2 new requests need review.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>One summary, two channels</p><div class="fl"><div class="nd act">Requests as text: <span class="chip ">Monitor arms x6 (540)</span><span class="chip ">Whiteboard markers (40)</span></div><div class="ar"></div><div class="br"><div><span class="lbl c">Email</span><div class="nd"><strong>Send an email (V2)</strong></div><div class="ar"></div><div class="nd ok">Inbox: <em>Contoso: 2 new requests need review</em></div></div><div><span class="lbl c">Teams</span><div class="nd"><strong>Post message in a chat or channel</strong></div><div class="ar"></div><div class="nd ok">Chat from Workflows</div></div></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l3-notify-canvas.webp" alt="Run of the flow: Send an email and Post message in Teams, both succeeded" width="400" height="215" loading="lazy">
-<figcaption>One email action, one Teams action.</figcaption></figure>
+<figcaption>Both actions in the run.</figcaption></figure>
 
-<h2 id="email">The email</h2>
+<h2 id="email"><span class="ico ico-data"></span>The email</h2>
 <figure class="shot"><img src="../assets/img/pa/l3-email.webp" alt="The received email: subject Contoso: 2 new requests need review, listing Monitor arms x6 (540) and Whiteboard markers (40)" width="890" height="360" loading="lazy">
-<figcaption>The email as it arrived. The sender is the account that owns the Outlook connection. Names here are placeholders.</figcaption></figure>
-<p><strong>Send an email (V2)</strong> needs To, Subject and Body. The Body box accepts HTML, so lists, bold text and tables (from Create HTML table in Level 2) all work.</p>
-<ul>
-<li>The email comes <em>from</em> the connection's account. To send from a team address, use <strong>Send an email from a shared mailbox</strong> and get the mailbox permission first.</li>
-<li>Use a semicolon between several addresses: <code>alex@contoso.com;sam@contoso.com</code>.</li>
-</ul>
+<figcaption>The email as received.</figcaption></figure>
+<p><strong>Send an email (V2)</strong> needs To, Subject and Body. The Body accepts HTML, so lists, bold text and tables (from Create HTML table) all work.</p>
 
-<h2 id="teams">The Teams message</h2>
+<h2 id="teams"><span class="ico ico-data"></span>The Teams message: who posts, where</h2>
 <figure class="shot"><img src="../assets/img/pa/l3-teams-message.webp" alt="Teams chat from Workflows: Contoso: 2 new requests need review. Monitor arms x6 (540) and Whiteboard markers (40)." width="655" height="58" loading="lazy">
-<figcaption>Posted as the Flow bot into the user's chat with Workflows.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Post as</th><th>Post in</th><th>Use when</th></tr></thead><tbody>
-<tr><td>Flow bot</td><td>Chat with Flow bot</td><td>A private notification to one person</td></tr>
-<tr><td>Flow bot</td><td>Channel</td><td>A team update everyone in the channel should see</td></tr>
-<tr><td>User</td><td>Group chat or channel</td><td>The message should look like it came from a person (the connection owner)</td></tr>
-</tbody></table></div>
-<div class="callout"><strong>Tip:</strong> keep messages short and link to the detail. A Teams message has a size limit of about 28 KB including HTML, and long messages are hard to read on a phone.</div>
+<figcaption>Posted by the Workflows (Flow bot) app.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-arrow"></span>Post as</th><th>Post in</th><th>Use when</th></tr></thead><tbody><tr><td>Flow bot</td><td>Chat with Flow bot</td><td>A private notification to one person</td></tr><tr><td>Flow bot</td><td>Channel</td><td>A team update everyone should see</td></tr><tr><td>User</td><td>Group chat or channel</td><td>It should look like it came from a person (the connection owner)</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Keep messages short and link to detail: a Teams message is limited to about 28 KB including HTML.</li><li>Emails and <em>post as user</em> messages come from the <strong>connection owner</strong>.</li></ul>
+
+<h2 id="shared-mailbox"><span class="ico ico-scope"></span>Shared mailboxes and message options</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>A shared-mailbox process</p><div class="fl"><div class="nd act">Trigger: <strong>When a new email arrives in a shared mailbox (V2)</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Is it a reply? <code>startsWith(subject, 'RE:')</code></div><div class="ar"></div><div class="br"><div><span class="lbl f">Yes</span><div class="nd mute">Trigger condition stops it</div></div><div><span class="lbl t">No</span><div class="nd">Process it</div><div class="ar"></div><div class="nd ok">Reply with <strong>Send an email from a shared mailbox (V2)</strong></div></div></div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Need</th><th>Setting</th></tr></thead><tbody><tr><td>Send as the shared mailbox</td><td>The connection's account needs <strong>Send As</strong> on the mailbox</td></tr><tr><td>Copy people in</td><td>CC and BCC under Show all; separate with <code>;</code></td></tr><tr><td>Flag as urgent</td><td>Importance: High</td></tr><tr><td>Replies go elsewhere</td><td>Reply To: e.g. the shared mailbox</td></tr></tbody></table></div>
+<p>Use the newest version of an action (V2, V3); older ones exist only so old flows keep working.</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Connection owner</strong>: the account a connection signs in as. Emails and "post as user" messages appear to come from that account.</p>
-<p><strong>Flow bot</strong>: the Workflows app in Teams. Messages from it don't come from a person.</p>
-<p><strong>HTML body</strong>: email and Teams bodies understand basic HTML tags such as <code>&lt;p&gt;</code>, <code>&lt;b&gt;</code>, <code>&lt;ul&gt;</code> and <code>&lt;table&gt;</code>.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Create an instant flow and add <strong>Send an email (V2)</strong>. To: your own address. Subject and an HTML body with a short list.</li><li>Add <strong>Post message in a chat or channel</strong> (Microsoft Teams). Post as: Flow bot. Post in: Chat with Flow bot. Recipient: your address.</li><li>Write a one-line message with <code>&lt;b&gt;</code> for the key words.</li><li>Test. Check your inbox and the Workflows chat in Teams.</li><li>Change Post in to a channel you own and test again to see the difference.</li></ol></div></details>
-
-<h2 id="shared-mailbox">Shared mailboxes and message options</h2>
-<p>Team processes usually run from a <strong>shared mailbox</strong> (such as support@contoso.com), not from one person's inbox.</p>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Need</th><th>Outlook action or trigger</th></tr></thead><tbody>
-<tr><td>Start when mail reaches the shared mailbox</td><td><strong>When a new email arrives in a shared mailbox (V2)</strong>. Give the mailbox address, the folder, and filters such as subject.</td></tr>
-<tr><td>Send as the shared mailbox</td><td><strong>Send an email from a shared mailbox (V2)</strong>. The connection's account needs Send As permission on the mailbox.</td></tr>
-<tr><td>Copy people in</td><td>CC and BCC under <em>Show all</em> on Send an email (V2). Separate addresses with <code>;</code>.</td></tr>
-<tr><td>Flag as urgent</td><td>Importance: Low, Normal or High.</td></tr>
-<tr><td>Send replies somewhere else</td><td>Reply To: for example, the shared mailbox, even when sending from a service account.</td></tr>
-</tbody></table></div>
-<p>When an action has several versions (V2, V3), use the newest one the designer offers; older versions are kept only so existing flows keep working. The separate <strong>Mail</strong> connector (Send an email notification) sends from a Microsoft no-reply address, which is fine for system alerts but not for messages people should answer.</p>
-<p><strong>Ignore replies.</strong> A trigger condition such as <code>@not(startsWith(triggerOutputs()?['body/subject'], 'RE:'))</code> stops the flow running again for every reply in a thread.</p>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Testing with real recipients. Send to yourself until the content is right, or store the recipient in an environment variable that differs per environment.</li>
-<li>Sending one email per item inside a loop. Build one summary (Select + Create HTML table) and send once.</li>
-<li>Posting to a private channel. That isn't supported by these actions.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/teams/">Microsoft Teams connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li></ul>
+<div class="layer-body"><p><strong>Connection owner</strong>: the account a connection signs in as.</p><p><strong>Flow bot</strong>: the Workflows app in Teams.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Sending from a personal account for a team process.</li><li>Long messages instead of a link.</li><li>No trigger condition for replies, so every reply restarts the flow.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/teams/">Microsoft Teams connector reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="trigger-conditions.html">← Trigger conditions</a><a href="adaptive-cards.html">Adaptive Cards in Teams →</a></div>
@@ -111,7 +85,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#flow">The demo flow</a></li><li><a href="#email">The email</a></li><li><a href="#teams">The Teams message</a></li><li><a href="#shared-mailbox">Shared mailboxes and message options</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#flow">The demo flow</a></li><li><a href="#email">The email</a></li><li><a href="#teams">The Teams message: who posts, where</a></li><li><a href="#shared-mailbox">Shared mailboxes and message options</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

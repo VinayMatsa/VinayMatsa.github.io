@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Approvals | Vinay Matsa</title>
-<meta name="description" content="Pause a flow until a person approves or rejects, and the policy check that can stop it before it starts.">
+<meta name="description" content="Pause a flow until a person approves or rejects: approval types, reading the outcome and comments, timeouts, approvers from a list, and the policy check that can block it.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Approvals">
-<meta property="og:description" content="Pause a flow until a person approves or rejects, and the policy check that can stop it before it starts.">
+<meta property="og:description" content="Pause a flow until a person approves or rejects: approval types, reading the outcome and comments, timeouts, approvers from a list, and the policy check that can block it.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,67 +45,40 @@
         <span class="mini" aria-hidden="true">VM</span>
         <strong>Vinay Matsa</strong>
         <time datetime="2026-11-21">21 November 2026</time>
-        <span>4 min read</span>
+        <span>3 min read</span>
       </div>
 
       <div class="prose">
-<p>The <strong>Approvals</strong> connector adds a human decision to a flow. <strong>Start and wait for an approval</strong> sends a request (by email, in Teams and in the Approvals centre), pauses the flow, and continues when the approver responds, with their decision and comments as outputs.</p>
+<p>The <strong>Approvals</strong> connector adds a human decision to a flow. <em>Start and wait for an approval</em> sends a request (email, Teams, Approvals centre), pauses the flow, and continues when someone responds.</p>
 
-<h2 id="design">The approval step</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Setting</th><th>Demo value</th></tr></thead><tbody>
-<tr><td>Approval type</td><td>Approve/Reject - First to respond</td></tr>
-<tr><td>Title</td><td>Contoso: approve New laptop for design team (1,450)</td></tr>
-<tr><td>Assigned to</td><td>The approver's email address</td></tr>
-<tr><td>Details</td><td>Requested by the Design team. Priority: High.</td></tr>
-</tbody></table></div>
-<p>After it, read the result:</p>
+<h2 id="design"><span class="ico ico-cond"></span>How an approval works</h2>
+<div class="cards"><div><strong>What</strong>A step that pauses the flow until approvers respond, then returns the outcome and comments.</div><div><strong>Why</strong>Many processes need a person's yes or no before the next step.</div><div><strong>Demo</strong>Approve a new laptop for the design team (1,450).</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>The approval pattern</p><div class="fl"><div class="nd act"><strong>Start and wait for an approval</strong>: title, approvers, details</div><div class="ar"></div><div class="nd mute">⏸ The flow waits (up to 30 days)</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span><code>outcome</code> = Approve?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Approve</span><div class="nd ok">Update status, notify requester</div></div><div><span class="lbl f">Reject</span><div class="nd mute">Update status, send the comment</div></div><div><span class="lbl d">Timed out</span><div class="nd mute">Mark Expired, escalate</div></div></div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Setting</th><th>Demo value</th></tr></thead><tbody><tr><td>Approval type</td><td>Approve/Reject - First to respond</td></tr><tr><td>Title</td><td>Contoso: approve New laptop for design team (1,450)</td></tr><tr><td>Assigned to</td><td>The approver's email</td></tr><tr><td>Details</td><td>Requested by the Design team. Priority: High.</td></tr></tbody></table></div>
+
+<h2 id="read"><span class="ico ico-expr"></span>Reading the result</h2>
 <pre><code>body(&#x27;Start_and_wait_for_an_approval&#x27;)?[&#x27;outcome&#x27;]</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>body(&#x27;Start_and_wait_for_an_approval&#x27;)</code></td><td>The approval's result once someone responds.</td></tr><tr><td><code>?[&#x27;outcome&#x27;]</code></td><td><em>Approve</em> or <em>Reject</em> for the basic types. Use it in a Condition.</td></tr></tbody></table></div>
-<pre><code>coalesce(first(body('Start_and_wait_for_an_approval')?['responses'])?['comments'], 'No comment')</code></pre>
-<p>That second expression reads the first approver's comment, with a fallback when none was given (the Level 2 null-handling pattern).</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[&#x27;outcome&#x27;]</code></td><td><em>Approve</em> or <em>Reject</em> (or a custom response).</td></tr></tbody></table></div>
+<pre><code>coalesce(first(body(&#x27;Start_and_wait_for_an_approval&#x27;)?[&#x27;responses&#x27;])?[&#x27;comments&#x27;], &#x27;No comment&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[&#x27;responses&#x27;]</code></td><td>One entry per approver who answered.</td></tr><tr><td><code>first(...)?[&#x27;comments&#x27;]</code></td><td>The first approver's comment.</td></tr><tr><td><code>coalesce(..., &#x27;No comment&#x27;)</code></td><td>Fallback when none was given.</td></tr></tbody></table></div>
 
-<h2 id="types">Approval types</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Type</th><th>Finishes when</th></tr></thead><tbody>
-<tr><td>Approve/Reject - First to respond</td><td>Any one approver responds</td></tr>
-<tr><td>Approve/Reject - Everyone must approve</td><td>All approve, or anyone rejects</td></tr>
-<tr><td>Custom responses</td><td>You define the buttons (for example Approve, Reject, Need more info)</td></tr>
-<tr><td>Sequential approval</td><td>Each approver in turn</td></tr>
-</tbody></table></div>
+<h2 id="types"><span class="ico ico-check"></span>Approval types</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-cond"></span>Type</th><th>Finishes when</th></tr></thead><tbody><tr><td>Approve/Reject - First to respond</td><td>Any one approver responds</td></tr><tr><td>Approve/Reject - Everyone must approve</td><td>All approve, or anyone rejects</td></tr><tr><td>Custom responses</td><td>Someone picks one of your buttons (e.g. Need more info)</td></tr><tr><td>Sequential approval</td><td>Each approver in turn</td></tr></tbody></table></div>
 
-<h2 id="blocked">When a policy blocks it</h2>
-<p>In the demo environment the flow could not even be turned on:</p>
+<h2 id="timeout"><span class="ico ico-clock"></span>Timeouts and approvers from a list</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>When nobody responds</p><div class="fl"><div class="nd">Approval action → Settings → <strong>Timeout</strong> <code>P7D</code> (7 days)</div><div class="ar"></div><div class="nd">Next step: Configure run after → <strong>has timed out</strong></div><div class="ar"></div><div class="nd ok">Set status Expired, tell the requester</div></div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Approvers from data, not hard-coded</p><div class="fl"><div class="nd"><strong>Get items</strong> from <em>Approvers</em>: <code>Product eq 'Laptops'</code></div><div class="ar"></div><div class="nd"><strong>Select</strong>: <code>item()?['ApproverEmail']</code></div><div class="ar"></div><div class="nd ok">Assigned to: <code>join(body('Select'), ';')</code></div></div><p class="viz-note">When an approver changes, the business edits the list; the flow isn't touched.</p></div>
+
+<h2 id="blocked"><span class="ico ico-warn"></span>When a policy blocks it</h2>
 <figure class="shot"><img src="../assets/img/pa/l3-dlp-error.webp" alt="Error banner: Admin data policy &#x27;Advanced Connector Policy&#x27; restricts use of these apis: /providers/Microsoft.PowerApps/apis/shared_approvals." width="770" height="30" loading="lazy">
-<figcaption>The real message from the demo environment. The flow saved but would not turn on.</figcaption></figure>
-<p>This is a <strong>data policy</strong> set by an administrator. This one is an <em>advanced connector policy</em>: it blocks every connector that is not on an allow list, so a connector that works in one environment can be refused in another. Nothing in the flow is wrong; the fix is a conversation with the Power Platform admin, who can allow the connector for the environment. Level 6 covers data policies in depth.</p>
-<div class="callout"><strong>Before you build:</strong> check which connectors your target environment allows. Discovering a blocked connector after the build costs far more than asking first.</div>
+<figcaption>In the demo environment the flow couldn't be turned on.</figcaption></figure>
+<p>This is an admin <strong>data policy</strong> (an advanced connector policy that allows only listed connectors). Nothing in the flow is wrong; the environment doesn't allow the connector. Check allowed connectors before you build.</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Approvals centre</strong>: the Approvals page in Power Automate (and the Approvals app in Teams) where people see and answer requests.</p>
-<p><strong>Wait</strong>: the flow pauses for up to 30 days. If nobody responds, the run times out and fails, so plan a reminder or escalation.</p>
-<p><strong>Data policy (DLP)</strong>: an admin rule about which connectors can be used, and which can be used together.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Create an instant flow and add <strong>Start and wait for an approval</strong> (Approvals).</li><li>Choose <em>Approve/Reject - First to respond</em>, enter a Title, your own email in Assigned to, and some Details.</li><li>Add a <strong>Condition</strong>: <code>outcome</code> is equal to <code>Approve</code>.</li><li>In each branch add a Compose (or a Teams message) saying what happened.</li><li>Save and turn the flow on. If you see an Admin data policy message, ask your admin which connectors are allowed in that environment.</li><li>Test, then approve from the email, Teams or the Approvals page, and watch the run continue.</li></ol></div></details>
-
-<h2 id="timeout">Timeouts and approvers from a list</h2>
-<p><strong>When nobody responds.</strong> An approval waits until someone answers. To stop waiting, open the approval action's <strong>Settings</strong> and set <strong>Timeout</strong>, for example <code>P7D</code> for seven days. Then add a step set to run after the approval <strong>has timed out</strong>: update the request's status to <em>Expired</em>, tell the requester, and end the run with Terminate (Cancelled). Without a timeout the run simply stops when it reaches the 30-day limit for a run.</p>
-<p><strong>Choose approvers from data</strong>, not from the flow. Keep an <em>Approvers</em> list with columns such as Product and Approver email. In the flow:</p>
-<ol>
-<li><strong>Get items</strong> from Approvers with a filter query: <code>Product eq 'Laptops'</code>.</li>
-<li><strong>Select</strong> just the email: <code>item()?['ApproverEmail']</code>.</li>
-<li>Put <code>join(body('Select'), ';')</code> in the approval's <em>Assigned to</em>.</li>
-</ol>
-<p>When an approver changes, the business updates the list and the flow is not touched.</p>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>No plan for no response. Add a parallel branch with a Delay and a reminder, or set the action's timeout in its settings.</li>
-<li>Assigning to a person by name in text. Use email addresses, separated by semicolons.</li>
-<li>Not saving the decision anywhere. Write the outcome and comments back to the list or table so there's a record.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/get-started-approvals">Get started with Power Automate approvals</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/modern-approvals">Create and test an approval workflow</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/advanced-connector-policies">Advanced connector policies</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows (run duration)</a></li></ul>
+<div class="layer-body"><p><strong>Approvals centre</strong>: the Approvals page in Power Automate and the Approvals app in Teams.</p>
+<p><strong>Data policy (DLP)</strong>: an admin rule about which connectors can be used.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>No timeout, so runs hang for 30 days and then fail.</li><li>Approvers hard-coded in the flow.</li><li>Reading comments without a fallback.</li><li>Discovering a blocked connector after the build.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/get-started-approvals">Get started with Power Automate approvals</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/modern-approvals">Create and test an approval workflow</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/advanced-connector-policies">Advanced connector policies</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows (run duration)</a></li></ul>
       </div>
 
       <div class="pager"><a href="adaptive-cards.html">← Adaptive Cards in Teams</a><a href="http-custom-connectors.html">HTTP requests and custom connectors →</a></div>
@@ -114,7 +87,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#design">The approval step</a></li><li><a href="#types">Approval types</a></li><li><a href="#blocked">When a policy blocks it</a></li><li><a href="#timeout">Timeouts and approvers from a list</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#design">How an approval works</a></li><li><a href="#read">Reading the result</a></li><li><a href="#types">Approval types</a></li><li><a href="#timeout">Timeouts and approvers from a list</a></li><li><a href="#blocked">When a policy blocks it</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

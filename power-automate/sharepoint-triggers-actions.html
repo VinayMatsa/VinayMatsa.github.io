@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SharePoint triggers and actions | Vinay Matsa</title>
-<meta name="description" content="Read, filter and create SharePoint list items from a flow, and know which trigger to start from.">
+<meta name="description" content="Which SharePoint trigger to start from, how to read, filter, create, update and delete list items, and how Choice, Person and size limits behave.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SharePoint triggers and actions">
-<meta property="og:description" content="Read, filter and create SharePoint list items from a flow, and know which trigger to start from.">
+<meta property="og:description" content="Which SharePoint trigger to start from, how to read, filter, create, update and delete list items, and how Choice, Person and size limits behave.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,69 +45,44 @@
         <span class="mini" aria-hidden="true">VM</span>
         <strong>Vinay Matsa</strong>
         <time datetime="2026-11-21">21 November 2026</time>
-        <span>4 min read</span>
+        <span>3 min read</span>
       </div>
 
       <div class="prose">
-<p>SharePoint lists are where many teams keep requests, trackers and registers, so they are often the first thing people automate. The SharePoint connector gives you <strong>triggers</strong> that start a flow when items change, and <strong>actions</strong> to read, create and update items.</p>
+<p>SharePoint lists hold many teams' requests, trackers and registers, so they're often the first thing people automate. The connector gives you <strong>triggers</strong> that start a flow when items change, and <strong>actions</strong> to read and write items.</p>
 
-<h2 id="list">The demo list</h2>
-<p>A list called <em>Website Demo Requests</em> with five columns: Title, <strong>Status</strong> (choice: New, Approved, Rejected), <strong>Priority</strong> (choice), <strong>Amount</strong> (number) and <strong>Department</strong> (text). The flow reads the new requests, lists them, and adds one more.</p>
+<h2 id="list"><span class="ico ico-data"></span>The demo list and flow</h2>
+<div class="cards"><div><strong>What</strong>Triggers start a flow from list changes; actions read, create, update and delete items.</div><div><strong>Why</strong>Requests and trackers live in lists; automating them saves the most manual work.</div><div><strong>Demo</strong>A <em>Requests</em> list: Title, Status (New/Approved/Rejected), Priority, Amount, Department.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The demo flow</p><div class="fl"><div class="nd act"><strong>Get items</strong>: <code>Status eq 'New'</code>, largest Amount first, top 10</div><div class="ar"></div><div class="nd"><strong>Requests as text</strong>: Select + Join → one line per request</div><div class="ar"></div><div class="nd"><strong>Create item</strong>: add one new request</div><div class="ar"></div><div class="nd ok"><strong>New item ID</strong> → <span class="chip ok">8</span></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l3-sp-canvas.webp" alt="Run of the flow: Get new requests, Requests as text, Create a request and New item ID, all succeeded" width="400" height="345" loading="lazy">
-<figcaption>Get items, reshape with Select, then Create item. Each SharePoint step took well under a second.</figcaption></figure>
+<figcaption>The demo run.</figcaption></figure>
 
-<h2 id="get-items">Get items with a filter</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Setting</th><th>Demo value</th><th>Why</th></tr></thead><tbody>
-<tr><td>Filter Query</td><td><code>Status eq 'New'</code></td><td>Only new requests come back from SharePoint</td></tr>
-<tr><td>Order By</td><td><code>Amount desc</code></td><td>Largest first</td></tr>
-<tr><td>Top Count</td><td><code>10</code></td><td>Never more than 10 rows</td></tr>
-</tbody></table></div>
+<h2 id="triggers"><span class="ico ico-clock"></span>Which trigger?</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Pick the trigger by what should start the flow</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>What should start it?</div><div class="ar"></div><div class="br"><div><span class="lbl t">A new item</span><div class="nd ok">When an item is created</div></div><div><span class="lbl t">Any add or edit</span><div class="nd ok">When an item is created or modified</div><div class="ar"></div><div class="nd mute">+ trigger condition (next articles)</div></div><div><span class="lbl t">A deletion</span><div class="nd ok">When an item or a file is deleted</div></div><div><span class="lbl t">A person, from the list</span><div class="nd ok">For a selected item</div></div></div></div></div>
+<div class="callout"><strong>Good to know:</strong> SharePoint triggers <em>poll</em> the list, so a run can start a minute or so after the change. Dataverse triggers are pushed instantly.</div>
+
+<h2 id="get-items"><span class="ico ico-cond"></span>Get items with a filter</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Setting</th><th>Demo value</th><th>Why</th></tr></thead><tbody><tr><td>Filter Query</td><td><code>Status eq 'New'</code></td><td>Only new requests come back</td></tr><tr><td>Order By</td><td><code>Amount desc</code></td><td>Largest first</td></tr><tr><td>Top Count</td><td><code>10</code></td><td>Never more than 10 rows</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>What came back</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Title</th><th>Department</th><th>Amount</th><th>Status</th></tr></thead><tbody><tr><td>Monitor arms (x6)</td><td>IT</td><td>540</td><td><span class="chip ok">New</span></td></tr><tr><td>Whiteboard markers</td><td>Facilities</td><td>40</td><td><span class="chip ok">New</span></td></tr></tbody></table></div><p class="viz-note">Approved and Rejected items were filtered out by SharePoint, not by the flow.</p></div>
 <figure class="shot"><img src="../assets/img/pa/l3-sp-requests.webp" alt="Requests as text output: Monitor arms (x6) - IT - 540 and Whiteboard markers - Facilities - 40" width="514" height="140" loading="lazy">
-<figcaption>Two of the seven requests were New. The filter ran in SharePoint, so only those two came back.</figcaption></figure>
-<p>Filter and order use the column's <strong>internal name</strong>, which can differ from what you see. A column created as <em>Request Status</em> is often <code>Request_x0020_Status</code> internally. Check it in the list settings (the address of the column's edit page ends with <code>Field=</code> and the internal name).</p>
+<figcaption>The two new requests, as text.</figcaption></figure>
+<h3>Watch out</h3><ul><li>Filters use the column's <strong>internal name</strong>. <em>Request Status</em> is often <code>Request_x0020_Status</code>; check the column's settings page address.</li><li>Get items returns 100 items by default; turn on pagination for more (Level 5).</li></ul>
 
-<h2 id="create">Create item</h2>
+<h2 id="create"><span class="ico ico-check"></span>Create, update and delete</h2>
 <figure class="shot"><img src="../assets/img/pa/l3-sp-newid.webp" alt="New item ID output: 8" width="505" height="260" loading="lazy">
-<figcaption>Create item returns the whole new item, including its ID. Keep the ID if a later step needs to update it.</figcaption></figure>
-<p>Choice columns need the choice value (<code>New</code>), and person columns need an email or claims value. In the designer both appear as drop-downs.</p>
+<figcaption>Create item returns the new item, including its ID.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-arrow"></span>Need</th><th>How</th><th>Watch out</th></tr></thead><tbody><tr><td>Create an item</td><td>Create item</td><td>Choice columns need the choice value; Person columns need an email</td></tr><tr><td>Change an item</td><td>Update item with the Id</td><td>Required columns must be filled again, even if unchanged</td></tr><tr><td>Remove an item</td><td>Delete item with the Id</td><td>It goes to the site recycle bin</td></tr></tbody></table></div>
 
-<h2 id="triggers">Which trigger?</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Trigger</th><th>Fires when</th></tr></thead><tbody>
-<tr><td>When an item is created</td><td>A new item is added</td></tr>
-<tr><td>When an item is created or modified</td><td>Any add or edit. Pair it with a trigger condition (next articles) so it only runs when it matters</td></tr>
-<tr><td>When an item or a file is deleted</td><td>An item is removed</td></tr>
-<tr><td>For a selected item</td><td>A user starts the flow from the list's Automate menu</td></tr>
-</tbody></table></div>
-<div class="callout"><strong>Good to know:</strong> SharePoint triggers check the list on a schedule (polling), so a run can start a minute or so after the change. Dataverse triggers, covered next, are pushed instantly.</div>
+<h2 id="special"><span class="ico ico-data"></span>Choice, Person and link columns</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Read or set</th><th>Expression or value</th><th>Demo value</th></tr></thead><tbody><tr><td>Read a Choice</td><td><code>triggerBody()?['Status']?['Value']</code></td><td><span class="chip ">"Approved"</span></td></tr><tr><td>Read a Person</td><td><code>triggerBody()?['AssignedTo']?['Email']</code></td><td><span class="chip ">"alex@contoso.com"</span></td></tr><tr><td>Set a Person</td><td>the email in the Claims box</td><td><code>alex@contoso.com</code></td></tr><tr><td>Link to the item</td><td><code>triggerBody()?['{Link}']</code></td><td>the item's address</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-warn"></span>Column type</th><th>Limit</th></tr></thead><tbody><tr><td>Single line of text</td><td>255 characters</td></tr><tr><td>Multiple lines of text</td><td>63,999 characters</td></tr></tbody></table></div>
+<p>Writing longer text to a single-line column fails; use multiple lines for comments, AI output or email bodies.</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Site address and list</strong>: every SharePoint step needs both. Pick them from the drop-downs, or put them in environment variables so the flow can move between sites.</p>
-<p><strong>Internal name</strong>: the fixed technical name of a column, set when the column is created. Renaming a column changes only its display name.</p>
-<p><strong>OData filter</strong>: the same query syntax as the Level 2 OData article: <code>eq</code>, <code>ne</code>, <code>gt</code>, <code>and</code>, <code>or</code>.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Create a list with Title, Status (choice), Priority (choice), Amount (number) and Department (text), and add a few rows.</li><li>Create an instant flow. Add <strong>Get items</strong> (SharePoint), choose the site and list, and open <strong>Show all</strong>.</li><li>Set Filter Query <code>Status eq 'New'</code>, Order By <code>Amount desc</code>, Top Count 10.</li><li>Add a <strong>Select</strong> in text mode over <em>value</em>: <code>concat(item()?['Title'], ' - ', string(item()?['Amount']))</code>.</li><li>Add <strong>Create item</strong> for the same list and fill Title, Status, Amount.</li><li>Add a Compose with the <em>ID</em> from Create item. Test and check the list: the new row is there.</li></ol></div></details>
-
-<h2 id="update-delete">Update, delete and special columns</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Need</th><th>How</th></tr></thead><tbody>
-<tr><td>Change an item</td><td><strong>Update item</strong> with the item's <em>Id</em>. Required columns must be filled in again, even if they don't change, so map them from the trigger or a Get item.</td></tr>
-<tr><td>Remove an item</td><td><strong>Delete item</strong> with the <em>Id</em>. It goes to the site's recycle bin.</td></tr>
-<tr><td>Read a Choice column</td><td><code>triggerBody()?['Status']?['Value']</code>. The column is an object; <em>Value</em> is the text.</td></tr>
-<tr><td>Read a Person column</td><td><code>triggerBody()?['AssignedTo']?['Email']</code> or <code>?['DisplayName']</code></td></tr>
-<tr><td>Set a Person column</td><td>Use the person's email in the Claims box (for example <code>alex@contoso.com</code>).</td></tr>
-<tr><td>Link to the item in a message</td><td><code>triggerBody()?['{Link}']</code> gives the item's address, ready for an email or Teams message.</td></tr>
-</tbody></table></div>
-<p><strong>Size limits to plan for.</strong> A Single line of text column holds up to 255 characters, and a Multiple lines of text column up to 63,999. Writing longer text to a single-line column fails, so choose multiple lines for comments, AI output or email bodies.</p>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Get items with no filter on a big list, then a Condition inside a loop. Filter in SharePoint instead.</li>
-<li>Expecting every item: Get items returns one page by default. Set Top Count, or turn on Pagination in the action's settings for larger lists.</li>
-<li>Filtering by display name. Use the internal name.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/sharepoint/dev/business-apps/power-automate/sharepoint-connector-actions-triggers">Microsoft SharePoint connector in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/odata-filters">Filter and copy data</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://support.microsoft.com/en-us/sharepoint/lists/data-and-lists/list-and-library-column-types-and-options">List and library column types and options (Microsoft Support)</a></li></ul>
+<div class="layer-body"><p><strong>Site address and list</strong>: every SharePoint step needs both. Put them in environment variables so the flow can move between sites.</p>
+<p><strong>Internal name</strong>: the fixed technical column name. Renaming a column changes only its display name.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Filtering on display names instead of internal names.</li><li>Using <em>created or modified</em> without a trigger condition, so every edit runs the flow.</li><li>Leaving required columns empty in Update item.</li><li>Hard-coding the site address.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/sharepoint/dev/business-apps/power-automate/sharepoint-connector-actions-triggers">Microsoft SharePoint connector in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/odata-filters">Filter and copy data</a></li></ul>
       </div>
 
       <div class="pager"><a href="./">← All Power Automate topics</a><a href="dataverse-triggers.html">Dataverse triggers and row actions →</a></div>
@@ -116,7 +91,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#list">The demo list</a></li><li><a href="#get-items">Get items with a filter</a></li><li><a href="#create">Create item</a></li><li><a href="#triggers">Which trigger?</a></li><li><a href="#update-delete">Update, delete and special columns</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#list">The demo list and flow</a></li><li><a href="#triggers">Which trigger?</a></li><li><a href="#get-items">Get items with a filter</a></li><li><a href="#create">Create, update and delete</a></li><li><a href="#special">Choice, Person and link columns</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

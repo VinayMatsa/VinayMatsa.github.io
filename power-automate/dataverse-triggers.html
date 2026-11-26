@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dataverse triggers and row actions | Vinay Matsa</title>
-<meta name="description" content="Start a flow the moment a Dataverse row changes, but only when the columns you care about change.">
+<meta name="description" content="Start a flow the moment a Dataverse row changes, but only when the columns you care about change, and the row actions you'll use.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Dataverse triggers and row actions">
-<meta property="og:description" content="Start a flow the moment a Dataverse row changes, but only when the columns you care about change.">
+<meta property="og:description" content="Start a flow the moment a Dataverse row changes, but only when the columns you care about change, and the row actions you'll use.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,53 +49,31 @@
       </div>
 
       <div class="prose">
-<p>The Dataverse trigger <strong>When a row is added, modified or deleted</strong> starts a flow as soon as data changes, with no polling delay. Its power is in two optional boxes that most people leave empty: <strong>Select columns</strong> and <strong>Filter rows</strong>. Used well, they stop the flow from running for changes it does not care about.</p>
+<p>The Dataverse trigger <strong>When a row is added, modified or deleted</strong> starts a flow as soon as data changes, with no polling delay. Its power is in two optional boxes most people leave empty: <strong>Select columns</strong> and <strong>Filter rows</strong>.</p>
 
-<h2 id="setup">The demo trigger</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Setting</th><th>Demo value</th><th>Effect</th></tr></thead><tbody>
-<tr><td>Change type</td><td>Modified</td><td>Only updates, not new or deleted rows</td></tr>
-<tr><td>Table name</td><td>Accounts</td><td>Which table to watch</td></tr>
-<tr><td>Scope</td><td>Organization</td><td>Rows owned by anyone, not just me</td></tr>
-<tr><td>Select columns</td><td><code>revenue</code></td><td>Only run when revenue is part of the update</td></tr>
-<tr><td>Filter rows</td><td><code>revenue gt 100000</code></td><td>Only run when the new revenue is over 100,000</td></tr>
-</tbody></table></div>
+<h2 id="setup"><span class="ico ico-clock"></span>The trigger and its filters</h2>
+<div class="cards"><div><strong>What</strong>A pushed (webhook) trigger on a table, with optional column and row filters.</div><div><strong>Why</strong>Without filters, every save of any column starts a run: wasted runs and self-triggering loops.</div><div><strong>Demo</strong>Run only when an account's revenue changes to over 100,000.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>Does this change start a run?</p><div class="fl"><div class="nd">A row in <strong>Accounts</strong> is updated</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Change type = Modified?</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Was <strong>revenue</strong> part of the update? (Select columns)</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Is the new <code>revenue gt 100000</code>? (Filter rows)</div><div class="ar"></div><div class="nd ok">Run the flow</div></div><p class="viz-note">Any “no” and nothing runs: no run, no history.</p></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Setting</th><th>Demo value</th><th>Effect</th></tr></thead><tbody><tr><td>Change type</td><td>Modified</td><td>Only updates</td></tr><tr><td>Table name</td><td>Accounts</td><td>Which table to watch</td></tr><tr><td>Scope</td><td>Organization</td><td>Rows owned by anyone</td></tr><tr><td>Select columns</td><td><code>revenue</code></td><td>Only when revenue changed</td></tr><tr><td>Filter rows</td><td><code>revenue gt 100000</code></td><td>Only when the new value is over 100,000</td></tr></tbody></table></div>
 
-<h2 id="run">What happened</h2>
+<h2 id="run"><span class="ico ico-check"></span>Three edits, one run</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>What each edit did</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Edit to Contoso Ltd</th><th>Select columns</th><th>Filter rows</th><th>Run?</th></tr></thead><tbody><tr><td>City changed</td><td><span class="chip no">no</span></td><td>–</td><td><span class="lbl f">no run</span></td></tr><tr><td>Revenue → 50,000</td><td><span class="chip ok">yes</span></td><td><span class="chip no">no</span></td><td><span class="lbl f">no run</span></td></tr><tr><td>Revenue → 165,000</td><td><span class="chip ok">yes</span></td><td><span class="chip ok">yes</span></td><td><span class="lbl t">ran</span></td></tr></tbody></table></div></div>
 <figure class="shot"><img src="../assets/img/pa/l3-dv-canvas.webp" alt="Run of the flow: When an account revenue changes, then Changed account, both succeeded" width="400" height="140" loading="lazy">
-<figcaption>Two steps: the trigger and a Compose that describes the change.</figcaption></figure>
+<figcaption>The one run.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l3-dv-output.webp" alt="Changed account output: Contoso Ltd revenue is now 165000" width="505" height="240" loading="lazy">
-<figcaption>Contoso Ltd's revenue was updated to 165,000, so the flow ran within seconds.</figcaption></figure>
+<figcaption>What the run saw.</figcaption></figure>
 <pre><code>concat(triggerOutputs()?[&#x27;body/name&#x27;], &#x27; revenue is now &#x27;, string(triggerOutputs()?[&#x27;body/revenue&#x27;]))</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>triggerOutputs()?[&#x27;body/name&#x27;]</code></td><td>A column from the row that changed. Every column of the row is available.</td></tr><tr><td><code>triggerOutputs()?[&#x27;body/revenue&#x27;]</code></td><td>The new value of revenue.</td></tr></tbody></table></div>
-<p>Changing the city of the same account, or setting revenue to 50,000, does nothing: the first fails <em>Select columns</em>, the second fails <em>Filter rows</em>.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>triggerOutputs()?[&#x27;body/name&#x27;]</code></td><td>The changed row's name: <em>Contoso Ltd</em>.</td></tr><tr><td><code>string(...[&#x27;body/revenue&#x27;])</code></td><td>The new revenue as text: <em>165000</em>.</td></tr></tbody></table></div>
 
-<h2 id="actions">Row actions you will use</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Action</th><th>Use it to</th></tr></thead><tbody>
-<tr><td>List rows</td><td>Query many rows (Level 2, OData article)</td></tr>
-<tr><td>Get a row by ID</td><td>Read one row when you know its ID, for example a related row</td></tr>
-<tr><td>Add a new row</td><td>Create a row</td></tr>
-<tr><td>Update a row</td><td>Change some columns of a row</td></tr>
-<tr><td>Relate rows</td><td>Link two rows through a relationship</td></tr>
-</tbody></table></div>
-<div class="callout"><strong>Watch out for loops:</strong> a flow that triggers on <em>Modified</em> and then updates the same row will trigger itself again. Use Select columns so the update the flow makes is not one it listens for.</div>
+<h2 id="actions"><span class="ico ico-data"></span>Row actions you'll use</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Action</th><th>Use it to</th><th>Key input</th></tr></thead><tbody><tr><td>List rows</td><td>Query many rows (see OData filter queries)</td><td>Filter rows, Select columns</td></tr><tr><td>Get a row by ID</td><td>Read one row you know the ID of</td><td>Row ID (a plain GUID)</td></tr><tr><td>Add a new row</td><td>Create a row</td><td>Column values; lookups as <code>/table(GUID)</code></td></tr><tr><td>Update a row</td><td>Change some columns</td><td>Row ID + the columns to change</td></tr><tr><td>Relate rows</td><td>Link two rows through a relationship</td><td>Both rows and the relationship</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>The self-trigger loop, and how to avoid it</p><div class="fl"><div class="nd">Flow triggers on <strong>Modified</strong></div><div class="ar"></div><div class="nd">Flow <strong>updates the same row</strong></div><div class="ar"></div><div class="br"><div><span class="lbl f">No Select columns</span><div class="nd mute">↺ the update triggers the flow again</div></div><div><span class="lbl t">Select columns set</span><div class="nd ok">Update a column the trigger doesn't watch: no loop</div></div></div></div></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Webhook trigger</strong>: Dataverse tells Power Automate about a change immediately, instead of Power Automate checking on a schedule.</p>
-<p><strong>Scope</strong>: whose rows count: User (mine), Business unit, Parent: child business unit, or Organization (everyone).</p>
-<p><strong>triggerOutputs()</strong>: the data the trigger received. For this trigger, <code>body</code> holds the row.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Create an <strong>Automated cloud flow</strong> with the trigger <strong>When a row is added, modified or deleted</strong> (Microsoft Dataverse).</li><li>Set Change type Modified, Table name Accounts, Scope Organization.</li><li>Open <strong>Show all</strong>, set Select columns <code>revenue</code> and Filter rows <code>revenue gt 100000</code>.</li><li>Add a Compose with the concat expression above. Save.</li><li>In a model-driven app or the Dataverse table editor, change an account's revenue to 150,000. Open the flow's run history.</li><li>Now change the same account's city only. No new run appears, which is the point.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Leaving Select columns empty on a Modified trigger. Every save of every account starts a run.</li>
-<li>Using display names in Select columns or Filter rows. Both need logical names, like <code>revenue</code> or <code>address1_city</code>.</li>
-<li>Expecting it to fire in an environment in administration mode. Triggers don't fire while admin mode is on.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/create-update-delete-trigger">Trigger flows when a row is added, modified, or deleted</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/overview">Overview of how to integrate flows with Dataverse</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/known-issues">Troubleshoot known issues with Dataverse</a></li></ul>
+<div class="layer-body"><p><strong>Webhook trigger</strong>: Dataverse tells Power Automate about a change immediately.</p>
+<p><strong>Scope</strong>: whose rows count: User, Business unit, Parent: child business unit, or Organization.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Leaving Select columns empty, so every save starts a run.</li><li>Updating the row the flow triggers on, creating a loop.</li><li>Using display names in Filter rows instead of logical names.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/create-update-delete-trigger">Trigger flows when a row is added, modified, or deleted</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/overview">Overview of how to integrate flows with Dataverse</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/known-issues">Troubleshoot known issues with Dataverse</a></li></ul>
       </div>
 
       <div class="pager"><a href="sharepoint-triggers-actions.html">← SharePoint triggers and actions</a><a href="trigger-conditions.html">Trigger conditions →</a></div>
@@ -104,7 +82,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#setup">The demo trigger</a></li><li><a href="#run">What happened</a></li><li><a href="#actions">Row actions you will use</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#setup">The trigger and its filters</a></li><li><a href="#run">Three edits, one run</a></li><li><a href="#actions">Row actions you'll use</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

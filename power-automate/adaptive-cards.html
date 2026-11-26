@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adaptive Cards in Teams | Vinay Matsa</title>
-<meta name="description" content="Post a structured card instead of plain text: title, facts and a button, built from JSON.">
+<meta name="description" content="Post a structured card instead of plain text: title, facts and a button, built from JSON, with flow data inside, and cards that collect answers.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Adaptive Cards in Teams">
-<meta property="og:description" content="Post a structured card instead of plain text: title, facts and a button, built from JSON.">
+<meta property="og:description" content="Post a structured card instead of plain text: title, facts and a button, built from JSON, with flow data inside, and cards that collect answers.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,61 +49,45 @@
       </div>
 
       <div class="prose">
-<p>An <strong>Adaptive Card</strong> is a small layout described in JSON: headings, a table of facts, images and buttons. Teams draws it the same way on desktop and phone. It turns a wall of text into something people can scan in two seconds.</p>
+<p>An <strong>Adaptive Card</strong> is a small layout described in JSON: headings, a list of facts, images and buttons. Teams draws it the same way on desktop and phone.</p>
 
-<h2 id="card">The card</h2>
+<h2 id="card"><span class="ico ico-scope"></span>From JSON to card</h2>
+<div class="cards"><div><strong>What</strong>A JSON description of a layout that Teams renders as a card.</div><div><strong>Why</strong>People scan a card in two seconds; a wall of text gets skipped.</div><div><strong>Demo</strong>A purchase request card with three facts and a button.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>How a card is made</p><div class="fl"><div class="nd">Design it in the <strong>Adaptive Card Designer</strong></div><div class="ar"></div><div class="nd">Paste the JSON into <strong>Post card in a chat or channel</strong></div><div class="ar"></div><div class="nd">Swap fixed values for dynamic content</div><div class="ar"></div><div class="nd ok">Teams renders the card</div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l3-adaptive-card.webp" alt="An Adaptive Card in Teams: New purchase request, Contoso Design team, facts Item, Amount, Priority, Requested, and an Open the request button" width="520" height="276" loading="lazy">
-<figcaption>Posted by the Flow bot with <strong>Post card in a chat or channel</strong>.</figcaption></figure>
+<figcaption>The card in Teams.</figcaption></figure>
 
-<h2 id="json">The JSON behind it</h2>
+<h2 id="json"><span class="ico ico-expr"></span>The JSON behind it</h2>
 <pre><code>{
-  "type": "AdaptiveCard",
-  "version": "1.4",
-  "body": [
-    { "type": "TextBlock", "text": "New purchase request", "weight": "Bolder", "size": "Large" },
-    { "type": "TextBlock", "text": "Contoso Design team", "isSubtle": true, "spacing": "None" },
-    { "type": "FactSet", "facts": [
-        { "title": "Item", "value": "New laptop for design team" },
-        { "title": "Amount", "value": "1,450" },
-        { "title": "Priority", "value": "High" }
+  &quot;type&quot;: &quot;AdaptiveCard&quot;,
+  &quot;version&quot;: &quot;1.4&quot;,
+  &quot;body&quot;: [
+    { &quot;type&quot;: &quot;TextBlock&quot;, &quot;text&quot;: &quot;New purchase request&quot;, &quot;weight&quot;: &quot;Bolder&quot;, &quot;size&quot;: &quot;Large&quot; },
+    { &quot;type&quot;: &quot;TextBlock&quot;, &quot;text&quot;: &quot;Contoso Design team&quot;, &quot;isSubtle&quot;: true, &quot;spacing&quot;: &quot;None&quot; },
+    { &quot;type&quot;: &quot;FactSet&quot;, &quot;facts&quot;: [
+        { &quot;title&quot;: &quot;Item&quot;, &quot;value&quot;: &quot;New laptop for design team&quot; },
+        { &quot;title&quot;: &quot;Amount&quot;, &quot;value&quot;: &quot;1,450&quot; },
+        { &quot;title&quot;: &quot;Priority&quot;, &quot;value&quot;: &quot;High&quot; }
     ] }
   ],
-  "actions": [
-    { "type": "Action.OpenUrl", "title": "Open the request", "url": "https://..." }
+  &quot;actions&quot;: [
+    { &quot;type&quot;: &quot;Action.OpenUrl&quot;, &quot;title&quot;: &quot;Open the request&quot;, &quot;url&quot;: &quot;https://...&quot; }
   ]
 }</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Element</th><th>Draws</th></tr></thead><tbody>
-<tr><td><code>TextBlock</code></td><td>A line of text. <code>weight</code>, <code>size</code> and <code>isSubtle</code> style it.</td></tr>
-<tr><td><code>FactSet</code></td><td>A two-column list of labels and values.</td></tr>
-<tr><td><code>Action.OpenUrl</code></td><td>A button that opens a link.</td></tr>
-<tr><td><code>version</code></td><td>The card schema version. 1.4 works in Teams today.</td></tr>
-</tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-scope"></span>Element</th><th>Draws</th><th>In the demo</th></tr></thead><tbody><tr><td>TextBlock</td><td>A line of text; <code>weight</code>, <code>size</code>, <code>isSubtle</code> style it</td><td><em>New purchase request</em></td></tr><tr><td>FactSet</td><td>A two-column list of labels and values</td><td>Item, Amount, Priority</td></tr><tr><td>Action.OpenUrl</td><td>A button that opens a link</td><td><em>Open the request</em></td></tr><tr><td>version</td><td>Card schema version</td><td>1.4 works in Teams</td></tr></tbody></table></div>
 
-<h2 id="dynamic">Putting flow data in the card</h2>
-<p>Replace fixed values with dynamic content or expressions, exactly as in any other text box. The card text is JSON, so the value must stay inside the quotes:</p>
-<pre><code>{ "title": "Amount", "value": "@{formatNumber(triggerOutputs()?['body/Amount'], 'N0')}" }</code></pre>
-<div class="callout"><strong>Design first:</strong> build and preview the card in the Adaptive Card Designer (adaptivecards.io/designer), then paste the JSON into the flow and swap in the dynamic values.</div>
+<h2 id="dynamic"><span class="ico ico-data"></span>Putting flow data in the card</h2>
+<pre><code>{ &quot;title&quot;: &quot;Amount&quot;, &quot;value&quot;: &quot;@{formatNumber(triggerOutputs()?[&#x27;body/Amount&#x27;], &#x27;N0&#x27;)}&quot; }</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>&quot;value&quot;: &quot;@{...}&quot;</code></td><td>The value stays inside the JSON quotes.</td></tr><tr><td><code>formatNumber(..., &#x27;N0&#x27;)</code></td><td>1450 becomes <em>1,450</em>.</td></tr></tbody></table></div>
 
-<h2 id="buttons">Buttons that collect answers</h2>
-<p>A card posted to a user as the Flow bot only supports link buttons (<code>Action.OpenUrl</code>). To collect an answer (inputs and a Submit button), use <strong>Post adaptive card and wait for a response</strong>. The flow pauses until someone responds, and the response arrives as outputs you can use in a Condition. For straightforward yes/no sign-off, the Approvals connector (next article) is usually simpler.</p>
+<h2 id="buttons"><span class="ico ico-check"></span>Cards that collect answers</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Link card vs question card</p><div class="fl"><div class="br"><div><span class="lbl c">Post card (Flow bot)</span><div class="nd">Link buttons only (<code>Action.OpenUrl</code>)</div><div class="ar"></div><div class="nd mute">The flow carries on</div></div><div><span class="lbl c">Post adaptive card and wait for a response</span><div class="nd">Inputs + Submit button</div><div class="ar"></div><div class="nd">The flow pauses</div><div class="ar"></div><div class="nd ok">Response data in dynamic content</div></div></div></div></div>
+<h3>Watch out</h3><ul><li>One missing comma or quote breaks the card; validate the JSON.</li><li>Newer features need a higher version; if something doesn't render, try a lower one.</li><li>The old MessageCard format isn't accepted; <code>type</code> must be <code>AdaptiveCard</code>.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>JSON</strong>: the card is plain text in JSON format, so one missing comma or quote breaks it. Paste it into a JSON validator if the action fails.</p>
-<p><strong>Schema version</strong>: newer features need a higher <code>version</code>. If something doesn't render, try a lower version.</p>
-<p><strong>Message card vs Adaptive Card</strong>: the old "MessageCard" format from Office 365 connectors isn't accepted; the card's type must be <code>AdaptiveCard</code>.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Open the Adaptive Card Designer, start from a blank card and add a TextBlock, a FactSet and an Action.OpenUrl.</li><li>Copy the card JSON from the designer's payload editor.</li><li>In an instant flow add <strong>Post card in a chat or channel</strong> (Microsoft Teams). Post as Flow bot, Post in Chat with Flow bot, Recipient your address.</li><li>Paste the JSON into <strong>Adaptive Card</strong>. Test, and check the Workflows chat in Teams.</li><li>Replace one fact's value with dynamic content and test again.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Dynamic text that contains a double quote or line break. It breaks the JSON; clean it with <code>replace()</code> first.</li>
-<li>Using Action.Submit in a card posted with a plain post action. The button does nothing; use the "wait for a response" action instead.</li>
-<li>Building a huge card. Keep it to what someone needs to decide or act; link to the rest.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/overview-adaptive-cards">Overview of adaptive cards for Microsoft Teams</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-adaptive-cards">Create flows that post adaptive cards to Microsoft Teams</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/teams/">Microsoft Teams connector reference</a></li></ul>
+<div class="layer-body"><p><strong>JSON</strong>: the card is plain text; structure matters.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Dynamic values outside the JSON quotes.</li><li>Using a link card when you need an answer.</li><li>Text-heavy cards; use facts.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/overview-adaptive-cards">Overview of adaptive cards for Microsoft Teams</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-adaptive-cards">Create flows that post adaptive cards to Microsoft Teams</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/teams/">Microsoft Teams connector reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="outlook-teams-notifications.html">← Outlook and Teams notifications</a><a href="approvals.html">Approvals →</a></div>
@@ -112,7 +96,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#card">The card</a></li><li><a href="#json">The JSON behind it</a></li><li><a href="#dynamic">Putting flow data in the card</a></li><li><a href="#buttons">Buttons that collect answers</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#card">From JSON to card</a></li><li><a href="#json">The JSON behind it</a></li><li><a href="#dynamic">Putting flow data in the card</a></li><li><a href="#buttons">Cards that collect answers</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

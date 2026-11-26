@@ -285,9 +285,9 @@ th .ico{width:15px;height:15px;vertical-align:-3px;margin-right:5px}
 .tl .row{display:grid;grid-template-columns:96px repeat(12,1fr);align-items:center;gap:3px}
 .tl .row span.s{height:16px;border-radius:4px;background:var(--accent);opacity:.85}
 .tl .row span.s.alt{background:#7C3AED}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:18px 0}
 .cards>div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.45}
-.cards>div strong{display:flex;align-items:center;color:var(--ink);margin-bottom:4px}
+.cards>div>strong:first-child{display:flex;align-items:center;color:var(--ink);margin-bottom:4px}
 table.breakdown td .chip{margin:0}
 
 .breakdown.trace th,.breakdown.trace td{padding:8px 10px}

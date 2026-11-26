@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Data types and conversions | Vinay Matsa</title>
-<meta name="description" content="Text, numbers, yes/no, arrays and objects: what each looks like and how to convert between them.">
+<meta name="description" content="Text, numbers, yes/no, arrays and objects: what each looks like, how to convert between them, Base64, and the math functions.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Data types and conversions">
-<meta property="og:description" content="Text, numbers, yes/no, arrays and objects: what each looks like and how to convert between them.">
+<meta property="og:description" content="Text, numbers, yes/no, arrays and objects: what each looks like, how to convert between them, Base64, and the math functions.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,73 +49,44 @@
       </div>
 
       <div class="prose">
-<p>Every value in a flow has a type. Most errors that beginners hit, such as <em>"expected Integer but got String"</em>, are type errors. Learn the six types and the handful of functions that convert between them, and these errors become easy to fix.</p>
+<p>Every value in a flow has a <strong>type</strong>. Most beginner errors, such as <em>expected Integer but got String</em>, are type errors. Learn the six types and the few functions that convert between them, and these errors become easy to fix.</p>
 
-<h2 id="six-types">The six types, with examples</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Type</th><th>Example value</th><th>Looks like</th></tr></thead><tbody>
-<tr><td>String (text)</td><td>Product</td><td><code>"Laptop"</code></td></tr>
-<tr><td>Integer</td><td>Quantity</td><td><code>3</code></td></tr>
-<tr><td>Float (decimal)</td><td>Unit price</td><td><code>49.99</code></td></tr>
-<tr><td>Boolean</td><td>In stock</td><td><code>true</code></td></tr>
-<tr><td>Array (list)</td><td>Tags</td><td><code>["hardware","office"]</code></td></tr>
-<tr><td>Object (record)</td><td>Order</td><td><code>{"id":101,"customer":"Contoso"}</code></td></tr>
-</tbody></table></div>
+<h2 id="six-types"><span class="ico ico-data"></span>The six types</h2>
+<div class="cards"><div><strong>What</strong>Each value is text, a whole number, a decimal, true/false, a list or a record.</div><div><strong>Why</strong>Functions only accept certain types. Comparing or adding the wrong type fails or gives wrong answers.</div><div><strong>Demo</strong>An order: product, quantity, price, stock flag, tags and the order record.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The demo's six variables</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Type</th><th>Variable</th><th>Value</th><th>Looks like in JSON</th></tr></thead><tbody><tr><td>String (text)</td><td>Product</td><td><span class="chip ">Laptop</span></td><td><code>"Laptop"</code></td></tr><tr><td>Integer</td><td>Quantity</td><td><span class="chip ">3</span></td><td><code>3</code></td></tr><tr><td>Float (decimal)</td><td>Unit price</td><td><span class="chip ">49.99</span></td><td><code>49.99</code></td></tr><tr><td>Boolean</td><td>In stock</td><td><span class="chip ok">true</span></td><td><code>true</code></td></tr><tr><td>Array (list)</td><td>Tags</td><td><span class="chip ">["hardware","office"]</span></td><td>square brackets</td></tr><tr><td>Object (record)</td><td>Order</td><td><span class="chip ">{"id":101,"customer":"Contoso"}</span></td><td>curly brackets</td></tr></tbody></table></div></div>
 
-<h2 id="convert">Converting between types</h2>
+<h2 id="convert"><span class="ico ico-expr"></span>Converting between types</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Common conversions</p><div class="fl"><div class="br"><div><span class="lbl c">text → number</span><div class="nd"><code>int('3')</code> → <span class="chip ">3</span></div><div class="ar"></div><div class="nd"><code>float('49.99')</code> → <span class="chip ">49.99</span></div></div><div><span class="lbl c">anything → text</span><div class="nd"><code>string(variables('Order'))</code> → <span class="chip ">{"id":101,…} (as text)</span></div></div><div><span class="lbl c">JSON text → object</span><div class="nd"><code>json('{"id":1}')</code> → object</div></div></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/order-as-text.webp" alt="Run results showing the Order object converted to the text {&quot;id&quot;:101,&quot;customer&quot;:&quot;Contoso&quot;}" width="900" height="401" loading="lazy">
-<figcaption><code>string(variables('Order'))</code> turns an object into JSON text, for example to put in an email.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Function</th><th>Does</th></tr></thead><tbody>
-<tr><td><code>string(x)</code></td><td>Any value to text</td></tr>
-<tr><td><code>int('3')</code> / <code>float('49.99')</code></td><td>Text to a number</td></tr>
-<tr><td><code>bool('true')</code></td><td>Text to yes/no</td></tr>
-<tr><td><code>json('{"id":1}')</code></td><td>JSON text back to an object or array</td></tr>
-<tr><td><code>createArray(1, 2, 3)</code></td><td>Builds an array from values</td></tr>
-<tr><td><code>base64(x)</code> / <code>base64ToString(x)</code></td><td>Text to Base64 and back; used for file content</td></tr>
-</tbody></table></div>
+<figcaption>string() turned the Order object into text.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Function</th><th>Does</th><th>Example</th></tr></thead><tbody><tr><td><code>string(x)</code></td><td>Any value to text</td><td><code>string(3)</code> → <code>"3"</code></td></tr><tr><td><code>int(x)</code> / <code>float(x)</code></td><td>Text to a number</td><td><code>float('49.99')</code> → <code>49.99</code></td></tr><tr><td><code>bool(x)</code></td><td>Text to yes/no</td><td><code>bool('true')</code> → <code>true</code></td></tr><tr><td><code>json(x)</code></td><td>JSON text back to an object or array</td><td><code>json('[1,2]')</code> → list</td></tr><tr><td><code>createArray(…)</code></td><td>Builds a list from values</td><td><code>createArray(1, 2, 3)</code></td></tr><tr><td><code>base64(x)</code> / <code>base64ToString(x)</code></td><td>Text to Base64 and back</td><td>see below</td></tr></tbody></table></div>
 
-<h2 id="read-object">Reading a field from an object</h2>
+<h2 id="read-object"><span class="ico ico-data"></span>Reading a field from an object</h2>
 <pre><code>variables(&#x27;Order&#x27;)?[&#x27;customer&#x27;]</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>variables(&#x27;Order&#x27;)</code></td><td>The whole object: <code>{"id":101,"customer":"Contoso"}</code>.</td></tr><tr><td><code>?[&#x27;customer&#x27;]</code></td><td>Reads one field by name, returning <em>Contoso</em>. Returns null instead of failing if the field is missing.</td></tr></tbody></table></div>
-<p>Maths works the same way: <code>mul(variables('Quantity'), variables('Unit price'))</code> multiplies 3 by 49.99. Decimal maths can show tiny rounding extras, so format money for display with <code>formatNumber(value, 'N2')</code>.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>variables(&#x27;Order&#x27;)</code></td><td>The whole object: <code>{"id":101,"customer":"Contoso"}</code>.</td></tr><tr><td><code>?[&#x27;customer&#x27;]</code></td><td>One field by name: <em>Contoso</em>. Returns null instead of failing if it's missing.</td></tr></tbody></table></div>
 
-<h2 id="base64">Base64: why files look strange</h2>
-<figure class="shot"><img src="../assets/img/pa/text-to-base64.webp" alt="Run results showing Hello Contoso converted to the Base64 text SGVsbG8gQ29udG9zbw==" width="900" height="401" loading="lazy">
-<figcaption><code>base64('Hello Contoso')</code> returns <code>SGVsbG8gQ29udG9zbw==</code>. File content often travels this way.</figcaption></figure>
-<p>When an action returns file content, it is usually wrapped as an object with <code>$content-type</code> and <code>$content</code> (Base64). You rarely decode it yourself; pass it straight to the action that saves or sends the file.</p>
-
-<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>JSON</strong>: the text format flows use to show data. Curly brackets <code>{ }</code> hold an object, square brackets <code>[ ]</code> hold an array, and text is in double quotes.</p>
-<p><strong>Null</strong>: "no value at all". It is different from an empty string <code>''</code>. Use <code>empty()</code> to test for both.</p>
-<p><strong>Why types matter</strong>: a number stored as text sorts as text ("10" comes before "9") and cannot be added. Convert first.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Create an instant flow named <em>Data Types</em>.</li><li>Add six <strong>Initialize variable</strong> actions: Product (String, Laptop), Quantity (Integer, 3), Unit price (Float, 49.99), In stock (Boolean, true), Tags (Array, <code>["hardware","office"]</code>), Order (Object, <code>{"id":101,"customer":"Contoso"}</code>).</li><li>Add Compose <em>Order total</em>: <code>mul(variables('Quantity'), variables('Unit price'))</code>.</li><li>Add Compose <em>Order as text</em>: <code>string(variables('Order'))</code>.</li><li>Add Compose <em>Customer</em>: <code>variables('Order')?['customer']</code>.</li><li>Add Compose <em>Text to Base64</em>: <code>base64('Hello Contoso')</code>, then <em>Back to text</em>: <code>base64ToString(outputs('Text_to_Base64'))</code>.</li><li>Test the flow and open each Compose card to compare the values.</li></ol></div></details>
-
-<h2 id="math">Math functions</h2>
-<p>Numbers in flows are calculated with functions, not with + and - signs. The demo runs each one with fixed numbers:</p>
+<h2 id="math"><span class="ico ico-expr"></span>Math functions</h2>
+<p>Numbers are calculated with functions, not <code>+</code> and <code>-</code>. The demo runs each one:</p>
 <figure class="shot"><img src="../assets/img/pa/ext-math.webp" alt="Math output: add(7, 3) 10, sub(7, 3) 4, mul(7, 3) 21, div(7, 2) 3, div(7.0, 2) 3.5, mod(7, 2) 1, min 2, max 9, formatNumber(1234.5, &#x27;N2&#x27;) 1,234.50, formatNumber(0.256, &#x27;P0&#x27;) 26%, rand(1, 100) 43" width="514" height="240" loading="lazy">
-<figcaption>The results of each math function in one run.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Function</th><th>Result here</th><th>Watch out for</th></tr></thead><tbody>
-<tr><td><code>add</code>, <code>sub</code>, <code>mul</code></td><td>10, 4, 21</td><td>Text such as <code>'7'</code> must be converted with <code>int()</code> or <code>float()</code> first.</td></tr>
-<tr><td><code>div(7, 2)</code></td><td><strong>3</strong></td><td>Two whole numbers give a whole number. The .5 is dropped.</td></tr>
-<tr><td><code>div(7.0, 2)</code></td><td>3.5</td><td>Make one side a decimal (or wrap it in <code>float()</code>) to keep the fraction.</td></tr>
-<tr><td><code>mod(7, 2)</code></td><td>1</td><td>The remainder. <code>mod(x, 2)</code> is 0 for even numbers.</td></tr>
-<tr><td><code>min</code>, <code>max</code></td><td>2, 9</td><td>Also accept one array: <code>max(createArray(4, 9, 2))</code>.</td></tr>
-<tr><td><code>formatNumber</code></td><td>1,234.50 and 26%</td><td>Returns text, so format only for display, at the end.</td></tr>
-<tr><td><code>rand(1, 100)</code></td><td>43</td><td>The upper number is never returned.</td></tr>
-</tbody></table></div>
+<figcaption>Each math function's result in one run.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>The same results, with the trap for each</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Function</th><th>Result</th><th>Watch out</th></tr></thead><tbody><tr><td><code>add(7,3)</code> / <code>sub</code> / <code>mul</code></td><td><span class="chip ">10</span><span class="chip ">4</span><span class="chip ">21</span></td><td>Convert text like <code>'7'</code> first.</td></tr><tr><td><code>div(7, 2)</code></td><td><span class="chip warn">3</span></td><td>Two whole numbers → whole number; .5 dropped.</td></tr><tr><td><code>div(7.0, 2)</code></td><td><span class="chip ok">3.5</span></td><td>Make one side decimal to keep the fraction.</td></tr><tr><td><code>mod(7, 2)</code></td><td><span class="chip ">1</span></td><td>Remainder. 0 means even.</td></tr><tr><td><code>min</code> / <code>max</code></td><td><span class="chip ">2</span><span class="chip ">9</span></td><td>Also take one list: <code>max(createArray(4,9,2))</code>.</td></tr><tr><td><code>formatNumber(1234.5,'N2')</code></td><td><span class="chip ">1,234.50</span></td><td>Returns text: format last, for display.</td></tr><tr><td><code>rand(1, 100)</code></td><td><span class="chip ">43</span></td><td>The upper number is never returned.</td></tr></tbody></table></div></div>
 <pre><code>div(float(triggerBody()?[&#x27;amount&#x27;]), 3)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>triggerBody()?[&#x27;amount&#x27;]</code></td><td>The amount, which may arrive as text.</td></tr><tr><td><code>float(...)</code></td><td>Turns it into a decimal number.</td></tr><tr><td><code>div(..., 3)</code></td><td>Divides by 3 and keeps the decimal part, because one side is a decimal.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>triggerBody()?[&#x27;amount&#x27;]</code></td><td>The amount, which may arrive as text.</td></tr><tr><td><code>float(...)</code></td><td>Turns it into a decimal number.</td></tr><tr><td><code>div(..., 3)</code></td><td>Divides and keeps the decimals, because one side is a decimal.</td></tr></tbody></table></div>
 
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Comparing a number with text in a condition, for example <code>'10'</code> greater than <code>9</code>. Convert with <code>int()</code> first.</li>
-<li>Calling <code>json()</code> on a value that is already an object. It only accepts text.</li>
-<li>Choosing the wrong variable type at Initialize. The type cannot change later in the run.</li>
-</ul>
+<h2 id="base64"><span class="ico ico-data"></span>Base64: why files look strange</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Text → Base64 → text</p><div class="fl"><div class="nd"><code>base64('Hello Contoso')</code></div><div class="ar"></div><div class="nd"><span class="chip ">SGVsbG8gQ29udG9zbw==</span></div><div class="ar"></div><div class="nd ok"><code>base64ToString(…)</code> → <span class="chip ok">"Hello Contoso"</span></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/text-to-base64.webp" alt="Run results showing Hello Contoso converted to the Base64 text SGVsbG8gQ29udG9zbw==" width="900" height="401" loading="lazy">
+<figcaption>Base64 is text that can carry any bytes, such as a file.</figcaption></figure>
+<p>File content usually arrives as an object with <code>$content-type</code> and <code>$content</code> (Base64). You rarely decode it: pass it straight to the action that saves or sends the file. Base64 isn't encryption; anyone can decode it.</p>
 
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (conversion functions)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-variable-store-values">Store and manage values in variables</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference</a></li></ul>
+<h3>Watch out</h3><ul><li>A number stored as text sorts as text: <em>"10"</em> comes before <em>"9"</em>. Convert first.</li><li><code>json()</code> only accepts text; calling it on an object fails.</li><li>A variable's type is fixed at Initialize and can't change later.</li></ul>
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>JSON</strong>: the text format flows use to show data. <code>{ }</code> holds an object, <code>[ ]</code> a list, text is in double quotes.</p>
+<p><strong>Null</strong>: no value at all, different from empty text <code>''</code>. <code>empty()</code> tests for both.</p></div></details>
+<details class="layer"><summary>Build it step by step <span>optional</span></summary>
+<div class="layer-body"><ol><li>Create an instant flow <em>Data Types</em> with six Initialize variable actions, one per type, using the demo values.</li><li>Add Compose <em>Order total</em>: <code>mul(variables('Quantity'), variables('Unit price'))</code>.</li><li>Add Compose <em>Order as text</em>: <code>string(variables('Order'))</code> and <em>Customer</em>: <code>variables('Order')?['customer']</code>.</li><li>Add Compose <em>Text to Base64</em>: <code>base64('Hello Contoso')</code> and <em>Back to text</em>: <code>base64ToString(outputs('Text_to_Base64'))</code>.</li><li>Test and open each Compose card.</li></ol></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Comparing a number with text in a condition. Convert with <code>int()</code> or <code>float()</code>.</li><li>Expecting <code>div(7, 2)</code> to give 3.5.</li><li>Formatting numbers with <code>formatNumber</code> before calculating with them.</li><li>Choosing the wrong variable type at Initialize.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-variable-store-values">Store and manage values in variables</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="dynamic-content-and-expressions.html">← Dynamic content and expressions</a><a href="variables-vs-compose.html">Variables vs Compose →</a></div>
@@ -124,7 +95,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#six-types">The six types, with examples</a></li><li><a href="#convert">Converting between types</a></li><li><a href="#read-object">Reading a field from an object</a></li><li><a href="#base64">Base64: why files look strange</a></li><li><a href="#math">Math functions</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#six-types">The six types</a></li><li><a href="#convert">Converting between types</a></li><li><a href="#read-object">Reading a field from an object</a></li><li><a href="#math">Math functions</a></li><li><a href="#base64">Base64: why files look strange</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dynamic content and expressions | Vinay Matsa</title>
-<meta name="description" content="Two ways to put values into an action: pick them from a list, or calculate them with a formula.">
+<meta name="description" content="Two ways to put values into an action: pick them from a list, or calculate them with a formula. How to read, write and debug expressions.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Dynamic content and expressions">
-<meta property="og:description" content="Two ways to put values into an action: pick them from a list, or calculate them with a formula.">
+<meta property="og:description" content="Two ways to put values into an action: pick them from a list, or calculate them with a formula. How to read, write and debug expressions.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,45 +49,40 @@
       </div>
 
       <div class="prose">
-<p>Almost every action box can take a value in one of two ways. <strong>Dynamic content</strong> lets you pick an output from an earlier step. An <strong>expression</strong> lets you calculate a new value with functions. Knowing when to use which is the first real skill in Power Automate.</p>
+<p>Almost every input box takes a value in one of two ways. <strong>Dynamic content</strong> picks an output from an earlier step. An <strong>expression</strong> calculates a new value with functions. Knowing which to use is the first real skill in Power Automate.</p>
 
-<h2 id="editor">The expression editor</h2>
+<h2 id="choose"><span class="ico ico-cond"></span>Dynamic content or expression?</h2>
+<div class="cards"><div><strong>What</strong>Dynamic content inserts a value an earlier step produced. An expression is a formula that works out a new value.</div><div><strong>Why</strong>Dynamic content is enough to <em>copy</em> a value; you need an expression to <em>change</em> it: join, cut, convert, calculate, decide.</div><div><strong>Demo</strong>Take the name <em>alex</em> and turn it into the initial <em>A</em>.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Which one do I need?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Do I need the value exactly as an earlier step gave it?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok"><strong>Dynamic content</strong>: pick it from the list</div></div><div><span class="lbl f">No, I need to change it</span><div class="nd ok"><strong>Expression</strong>: open <strong>fx</strong> and use functions</div></div></div></div></div>
+
+<h2 id="editor"><span class="ico ico-expr"></span>The expression editor</h2>
 <figure class="shot"><img src="../assets/img/pa/expression-editor.webp" alt="The expression editor with the concat greeting formula, a Copilot button and Function and Dynamic content tabs" width="475" height="446" loading="lazy">
-<figcaption>The editor has two tabs. Function lists every function; Dynamic content lists outputs of earlier steps.</figcaption></figure>
-<p>Open it with the <strong>fx</strong> icon that appears when you click in an input. Anything you add from the Dynamic content tab while the editor is open is inserted as an expression reference, so you can wrap it in functions.</p>
+<figcaption>Open it with the fx icon in any input. Dynamic content picked while it's open is inserted as an expression reference you can wrap in functions.</figcaption></figure>
 
-<h2 id="references-to-steps">How expressions point at other steps</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Expression</th><th>Returns</th></tr></thead><tbody>
-<tr><td><code>triggerBody()?['text']</code></td><td>An input from the trigger</td></tr>
-<tr><td><code>outputs('Greeting')</code></td><td>The result of the action named Greeting (spaces become underscores: <code>outputs('Name_length')</code>)</td></tr>
-<tr><td><code>body('Get_item')?['Title']</code></td><td>One field from an action that returns a record</td></tr>
-<tr><td><code>variables('Counter')</code></td><td>The current value of a variable</td></tr>
-<tr><td><code>items('Apply_to_each')</code></td><td>The current item inside a loop</td></tr>
-</tbody></table></div>
+<h2 id="references-to-steps"><span class="ico ico-data"></span>How expressions point at other steps</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Expression</th><th>Returns</th><th>Example value</th></tr></thead><tbody><tr><td><code>triggerBody()?['text']</code></td><td>An input from the trigger</td><td><span class="chip ">"alex"</span></td></tr><tr><td><code>outputs('Greeting')</code></td><td>The result of the action named Greeting (spaces become underscores)</td><td><span class="chip ">"Hello, alex!…"</span></td></tr><tr><td><code>body('Get_item')?['Title']</code></td><td>One field from an action that returns a record</td><td><span class="chip ">"Laptop request"</span></td></tr><tr><td><code>variables('Counter')</code></td><td>The current value of a variable</td><td><span class="chip ">3</span></td></tr><tr><td><code>items('Apply_to_each')</code></td><td>The current item inside a loop</td><td>the current row</td></tr></tbody></table></div>
 
-<h2 id="nesting">Reading a nested formula</h2>
-<p>Read from the inside out. Each function's result becomes the input of the one around it.</p>
+<h2 id="nesting"><span class="ico ico-expr"></span>Reading a nested formula: inside out</h2>
+<p>Each function's result becomes the input of the one around it. Read from the innermost brackets outwards:</p>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>toUpper(substring(triggerBody()?['text'], 0, 1)) with the name alex</p><div class="fl"><div class="nd">1. <code>triggerBody()?['text']</code> → <span class="chip ">"alex"</span></div><div class="ar"></div><div class="nd">2. <code>substring(…, 0, 1)</code>: 1 character from position 0 → <span class="chip ">"a"</span></div><div class="ar"></div><div class="nd ok">3. <code>toUpper(…)</code> → <span class="chip ok">"A"</span></div></div></div>
 <pre><code>toUpper(substring(triggerBody()?[&#x27;text&#x27;], 0, 1))</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>triggerBody()?[&#x27;text&#x27;]</code></td><td>Step 1: get the name, for example <em>alex</em>.</td></tr><tr><td><code>substring(..., 0, 1)</code></td><td>Step 2: take 1 character starting at position 0, giving <em>a</em>.</td></tr><tr><td><code>toUpper(...)</code></td><td>Step 3: make it upper case, giving <em>A</em>.</td></tr></tbody></table></div>
-<div class="callout"><strong>Tip:</strong> when a long formula misbehaves, split it across several Compose actions, one function each. Run the flow and see which step goes wrong.</div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>triggerBody()?[&#x27;text&#x27;]</code></td><td>Get the name.</td></tr><tr><td><code>substring(text, start, length)</code></td><td>Cut out part of the text. Positions start at <strong>0</strong>.</td></tr><tr><td><code>toUpper(...)</code></td><td>Make it upper case.</td></tr></tbody></table></div>
+<p>What if the name is empty? <code>substring</code> fails, because there's no character 0. Guard it:</p>
+<pre><code>if(empty(triggerBody()?[&#x27;text&#x27;]), &#x27;&#x27;, toUpper(substring(triggerBody()?[&#x27;text&#x27;], 0, 1)))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>empty(...)</code></td><td>True for null or empty text.</td></tr><tr><td><code>if(test, a, b)</code></td><td>Returns '' when empty, otherwise the initial.</td></tr></tbody></table></div>
+
+<h2 id="functions"><span class="ico ico-expr"></span>The function families you'll use most</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Family</th><th>Examples</th><th>Covered in</th></tr></thead><tbody><tr><td>Text</td><td><code>concat</code>, <code>substring</code>, <code>replace</code>, <code>split</code>, <code>toLower</code>, <code>trim</code></td><td>Text functions (Level 2)</td></tr><tr><td>Logic</td><td><code>if</code>, <code>equals</code>, <code>and</code>, <code>or</code>, <code>not</code>, <code>empty</code>, <code>coalesce</code></td><td>Conditions, Switch and loops; Handling nulls</td></tr><tr><td>Conversion</td><td><code>string</code>, <code>int</code>, <code>float</code>, <code>bool</code>, <code>json</code></td><td>Data types and conversions</td></tr><tr><td>Date and time</td><td><code>utcNow</code>, <code>addDays</code>, <code>formatDateTime</code>, <code>convertFromUtc</code></td><td>Dates and time zones (Level 2)</td></tr><tr><td>Collections</td><td><code>length</code>, <code>first</code>, <code>last</code>, <code>union</code>, <code>contains</code></td><td>Arrays and objects (Level 2)</td></tr><tr><td>Workflow</td><td><code>triggerBody</code>, <code>outputs</code>, <code>body</code>, <code>variables</code>, <code>items</code></td><td>This page</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>When a long formula misbehaves, split it across several Compose actions, one function each, and see which step goes wrong.</li><li><code>outputs()</code> for Compose; <code>body()</code> for connector actions (just the response body).</li><li>Use <code>?['field']</code>, not <code>['field']</code>, for fields that might be missing.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Function</strong>: a named operation that takes inputs in brackets and returns a value, like <code>length('abc')</code> returning 3.</p>
-<p><strong>Argument</strong>: a value you pass into a function, separated by commas.</p>
-<p><strong>The ? operator</strong>: <code>?['field']</code> means "read this field if it exists, otherwise return null". Without the question mark the flow fails when the field is missing.</p></div></details>
-
+<div class="layer-body"><p><strong>Function</strong>: a named operation that takes inputs in brackets and returns a value: <code>length('abc')</code> returns 3.</p>
+<p><strong>Argument</strong>: a value passed into a function, separated by commas.</p>
+<p><strong>The ? operator</strong>: <code>?['field']</code> reads a field if it exists, otherwise returns null.</p></div></details>
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Open your first flow and add a Compose action named <em>Initial</em>.</li><li>Click in Inputs and select <strong>fx</strong>.</li><li>Type <code>toUpper(substring(</code>, then switch to the <strong>Dynamic content</strong> tab and select <em>Name</em>.</li><li>Finish the formula with <code>, 0, 1))</code> and select <strong>Add</strong>.</li><li>Save and test with the name <em>alex</em>. The Initial card should show <em>A</em>.</li><li>Now test with an empty name. <code>substring</code> fails because there is no character 0. Fix it with <code>if(empty(triggerBody()?['text']), '', toUpper(substring(triggerBody()?['text'], 0, 1)))</code>.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Renaming an action after other steps refer to it. The new designer updates references, but expressions typed as text in older flows can break. Name actions before you use them.</li>
-<li>Mixing up <code>outputs()</code> and <code>body()</code>. For Compose use <code>outputs()</code>; for connector actions, <code>body()</code> returns just the response body.</li>
-<li>Forgetting that positions start at 0, not 1.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/expression-cookbook">Expression cookbook for cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/use-expressions-in-conditions">Use expressions in conditions</a></li></ul>
+<div class="layer-body"><ol><li>Open your first flow and add a Compose named <em>Initial</em>.</li><li>Click in Inputs, select <strong>fx</strong>, type <code>toUpper(substring(</code>, switch to Dynamic content and pick <em>Name</em>.</li><li>Finish with <code>, 0, 1))</code> and select Add.</li><li>Test with <em>alex</em>: Initial shows <em>A</em>. Test with an empty name: it fails. Replace it with the guarded <code>if(empty(…))</code> version.</li></ol></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Renaming an action after expressions refer to it. Name actions first.</li><li>Mixing up <code>outputs()</code> and <code>body()</code>.</li><li>Forgetting that positions start at 0, not 1.</li><li>Typing a formula without <strong>fx</strong>, so it's saved as plain text.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/expression-cookbook">Expression cookbook for cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/use-expressions-in-conditions">Use expressions in conditions</a></li></ul>
       </div>
 
       <div class="pager"><a href="first-flow.html">← Your first flow: trigger, actions and a test run</a><a href="data-types.html">Data types and conversions →</a></div>
@@ -96,7 +91,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#editor">The expression editor</a></li><li><a href="#references-to-steps">How expressions point at other steps</a></li><li><a href="#nesting">Reading a nested formula</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#choose">Dynamic content or expression?</a></li><li><a href="#editor">The expression editor</a></li><li><a href="#references-to-steps">How expressions point at other steps</a></li><li><a href="#nesting">Reading a nested formula: inside out</a></li><li><a href="#functions">The function families you'll use most</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

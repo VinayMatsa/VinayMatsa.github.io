@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scopes and the try / catch pattern | Vinay Matsa</title>
-<meta name="description" content="Group steps into Try, Catch and Finally scopes so a failure is caught and handled instead of ending the run.">
+<meta name="description" content="Group steps into Try, Catch and Finally scopes so a failure is caught and handled instead of ending the run, and read the real error with result().">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Scopes and the try / catch pattern">
-<meta property="og:description" content="Group steps into Try, Catch and Finally scopes so a failure is caught and handled instead of ending the run.">
+<meta property="og:description" content="Group steps into Try, Catch and Finally scopes so a failure is caught and handled instead of ending the run, and read the real error with result().">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,45 +49,31 @@
       </div>
 
       <div class="prose">
-<p>By default, when one step fails, every step after it is skipped and the run ends as Failed. Nobody is told, and nothing is cleaned up. The <strong>try / catch / finally</strong> pattern fixes that with three <strong>Scope</strong> actions: put the work in <em>Try</em>, the recovery in <em>Catch</em>, and anything that must always happen in <em>Finally</em>.</p>
+<p>By default, when one step fails, every step after it is skipped and the run ends Failed: nobody's told and nothing's cleaned up. <strong>Try / catch / finally</strong> fixes that with three <strong>Scope</strong> actions.</p>
 
-<h2 id="pattern">The pattern in one picture</h2>
+<h2 id="pattern"><span class="ico ico-scope"></span>The pattern</h2>
+<div class="cards"><div><strong>What</strong>Three scopes: Try holds the work, Catch handles failures, Finally always runs.</div><div><strong>Why</strong>One place to catch any failure, find the error and tell someone, instead of a failure branch on every action.</div><div><strong>Demo</strong>An order with the amount <em>not a number</em> makes Calculate tax fail.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>Try / Catch / Finally</p><div class="fl"><div class="nd act"><strong>Try</strong>: Read order → Calculate tax</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Did Try fail or time out?</div><div class="ar"></div><div class="br"><div><span class="lbl f">Yes</span><div class="nd"><strong>Catch</strong>: find the error → alert → log</div></div><div><span class="lbl t">No</span><div class="nd mute">Catch is skipped</div></div></div><div class="ar"></div><div class="nd ok"><strong>Finally</strong>: runs after Catch whatever happened (clean-up, summary)</div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-scope"></span>Scope</th><th>Contains</th><th>Run after</th></tr></thead><tbody><tr><td>Try</td><td>The real work</td><td>The trigger</td></tr><tr><td>Catch</td><td>Find the error, alert, log</td><td>Try <strong>has failed</strong> or <strong>has timed out</strong></td></tr><tr><td>Finally</td><td>Clean-up, summary, log entry</td><td>Catch: all four outcomes</td></tr></tbody></table></div>
 <figure class="shot"><img src="../assets/img/pa/l4-trycatch-overview.webp" alt="Run view: Try scope failed (ActionFailed), Catch scope succeeded, Finally scope succeeded; small coloured dots above Catch and Finally show their run-after settings" width="400" height="446" loading="lazy">
-<figcaption>Try failed, so Catch ran. Finally ran too. The coloured dots above each scope show which outcomes it runs after.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Scope</th><th>Contains</th><th>Runs after</th></tr></thead><tbody>
-<tr><td>Try</td><td>The real work: Read order, Calculate tax</td><td>The trigger</td></tr>
-<tr><td>Catch</td><td>Find the error, alert, log</td><td>Try <strong>has failed</strong> or <strong>has timed out</strong></td></tr>
-<tr><td>Finally</td><td>Clean-up, a summary, a log entry</td><td>Catch <strong>succeeded, failed, skipped or timed out</strong> (anything)</td></tr>
-</tbody></table></div>
-<p>In the demo, an order arrives with the amount <em>"not a number"</em>. Calculate tax tries <code>int()</code> on it and fails, which fails the Try scope and starts Catch.</p>
+<figcaption>Try failed, Catch and Finally ran.</figcaption></figure>
 
-<h2 id="error">Finding out what went wrong</h2>
-<p>Inside Catch, <code>result('Try')</code> returns every action in the Try scope with its status and error. Filter it to the failed ones:</p>
+<h2 id="error"><span class="ico ico-expr"></span>Finding out what went wrong</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Inside Catch</p><div class="fl"><div class="nd"><code>result('Try')</code>: every action in Try, with status and error</div><div class="ar"></div><div class="nd"><strong>Filter array</strong> <em>Failed actions</em>: <code>equals(item()?['status'], 'Failed')</code></div><div class="ar"></div><div class="nd ok"><code>first(body('Failed_actions'))?['error']?['message']</code> → the real message</div></div></div>
 <pre><code>first(body(&#x27;Failed_actions&#x27;))?[&#x27;error&#x27;]?[&#x27;message&#x27;]</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>result(&#x27;Try&#x27;)</code></td><td>Used in a <strong>Filter array</strong> named Failed actions: the list of actions inside Try with their status.</td></tr><tr><td><code>where status equals &#x27;Failed&#x27;</code></td><td>Keeps only the action that failed.</td></tr><tr><td><code>first(...)?[&#x27;error&#x27;]?[&#x27;message&#x27;]</code></td><td>Its error message, ready to put in an alert or log.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>body(&#x27;Failed_actions&#x27;)</code></td><td>The failed actions from <code>result('Try')</code>.</td></tr><tr><td><code>first(...)</code></td><td>The first one: Calculate tax.</td></tr><tr><td><code>?[&#x27;error&#x27;]?[&#x27;message&#x27;]</code></td><td>Its error text.</td></tr></tbody></table></div>
 <figure class="shot"><img src="../assets/img/pa/l4-trycatch-error.webp" alt="Error message output: Unable to process template language expressions in action &#x27;Calculate_tax&#x27;... The template language function &#x27;int&#x27; was invoked with a parameter that is not valid." width="505" height="300" loading="lazy">
-<figcaption>The exact reason, captured inside the flow rather than only in run history.</figcaption></figure>
+<figcaption>The real cause: int() was given text that isn't a number.</figcaption></figure>
 
-<h2 id="status">Why the run says Succeeded</h2>
-<p>This run shows <em>Your flow ran successfully</em> even though Calculate tax failed. Power Automate judges a run by its last steps, and Finally succeeded. That's fine when Catch really handled the problem. When it didn't, the run should still be marked as Failed so it shows up in monitoring. The <strong>Terminate</strong> action does that (see Error alerts and Terminate).</p>
+<h2 id="status"><span class="ico ico-warn"></span>Why the run says Succeeded</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>Run status is judged by the last steps</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Scope</th><th>Status</th></tr></thead><tbody><tr><td>Try</td><td><span class="lbl f">Failed</span></td></tr><tr><td>Catch</td><td><span class="lbl t">Succeeded</span></td></tr><tr><td>Finally</td><td><span class="lbl t">Succeeded</span></td></tr><tr><td><strong>Run</strong></td><td><span class="lbl t">Succeeded</span> ← misleading if Catch didn't fix it</td></tr></tbody></table></div></div>
+<p>That's fine when Catch really handled the problem. When it didn't, end Catch with <strong>Terminate</strong> (Failed) so monitoring sees the truth. See Error alerts and Terminate.</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Scope</strong>: a container that groups actions. The scope's status is the combined status of what's inside it.</p>
-<p><strong>Run after</strong>: the setting that decides when an action runs: after the previous one succeeded, failed, was skipped or timed out. The next article covers it in detail.</p>
-<p><strong>result('ScopeName')</strong>: an expression that returns the outcome of every action inside a scope.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Add a <strong>Scope</strong> named <em>Try</em> and move your main actions into it.</li><li>Add a second Scope named <em>Catch</em> below it. Open its <strong>Settings</strong> &gt; <strong>Run after</strong>, tick <em>has failed</em> and <em>has timed out</em>, and untick <em>is successful</em>.</li><li>Inside Catch add <strong>Filter array</strong>: From <code>result('Try')</code>, where <code>item()?['status']</code> is equal to <code>Failed</code>.</li><li>Add a Compose with <code>first(body('Filter_array'))?['error']?['message']</code>.</li><li>Add a third Scope named <em>Finally</em>, set to run after Catch for all four outcomes.</li><li>Make a step in Try fail on purpose (for example <code>int('abc')</code>) and test.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Leaving Catch on the default <em>is successful</em>. It is then skipped exactly when you need it.</li>
-<li>Catching everything and reporting nothing. A Catch scope with no alert or log hides failures.</li>
-<li>One huge Try around the whole flow. Smaller Try scopes per stage tell you which stage broke.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/scopes">Use scopes to organize actions in cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Employ robust error handling</a></li></ul>
+<div class="layer-body"><p><strong>Scope</strong>: a container that groups actions; its status is the combined status of its contents.</p>
+<p><strong>result('Scope')</strong>: the outcome of every action inside a scope.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Catch that only runs on <em>has failed</em>, missing timeouts.</li><li>Alerting without the real error message.</li><li>Leaving failed runs marked Succeeded.</li><li>Using <code>result()</code> on a scope that isn't the direct container.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/scopes">Use scopes to organize actions in cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Employ robust error handling</a></li></ul>
       </div>
 
       <div class="pager"><a href="./">← All Power Automate topics</a><a href="configure-run-after.html">Configure run after →</a></div>
@@ -96,7 +82,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#pattern">The pattern in one picture</a></li><li><a href="#error">Finding out what went wrong</a></li><li><a href="#status">Why the run says Succeeded</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#pattern">The pattern</a></li><li><a href="#error">Finding out what went wrong</a></li><li><a href="#status">Why the run says Succeeded</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

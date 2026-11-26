@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Configure run after | Vinay Matsa</title>
-<meta name="description" content="Decide, step by step, whether an action runs after the previous one succeeded, failed, was skipped or timed out.">
+<meta name="description" content="Decide, step by step, whether an action runs after the previous one succeeded, failed, was skipped or timed out: the basis of every failure branch.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Configure run after">
-<meta property="og:description" content="Decide, step by step, whether an action runs after the previous one succeeded, failed, was skipped or timed out.">
+<meta property="og:description" content="Decide, step by step, whether an action runs after the previous one succeeded, failed, was skipped or timed out: the basis of every failure branch.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,40 +49,26 @@
       </div>
 
       <div class="prose">
-<p>Every action has a <strong>Run after</strong> setting. By default it is <em>is successful</em>: run only if the step before it worked. Changing it is how you build failure branches, clean-up steps and the try / catch pattern.</p>
+<p>Every action has a <strong>Run after</strong> setting. By default it's <em>is successful</em>: run only if the step before worked. Changing it is how you build failure branches, clean-up steps and try / catch.</p>
 
-<h2 id="demo">Three branches after one risky step</h2>
+<h2 id="what"><span class="ico ico-arrow"></span>The four outcomes</h2>
+<div class="cards"><div><strong>What</strong>A setting on each action that lists which outcomes of the previous step let it run.</div><div><strong>Why</strong>Without it, the first failure skips everything after it and nobody is told.</div><div><strong>Demo</strong>One risky step, then three steps: on success, on failure, always.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>One risky step, three branches</p><div class="fl"><div class="nd act"><strong>Risky step</strong> → fails with InvalidTemplate</div><div class="ar"></div><div class="br"><div><span class="lbl t">is successful</span><div class="nd mute"><strong>Only on success</strong>: skipped</div></div><div><span class="lbl f">has failed</span><div class="nd ok"><strong>Only on failure</strong>: ran</div></div><div><span class="lbl c">all four</span><div class="nd ok"><strong>Always</strong>: ran</div></div></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l4-runafter-canvas.webp" alt="Run view: Risky step failed with InvalidTemplate; Only on success was skipped; Only on failure succeeded; Always succeeded" width="400" height="430" loading="lazy">
-<figcaption>Risky step failed. The success branch was skipped (grey), the failure branch ran, and Always ran either way.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Action</th><th>Run after setting</th><th>Result here</th></tr></thead><tbody>
-<tr><td>Only on success</td><td>Risky step <em>is successful</em></td><td>Skipped</td></tr>
-<tr><td>Only on failure</td><td>Risky step <em>has failed</em></td><td>Ran</td></tr>
-<tr><td>Always</td><td>Both branches: all four outcomes ticked</td><td>Ran</td></tr>
-</tbody></table></div>
+<figcaption>The run: the failure branch and Always ran.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Run after setting vs what happened</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Action</th><th>Runs after Risky step when…</th><th>Risky step failed, so…</th></tr></thead><tbody><tr><td>Only on success</td><td><span class="chip ">is successful</span></td><td><span class="lbl d">skipped</span></td></tr><tr><td>Only on failure</td><td><span class="chip ">has failed</span></td><td><span class="lbl t">ran</span></td></tr><tr><td>Always</td><td><span class="chip ">successful</span><span class="chip ">failed</span><span class="chip ">skipped</span><span class="chip ">timed out</span></td><td><span class="lbl t">ran</span></td></tr></tbody></table></div></div>
 
-<h2 id="setting">Where the setting lives</h2>
+<h2 id="setting"><span class="ico ico-scope"></span>Where the setting lives</h2>
 <figure class="shot"><img src="../assets/img/pa/l4-runafter-settings.webp" alt="Settings tab, Run after section for Only on failure: Risky step with Is successful, Has timed out and Is skipped unticked and Has failed ticked" width="490" height="310" loading="lazy">
-<figcaption>Select the action, open Settings, expand the step under Run after and tick the outcomes.</figcaption></figure>
-<p>The four outcomes are <strong>is successful</strong>, <strong>has timed out</strong>, <strong>is skipped</strong> and <strong>has failed</strong>. Tick more than one to run on any of them. On the canvas, a dashed arrow with coloured dots marks a step whose run after is not the default.</p>
-<div class="callout"><strong>Skipped spreads:</strong> when a step is skipped, steps that run after it on <em>is successful</em> are skipped too. That's why <em>Always</em> must also tick <em>is skipped</em>, otherwise it would be skipped whenever one of its branches is.</div>
+<figcaption>Action → Settings → Run after. Tick one or more outcomes.</figcaption></figure>
+<p>On the canvas, a dashed arrow with coloured dots marks a step whose run after isn't the default.</p>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>Why “Always” must tick <em>is skipped</em></p><div class="fl"><div class="nd">Step A fails</div><div class="ar"></div><div class="nd">Step B (runs on success of A) is <strong>skipped</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Does Step C (after B) tick <em>is skipped</em>?</div><div class="ar"></div><div class="br"><div><span class="lbl f">No</span><div class="nd mute">C is skipped too: skipped spreads</div></div><div><span class="lbl t">Yes</span><div class="nd ok">C runs</div></div></div></div></div>
+<h3>Watch out</h3><ul><li>A run whose failure was handled by a failure branch can still end as <strong>Succeeded</strong>. Use Terminate to mark it failed (see Error alerts and Terminate).</li><li>Run after can only point at steps at the same level; to react to a group, wrap it in a Scope.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Succeeded / Failed / Skipped / TimedOut</strong>: the four ways an action can finish.</p>
-<p><strong>Branch</strong>: two actions that both run after the same step form parallel branches; each has its own run after.</p>
-<p><strong>Run status</strong>: a run where a failure was handled by a failure branch can still end as Succeeded.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Add a Compose named <em>Risky step</em> with <code>int('abc')</code> (it always fails).</li><li>Add <em>Only on success</em> after it and leave Run after as is.</li><li>Hover the arrow above Only on success, select <strong>+</strong> &gt; <strong>Add a parallel branch</strong>, and add <em>Only on failure</em>. In its Settings, set Run after to <em>has failed</em> only.</li><li>Add <em>Always</em> below both branches and set Run after for each branch to all four outcomes.</li><li>Test, then change Risky step to <code>int('5')</code> and test again to see the branches swap.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Forgetting <em>has timed out</em> on failure handlers. Slow services time out rather than fail.</li>
-<li>A failure branch that itself fails with no handler. Keep failure branches simple and safe.</li>
-<li>Setting run after on the wrong step: it refers to the step directly before, not the whole flow.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Employ robust error handling (Configure run after)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li></ul>
+<div class="layer-body"><p><strong>Succeeded / Failed / Skipped / TimedOut</strong>: the four ways an action can finish.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Forgetting <em>is skipped</em> on a step that must always run.</li><li>Failure branches on every single action instead of one Scope.</li><li>Leaving a handled failure showing Succeeded with nobody told.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Employ robust error handling (Configure run after)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="scopes-try-catch.html">← Scopes and the try / catch pattern</a><a href="retry-policies-timeouts.html">Retry policies and timeouts →</a></div>
@@ -91,7 +77,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#demo">Three branches after one risky step</a></li><li><a href="#setting">Where the setting lives</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#what">The four outcomes</a></li><li><a href="#setting">Where the setting lives</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

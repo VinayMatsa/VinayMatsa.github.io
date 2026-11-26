@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Retry policies and timeouts | Vinay Matsa</title>
-<meta name="description" content="Let temporary failures fix themselves with retries, and understand what the action timeout really limits.">
+<meta name="description" content="Let temporary failures fix themselves with retries, understand what the action timeout really limits, and wait on purpose with Delay.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Retry policies and timeouts">
-<meta property="og:description" content="Let temporary failures fix themselves with retries, and understand what the action timeout really limits.">
+<meta property="og:description" content="Let temporary failures fix themselves with retries, understand what the action timeout really limits, and wait on purpose with Delay.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,57 +49,34 @@
       </div>
 
       <div class="prose">
-<p>Many failures are temporary: a service is busy, a network blip, a 429 "too many requests". Power Automate retries these automatically. Knowing the rules lets you make a flow patient where it should be and fast to fail where it shouldn't wait.</p>
+<p>Many failures are temporary: a busy service, a network blip, a 429 <em>too many requests</em>. Power Automate retries these automatically. Knowing the rules lets you make a flow patient where it should be and fast to fail where it shouldn't wait.</p>
 
-<h2 id="demo">The demo</h2>
+<h2 id="retries"><span class="ico ico-until"></span>Retries</h2>
+<div class="cards"><div><strong>What</strong>A retry policy on each action decides how often and how long to try again after a temporary error.</div><div><strong>Why</strong>Most temporary errors fix themselves seconds later; retries avoid failed runs for nothing.</div><div><strong>Demo</strong>A call to a test address that always answers 503: Fixed interval, 3 retries, every 5 seconds.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>What happens on an error</p><div class="fl"><div class="nd act">Action calls the service</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Is the error temporary? (408, 429, 5xx, connection)</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd">Wait, then retry (up to the policy's count)</div><div class="ar"></div><div class="nd ok">Succeeds, or fails after the last retry</div></div><div><span class="lbl f">No (400, 401, 404)</span><div class="nd mute">Fail now: retrying won't change the answer</div></div></div></div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>The demo: 503 every time</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Attempt</th><th>Wait before</th><th>Result</th></tr></thead><tbody><tr><td>1 (original)</td><td>–</td><td><span class="chip warn">503</span></td></tr><tr><td>Retry 1</td><td>5 s</td><td><span class="chip warn">503</span></td></tr><tr><td>Retry 2</td><td>5 s</td><td><span class="chip warn">503</span></td></tr><tr><td>Retry 3</td><td>5 s</td><td><span class="chip warn">503</span> → <span class="lbl f">Failed after 21 s</span></td></tr></tbody></table></div></div>
 <figure class="shot"><img src="../assets/img/pa/l4-retry-canvas.webp" alt="Run view: Call a failing service took 21s and failed with ServiceUnavailable; Call a slow service succeeded in 11s; Handle timeout was skipped" width="400" height="305" loading="lazy">
-<figcaption>The failing call took 21 seconds because it was retried. The slow call took 11 seconds despite a 3-second timeout.</figcaption></figure>
-
-<h2 id="retries">Retries</h2>
-<p>The first HTTP call goes to a test address that always answers <strong>503 Service Unavailable</strong>. Its retry policy is <em>Fixed interval, 3 retries, every 5 seconds</em>.</p>
+<figcaption>The demo run.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l4-retry-summary.webp" alt="Run results banner: 3 retries occurred, ServiceUnavailable, for a GET to a test URL returning status 503" width="490" height="160" loading="lazy">
-<figcaption>One original attempt plus 3 retries, then it gave up.</figcaption></figure>
+<figcaption>The banner shows how many retries happened.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l4-retry-history.webp" alt="Retry history tab, retry 1 of 3: duration 0.9 seconds, status ServiceUnavailable" width="490" height="420" loading="lazy">
-<figcaption>The Retry history tab lists every attempt with its time and status.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Policy</th><th>Behaviour</th></tr></thead><tbody>
-<tr><td>Default</td><td>Exponential back-off: waits grow longer between attempts</td></tr>
-<tr><td>Exponential interval</td><td>You set the count and the minimum and maximum wait</td></tr>
-<tr><td>Fixed interval</td><td>You set the count and one wait, as in the demo</td></tr>
-<tr><td>None</td><td>Fail immediately; use it when a quick failure is better than waiting</td></tr>
-</tbody></table></div>
-<p>Retries happen only for temporary errors: <strong>408</strong> (timeout), <strong>429</strong> (too many requests), <strong>5xx</strong> (server errors) and connection problems. A <strong>400</strong>, <strong>401</strong> or <strong>404</strong> is never retried, because trying again won't change the answer.</p>
+<figcaption>Each retry is recorded.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-until"></span>Policy</th><th>Behaviour</th><th>Use when</th></tr></thead><tbody><tr><td>Default</td><td>Exponential back-off: waits grow longer</td><td>Most actions</td></tr><tr><td>Exponential interval</td><td>You set count, min and max wait</td><td>Busy services</td></tr><tr><td>Fixed interval</td><td>You set count and one wait</td><td>Predictable tests, as in the demo</td></tr><tr><td>None</td><td>Fail immediately</td><td>A quick failure beats waiting</td></tr></tbody></table></div>
 
-<h2 id="timeout">Timeouts</h2>
+<h2 id="timeout"><span class="ico ico-clock"></span>Timeouts: what they really limit</h2>
 <figure class="shot"><img src="../assets/img/pa/l4-timeout-setting.webp" alt="General settings, Action timeout set to PT3S (ISO-8601 duration)" width="490" height="100" loading="lazy">
-<figcaption>Action timeout uses ISO-8601 durations: PT3S is 3 seconds, PT10M is 10 minutes, P1D is one day.</figcaption></figure>
-<p>The second call asks a test service to wait 10 seconds before answering, with an action timeout of 3 seconds. It still succeeded after 11 seconds. The action timeout limits the total time an action spends on <em>retries and asynchronous (long-running) responses</em>. It doesn't cut off a single request that is still waiting for its answer. Use it for actions that run a long time in the background, such as approvals, waits for a response, or APIs that reply "accepted, check back later".</p>
-<div class="callout"><strong>Practical rule:</strong> to stop waiting on a slow API, ask the API for a shorter server-side timeout, or move the call to a child flow and handle its failure in the parent.</div>
+<figcaption>Action timeout PT3S.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>The surprise</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Setting</th><th>Value</th></tr></thead><tbody><tr><td>Service answers after</td><td>10 s</td></tr><tr><td>Action timeout</td><td>PT3S</td></tr><tr><td>Result</td><td><span class="lbl t">Succeeded in 11 s</span></td></tr></tbody></table></div><p class="viz-note">The action timeout limits time spent on retries and asynchronous (long-running) responses, not one single HTTP request.</p></div>
+<p>To stop waiting on a slow API, ask the API for a shorter server-side timeout, or move the call into a child flow and handle its failure in the parent.</p>
+
+<h2 id="delay"><span class="ico ico-clock"></span>Waiting on purpose: Delay and Delay until</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-clock"></span>Action</th><th>Waits</th><th>Example</th></tr></thead><tbody><tr><td>Delay</td><td>A fixed time</td><td>2 minutes before reading a just-uploaded Excel file</td></tr><tr><td>Delay until</td><td>Until a date and time</td><td><code>addDays(utcNow(), 3)</code> for a reminder</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>A waiting run still counts toward the 30-day run limit. For long waits, a scheduled flow that checks what's due is safer.</li><li>ISO 8601 durations: <code>PT5S</code> 5 seconds, <code>PT1H</code> 1 hour, <code>P2D</code> 2 days.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Transient error</strong>: a failure that goes away by itself if you try again a little later.</p>
-<p><strong>Back-off</strong>: waiting longer between each retry so a busy service has time to recover.</p>
-<p><strong>ISO-8601 duration</strong>: <code>P</code> starts it, <code>T</code> separates days from time. <code>PT5S</code> = 5 seconds, <code>PT1H</code> = 1 hour, <code>P2D</code> = 2 days.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Add an <strong>HTTP</strong> action calling a test endpoint that returns 503.</li><li>Open <strong>Settings</strong> &gt; <strong>Networking</strong> &gt; <strong>Retry policy</strong>: Fixed interval, Count 3, Interval <code>PT5S</code>.</li><li>Test, open the failed action and look at <strong>Retry history</strong>.</li><li>Change the policy to <em>None</em> and test again: it fails in under a second.</li><li>Add a Compose after it with Run after set to <em>has failed</em> to handle the final failure.</li></ol></div></details>
-
-<h2 id="delay">Delay and Delay until</h2>
-<p>Sometimes a flow should wait on purpose: give a file time to finish saving, space out calls to a busy service, or send a reminder later.</p>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Action</th><th>Waits</th><th>Example</th></tr></thead><tbody>
-<tr><td><strong>Delay</strong></td><td>A fixed amount of time</td><td>Count 2, Unit Minute, before reading an Excel file that was just uploaded</td></tr>
-<tr><td><strong>Delay until</strong></td><td>Until a date and time</td><td><code>addDays(utcNow(), 3)</code> for a reminder in three days</td></tr>
-</tbody></table></div>
-<p>A waiting run still counts toward the 30-day run limit. For waits longer than a few days, a scheduled flow that checks what is due is usually safer than one long run.</p>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Retrying actions that create records. A retry after a timeout can create a duplicate; make the target check for an existing record first.</li>
-<li>Setting huge retry counts on a flow that runs every minute. Runs pile up while each one waits.</li>
-<li>Expecting the action timeout to cancel a slow synchronous request (see above).</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Employ robust error handling (retry policies)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/schedule/">Schedule connector (Delay, Delay until)</a></li></ul>
+<div class="layer-body"><p><strong>Transient error</strong>: a failure that goes away if you try again later.</p><p><strong>Back-off</strong>: waiting longer between each retry.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Turning retries off on calls to busy services.</li><li>Expecting the action timeout to cut a single slow request.</li><li>Week-long Delays instead of a scheduled check.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Employ robust error handling (retry policies)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/schedule/">Schedule connector (Delay, Delay until)</a></li></ul>
       </div>
 
       <div class="pager"><a href="configure-run-after.html">← Configure run after</a><a href="concurrency-control.html">Concurrency control →</a></div>
@@ -108,7 +85,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#demo">The demo</a></li><li><a href="#retries">Retries</a></li><li><a href="#timeout">Timeouts</a></li><li><a href="#delay">Delay and Delay until</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#retries">Retries</a></li><li><a href="#timeout">Timeouts: what they really limit</a></li><li><a href="#delay">Waiting on purpose: Delay and Delay until</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

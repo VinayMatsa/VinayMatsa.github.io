@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pagination and thresholds | Vinay Matsa</title>
-<meta name="description" content="Why a list action stops at a page of rows, and how to ask for all of them.">
+<meta name="description" content="Why a list action stops at one page of rows, how to ask for all of them with pagination, and what to do before you need it.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Pagination and thresholds">
-<meta property="og:description" content="Why a list action stops at a page of rows, and how to ask for all of them.">
+<meta property="og:description" content="Why a list action stops at one page of rows, how to ask for all of them with pagination, and what to do before you need it.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,47 +49,29 @@
       </div>
 
       <div class="prose">
-<p>Actions that return lists (Dataverse <em>List rows</em>, SharePoint <em>Get items</em>, Excel <em>List rows present in a table</em>) return one <strong>page</strong> of results by default. If your data is bigger than a page, the flow silently works on part of it. <strong>Pagination</strong> tells the action to keep fetching pages until it reaches a <strong>threshold</strong>.</p>
+<p>List actions return one <strong>page</strong> of results per request. Unless you turn on <strong>pagination</strong>, you get the first page only, with no error: the run succeeds but misses data.</p>
 
-<h2 id="demo">Row count vs pagination</h2>
+<h2 id="demo"><span class="ico ico-data"></span>Row count vs pagination</h2>
+<div class="cards"><div><strong>What</strong>Row count limits how many rows you get; pagination keeps fetching pages until a threshold.</div><div><strong>Why</strong>Silent truncation is one of the hardest bugs to notice: nothing fails, data is just missing.</div><div><strong>Demo</strong>The same Dataverse query, once with Row count 2 and once with pagination on.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>How pages are collected</p><div class="fl"><div class="nd act">List rows: request page 1</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Pagination on, more pages, and under the threshold?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd mute">↺ request the next page</div></div><div><span class="lbl f">No</span><div class="nd ok">Return what's collected</div></div></div></div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The demo's counts</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Action</th><th>Setting</th><th>Rows returned</th></tr></thead><tbody><tr><td>List first 2 rows</td><td>Row count 2</td><td><span class="chip ">2</span></td></tr><tr><td>List all with pagination</td><td>Pagination on, threshold 5000</td><td><span class="chip ok">5</span></td></tr></tbody></table></div></div>
 <figure class="shot"><img src="../assets/img/pa/l4-pagination-canvas.webp" alt="Run view: List first 2 rows, List all with pagination, Row counts, all succeeded" width="400" height="285" loading="lazy">
-<figcaption>Two List rows actions on the same table and filter.</figcaption></figure>
+<figcaption>Both actions in the run.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l4-pagination-counts.webp" alt="Row counts: Row count 2 returned 2, Pagination on returned 5" width="490" height="290" loading="lazy">
-<figcaption>Row count 2 returned exactly 2 rows. The second action returned all 5 matching sample rows.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Setting</th><th>Means</th></tr></thead><tbody>
-<tr><td>Row count / Top Count</td><td>"Give me at most this many." Use it when you only want the first few.</td></tr>
-<tr><td>Pagination + Threshold</td><td>"Keep fetching pages until you have this many." Use it to read everything.</td></tr>
-</tbody></table></div>
+<figcaption>The counts.</figcaption></figure>
 
-<h2 id="setting">Turning pagination on</h2>
+<h2 id="setting"><span class="ico ico-scope"></span>Turning pagination on</h2>
 <figure class="shot"><img src="../assets/img/pa/l4-pagination-setting.webp" alt="Networking settings: Pagination On, Threshold 5000, with the note that due to the connector&#x27;s page size the number returned may exceed the threshold" width="490" height="142" loading="lazy">
-<figcaption>Settings &gt; Networking &gt; Pagination. The threshold is the most rows the action will collect.</figcaption></figure>
-<p>For Dataverse, a page is up to 5,000 rows and the threshold can go up to 100,000. Other connectors have smaller pages (Excel's default page is much smaller), and the threshold is rounded to whole pages, so you can get slightly more rows than you asked for.</p>
+<figcaption>Action → Settings → Networking → Pagination.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Connector</th><th>Page size</th><th>Notes</th></tr></thead><tbody><tr><td>Dataverse List rows</td><td>Up to 5,000 rows</td><td>Threshold up to 100,000</td></tr><tr><td>SharePoint Get items</td><td>100 by default</td><td>Turn on pagination for more</td></tr><tr><td>Excel List rows</td><td>Smaller pages</td><td>Threshold is rounded to whole pages</td></tr></tbody></table></div>
 
-<h2 id="better">Before you turn it on</h2>
-<ul>
-<li><strong>Filter first.</strong> An OData filter that returns 200 rows beats pagination that returns 50,000.</li>
-<li><strong>Select columns.</strong> Fewer columns per row means faster responses and smaller run history.</li>
-<li><strong>Beyond the threshold</strong>, process in batches: page with a skip token or a date window in a Do until loop, or move the work to a dataflow.</li>
-</ul>
+<h2 id="better"><span class="ico ico-check"></span>Before you turn it on</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Fetch less first</p><div class="fl"><div class="nd"><strong>Filter</strong> at the source (OData): 200 rows beats 50,000</div><div class="ar"></div><div class="nd"><strong>Select columns</strong>: fewer columns, faster</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Still more than the threshold?</div><div class="ar"></div><div class="nd ok">Process in batches: a Do until with a skip token or date window, or a dataflow</div></div></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Page</strong>: one chunk of results returned by one request to the service.</p>
-<p><strong>Threshold</strong>: the total number of rows the action collects across pages.</p>
-<p><strong>Silent truncation</strong>: getting the first page only, with no error. The run succeeds but misses data.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Add <strong>List rows</strong> (Dataverse) on a table with a filter, and set Row count to 2.</li><li>Add a second List rows with the same table and filter and no Row count.</li><li>Open the second one's <strong>Settings</strong>, turn on <strong>Pagination</strong> and set Threshold to 5000.</li><li>Add a Compose that shows <code>length(outputs('List_rows')?['body/value'])</code> for each.</li><li>Test and compare the counts.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Testing with 20 rows and going live with 20,000. Always check the connector's default page size.</li>
-<li>Combining Row count and pagination and expecting both. Decide whether you want "the first N" or "all".</li>
-<li>Pulling everything into a loop. Large lists inside Apply to each multiply actions quickly; filter at the source.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/list-rows">Use lists of rows in flows (pagination)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+<div class="layer-body"><p><strong>Page</strong>: one chunk of results from one request.</p><p><strong>Threshold</strong>: the total rows the action collects across pages.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Assuming you got every row.</li><li>Pagination on an unfiltered table.</li><li>Using Row count to mean “all”.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/list-rows">Use lists of rows in flows (pagination)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
       </div>
 
       <div class="pager"><a href="concurrency-control.html">← Concurrency control</a><a href="child-flows.html">Child flows →</a></div>

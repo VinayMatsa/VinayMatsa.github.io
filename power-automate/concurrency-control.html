@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Concurrency control | Vinay Matsa</title>
-<meta name="description" content="Run loop iterations in parallel to save time, and know when running them one at a time is the safer choice.">
+<meta name="description" content="Run loop iterations in parallel to save time, limit how many runs happen at once, and know when one at a time is the safer choice.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Concurrency control">
-<meta property="og:description" content="Run loop iterations in parallel to save time, and know when running them one at a time is the safer choice.">
+<meta property="og:description" content="Run loop iterations in parallel to save time, limit how many runs happen at once, and know when one at a time is the safer choice.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,45 +49,30 @@
       </div>
 
       <div class="prose">
-<p>An <strong>Apply to each</strong> loop processes items one at a time by default. If the items don't depend on each other, the loop can process several at once. In the demo the same loop of ten 2-second waits took 26 seconds one at a time and 3 seconds in parallel.</p>
+<p>An Apply to each processes items one at a time by default. If the items don't depend on each other, the loop can process several at once. The same loop of ten 2-second waits took 26 seconds one at a time and 3 seconds in parallel.</p>
 
-<h2 id="demo">Same loop, two settings</h2>
+<h2 id="demo"><span class="ico ico-clock"></span>Same loop, two settings</h2>
+<div class="cards"><div><strong>What</strong>A loop setting (degree 1 to 50) and a trigger setting (how many runs at once).</div><div><strong>Why</strong>Parallel iterations save time on slow, independent work; one-at-a-time protects shared data.</div><div><strong>Demo</strong>Ten items, each waiting 2 seconds.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>Ten 2-second items</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Setting</th><th>How they run</th><th>Time</th></tr></thead><tbody><tr><td>Default (1)</td><td><div class="bar"><i style="width:100%"></i></div></td><td><span class="chip ">25–26 s</span></td></tr><tr><td>Degree 10</td><td><div class="bar done"><i style="width:12%"></i></div></td><td><span class="chip ok">3 s</span></td></tr></tbody></table></div><p class="viz-note">In parallel, all ten start together, so the loop takes about as long as one item.</p></div>
 <figure class="shot"><img src="../assets/img/pa/l4-concurrency-canvas.webp" alt="Run view: One at a time loop took 26s, Ten in parallel loop took 3s" width="400" height="350" loading="lazy">
-<figcaption>Both loops do the same ten 2-second waits. Only the concurrency setting differs.</figcaption></figure>
+<figcaption>Both loops in one run.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l4-concurrency-seconds.webp" alt="Seconds taken output: sequential 25, parallel 3" width="514" height="110" loading="lazy">
-<figcaption>Measured inside the flow with ticks(): 25 seconds vs 3.</figcaption></figure>
+<figcaption>Measured with utcNow() before and after each loop.</figcaption></figure>
 
-<h2 id="setting">The setting</h2>
-<p>Select the loop, open <strong>Settings</strong>, turn on <strong>Concurrency control</strong> and set <strong>Degree of parallelism</strong> from 1 to 50. One means one at a time; ten means up to ten items at once.</p>
+<h2 id="setting"><span class="ico ico-scope"></span>The setting</h2>
+<p>Select the loop → <strong>Settings</strong> → turn on <strong>Concurrency control</strong> → <strong>Degree of parallelism</strong> 1 to 50. (See Conditions, Switch and loops for the screenshot.)</p>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Should I turn it on?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Does any iteration depend on another, or change a shared variable?</div><div class="ar"></div><div class="br"><div><span class="lbl t">No</span><div class="nd dec"><span class="ico ico-cond"></span>Can the target service take the load?</div><div class="ar"></div><div class="nd ok">Yes → turn it on (start around 5–20)</div></div><div><span class="lbl f">Yes</span><div class="nd mute">Keep it at 1 (one at a time)</div></div></div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th><span class="ico ico-check"></span>Turn it on when</th><th><span class="ico ico-warn"></span>Keep it off when</th></tr></thead><tbody><tr><td>Dependence</td><td>Each item is independent</td><td>A later item reads what an earlier one wrote</td></tr><tr><td>Speed</td><td>Each item waits on a slow service</td><td>Order matters (running totals, numbering)</td></tr><tr><td>Target</td><td>The service handles the load</td><td>It throttles quickly (many 429s)</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Variables in a parallel loop give wrong totals. Collect Compose outputs after the loop instead.</li><li>In nested loops, only the outer loop runs in parallel.</li></ul>
 
-<h2 id="when">When to use it, and when not</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Turn it on when</th><th>Keep it off when</th></tr></thead><tbody>
-<tr><td>Each item is independent (send a message, update its own row)</td><td>The loop changes a variable that later iterations read</td></tr>
-<tr><td>Each item waits on a slow service</td><td>Order matters (running totals, numbered output)</td></tr>
-<tr><td>The target service can take the load</td><td>The target throttles quickly (many 429 errors)</td></tr>
-</tbody></table></div>
-<div class="callout"><strong>Variables and parallel loops:</strong> iterations running at the same time can overwrite each other's Set variable. Collect results with Compose inside the loop and combine them after it, or use Select instead of a loop where you can.</div>
-
-<h2 id="trigger">Trigger concurrency</h2>
-<p>Triggers have their own concurrency setting, which limits how many <em>runs</em> of the flow can happen at once. Setting it to 1 makes runs queue and go one by one, which is useful when each run updates the same record or file.</p>
+<h2 id="trigger"><span class="ico ico-until"></span>Trigger concurrency</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>Many runs at once vs a queue</p><div class="fl"><div class="br"><div><span class="lbl c">Off (default)</span><div class="nd">Runs start as soon as triggered, in parallel</div></div><div><span class="lbl c">On, limit 1</span><div class="nd">Runs queue and go one by one</div><div class="ar"></div><div class="nd ok">Safe when each run updates the same record or file</div></div></div></div></div>
+<h3>Watch out</h3><ul><li>Once turned on, trigger concurrency can't be turned off without deleting and re-adding the trigger.</li><li>Split on is limited to 100 items when trigger concurrency is on.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Iteration</strong>: one pass through the loop for one item.</p>
-<p><strong>Degree of parallelism</strong>: the most iterations allowed to run at the same time.</p>
-<p><strong>Throttling</strong>: a service slowing you down or refusing requests (429) because you sent too many too fast.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Add a Compose <em>Started</em> with <code>utcNow()</code>.</li><li>Add <strong>Apply to each</strong> over <code>createArray(1,2,3,4,5,6,7,8,9,10)</code> with a <strong>Delay</strong> of 2 seconds inside.</li><li>Add a Compose <em>After</em> with <code>utcNow()</code>, then one with <code>div(sub(ticks(outputs('After')), ticks(outputs('Started'))), 10000000)</code> for the seconds taken.</li><li>Test. Then open the loop's Settings, turn on Concurrency control with 10, and test again.</li><li>Compare the two durations in the run history.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Turning on concurrency in a loop that appends to a string or increments a counter, then trusting the result.</li>
-<li>Setting 50 against a connector with low limits. You trade speed for throttling and retries.</li>
-<li>Using concurrency to fix a slow design. A Select or a filtered query often removes the loop altogether.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/implement-parallel-execution">Optimize flows with parallel execution and concurrency</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/apply-to-each">Use the Apply to each action</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+<div class="layer-body"><p><strong>Degree of parallelism</strong>: the most iterations allowed at the same time.</p><p><strong>Throttling</strong>: a service refusing requests (429) because you sent too many.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Parallel loops that set variables.</li><li>Degree 50 against a service that throttles.</li><li>Expecting numbered output in order from a parallel loop.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/implement-parallel-execution">Optimize flows with parallel execution and concurrency</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/apply-to-each">Use the Apply to each action</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
       </div>
 
       <div class="pager"><a href="retry-policies-timeouts.html">← Retry policies and timeouts</a><a href="pagination-thresholds.html">Pagination and thresholds →</a></div>
@@ -96,7 +81,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#demo">Same loop, two settings</a></li><li><a href="#setting">The setting</a></li><li><a href="#when">When to use it, and when not</a></li><li><a href="#trigger">Trigger concurrency</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#demo">Same loop, two settings</a></li><li><a href="#setting">The setting</a></li><li><a href="#trigger">Trigger concurrency</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

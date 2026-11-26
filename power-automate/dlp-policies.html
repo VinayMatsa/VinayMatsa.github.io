@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Data loss prevention (DLP) policies | Vinay Matsa</title>
-<meta name="description" content="Understand the admin rules that decide which connectors a flow may use, and which ones may be used together.">
+<meta name="description" content="Understand the admin rules that decide which connectors a flow may use, which may be combined, and what tenant isolation adds.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Data loss prevention (DLP) policies">
-<meta property="og:description" content="Understand the admin rules that decide which connectors a flow may use, and which ones may be used together.">
+<meta property="og:description" content="Understand the admin rules that decide which connectors a flow may use, which may be combined, and what tenant isolation adds.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,49 +49,32 @@
       </div>
 
       <div class="prose">
-<p>Admins use <strong>data policies</strong> (often called DLP policies) to stop company data flowing to places it shouldn't. A policy decides, per environment, which connectors are allowed and which may be combined in one flow. As a maker you don't set these, but you will meet them, usually as an error when you save or turn on a flow.</p>
+<p>Admins use <strong>data policies</strong> (DLP policies) to stop company data flowing where it shouldn't. A policy decides, per environment, which connectors are allowed and which may be used together.</p>
 
-<h2 id="error">What it looks like</h2>
+<h2 id="error"><span class="ico ico-warn"></span>What it looks like</h2>
+<div class="cards"><div><strong>What</strong>Admin rules per environment: connector groups, or an allowlist.</div><div><strong>Why</strong>A flow can be perfect and still refuse to turn on. Knowing why saves hours.</div><div><strong>Demo</strong>The Approvals connector blocked in the demo environment.</div></div>
 <figure class="shot"><img src="../assets/img/pa/l3-dlp-error.webp" alt="Error banner: Admin data policy &#x27;Advanced Connector Policy&#x27; restricts use of these apis: /providers/Microsoft.PowerApps/apis/shared_approvals." width="770" height="30" loading="lazy">
-<figcaption>From the Approvals demo earlier on this site: the environment's policy blocks the Approvals connector.</figcaption></figure>
-<p>The flow saved but wouldn't turn on. Nothing in the flow is wrong; the environment doesn't allow that connector.</p>
+<figcaption>The flow saved but wouldn't turn on.</figcaption></figure>
 
-<h2 id="groups">Classic policies: three groups</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Group</th><th>Meaning</th></tr></thead><tbody>
-<tr><td>Business</td><td>Connectors for company data. They can be used together.</td></tr>
-<tr><td>Non-Business</td><td>Connectors for personal or other data. They can be used together, but not with Business ones in the same flow.</td></tr>
-<tr><td>Blocked</td><td>Can't be used at all.</td></tr>
-</tbody></table></div>
-<p>New connectors land in the policy's default group, which is Non-Business unless the admin changes it.</p>
+<h2 id="groups"><span class="ico ico-scope"></span>Classic policies: three groups</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>Can these connectors be in one flow?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Are they in the same group?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Both Business</span><div class="nd ok">Allowed</div></div><div><span class="lbl t">Both Non-Business</span><div class="nd ok">Allowed</div></div><div><span class="lbl f">Business + Non-Business</span><div class="nd mute">Not allowed together</div></div><div><span class="lbl f">Any Blocked</span><div class="nd mute">Not allowed at all</div></div></div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-scope"></span>Group</th><th>Meaning</th></tr></thead><tbody><tr><td>Business</td><td>Company data connectors; usable together</td></tr><tr><td>Non-Business</td><td>Personal or other data; not with Business in one flow</td></tr><tr><td>Blocked</td><td>Can't be used</td></tr></tbody></table></div>
+<p>New connectors land in the default group (Non-Business unless the admin changes it).</p>
 
-<h2 id="acp">Advanced connector policies</h2>
-<p>The error above names an <strong>Advanced Connector Policy</strong>. Microsoft describes these as the next generation: instead of three groups they use a strict allowlist, and every connector that isn't explicitly allowed is blocked.</p>
+<h2 id="acp"><span class="ico ico-stop"></span>Advanced connector policies</h2>
+<p>The error above names an <strong>Advanced Connector Policy</strong>: a strict allowlist. Every connector that isn't explicitly allowed is blocked, so a connector that works in one environment can be refused in another.</p>
+
+<h2 id="maker"><span class="ico ico-check"></span>What to do as a maker</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Blocked connector</p><div class="fl"><div class="nd">Read the error: it names the policy and connector</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Can an allowed connector do the job?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">Use it</div></div><div><span class="lbl f">No</span><div class="nd ok">Ask the admin: business reason + environment</div></div></div></div></div>
+<p>Build in an environment whose policy matches production, so there are no surprises at deployment.</p>
+
+<h2 id="tenant-isolation"><span class="ico ico-stop"></span>Tenant isolation</h2>
+<div class="cards"><div><strong><span class="ico ico-scope"></span>Data policies</strong>Which connectors may be used.</div><div><strong><span class="ico ico-stop"></span>Tenant isolation</strong>Where they may connect: blocks connections to other organisations' tenants except an allow list. Off by default; an admin setting.</div></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Connector</strong>: the wrapper around a service (SharePoint, Outlook, HTTP) that gives a flow its actions.</p>
-<p><strong>Data policy</strong>: admin rules that apply to one or more environments, or to all of them.</p></div></details>
-
-<h2 id="maker">What to do as a maker</h2>
-<ul>
-<li>Read the error: it names the policy and the connector.</li>
-<li>Check whether another, allowed connector can do the job.</li>
-<li>If the connector is truly needed, ask your admin, with the business reason and the environment name.</li>
-<li>Build in an environment whose policy matches what production will allow, so there are no surprises at deployment.</li>
-</ul>
-
-<h2 id="tenant-isolation">Tenant isolation</h2>
-<p>Data policies control which connectors may be used. <strong>Tenant isolation</strong> controls <em>where</em> they may connect. It is off by default, so a connector that signs in with Microsoft Entra ID can connect to another organisation's tenant if the user has valid credentials there. With tenant isolation on, connections to and from other tenants are blocked, apart from tenants the admin adds to an allow list.</p>
-<p>If a flow that reads another company's SharePoint suddenly can't connect, tenant isolation is a likely cause. It is an admin setting in the Power Platform admin center, not something a maker can change.</p>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Assuming the flow is broken and rebuilding it. The policy is the cause.</li>
-<li>Developing in an environment with looser rules than production.</li>
-<li>Mixing a business connector (SharePoint) with a non-business one (a personal mail service) in one flow.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification">Connector classification</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/advanced-connector-policies">Advanced connector policies</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/guidance/adoption/dlp-strategy">Implement a data policy strategy</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/cross-tenant-restrictions">Restrict cross-tenant inbound and outbound access</a></li></ul>
+<div class="layer-body"><p><strong>Connector</strong>: the wrapper around a service that gives a flow its actions.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Rebuilding a flow that a policy blocks.</li><li>Developing with looser rules than production.</li><li>Mixing Business and Non-Business connectors.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification">Connector classification</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/advanced-connector-policies">Advanced connector policies</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/guidance/adoption/dlp-strategy">Implement a data policy strategy</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/cross-tenant-restrictions">Restrict cross-tenant inbound and outbound access</a></li></ul>
       </div>
 
       <div class="pager"><a href="ownership-service-accounts.html">← Flow ownership and service accounts</a><a href="automation-center.html">Monitoring with Automation center →</a></div>

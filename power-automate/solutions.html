@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Solutions and solution-aware flows | Vinay Matsa</title>
-<meta name="description" content="Package flows with everything they depend on so they can move from development to test to production as one unit.">
+<meta name="description" content="Package flows with everything they depend on so they move from development to test to production as one unit.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Solutions and solution-aware flows">
-<meta property="og:description" content="Package flows with everything they depend on so they can move from development to test to production as one unit.">
+<meta property="og:description" content="Package flows with everything they depend on so they move from development to test to production as one unit.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,46 +49,31 @@
       </div>
 
       <div class="prose">
-<p>A flow built under <strong>My flows</strong> lives only in the environment where you made it. To move it you would export it by hand, fix its connections and hope nothing was missed. A <strong>solution</strong> is a container that holds the flow together with everything it depends on, so the whole set can be exported, imported, versioned and upgraded as one unit. This is the start of ALM (application lifecycle management).</p>
+<p>A flow built under <em>My flows</em> lives only in the environment where you made it. A <strong>solution</strong> is a container that holds the flow with everything it depends on, so the whole set moves together.</p>
 
-<h2 id="inside">What a solution holds</h2>
+<h2 id="why"><span class="ico ico-scope"></span>Why solutions</h2>
+<div class="cards"><div><strong>What</strong>A container for flows, connection references, environment variables, tables, apps and agents.</div><div><strong>Why</strong>Without one, moving a flow means exporting by hand, fixing connections and hoping nothing was missed.</div><div><strong>Demo</strong>The <em>Website Demos</em> solution behind every demo on this site.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>The path a solution takes</p><div class="fl"><div class="nd act"><strong>Dev</strong>: build in an <em>unmanaged</em> solution</div><div class="ar"></div><div class="nd">Export or pipeline (as <em>managed</em>)</div><div class="ar"></div><div class="nd"><strong>Test</strong>: check it works</div><div class="ar"></div><div class="nd">Deploy again</div><div class="ar"></div><div class="nd ok"><strong>Prod</strong>: people use it; nobody edits it here</div></div></div>
+
+<h2 id="inside"><span class="ico ico-data"></span>What a solution holds</h2>
 <figure class="shot"><img src="../assets/img/pa/l6-solution-objects.webp" alt="Website Demos solution, All objects view: Cloud flows (31), Connection references (4), Environment variables (1); list of flows such as Demo – Adaptive Card, Demo – Approvals, Demo – Arrays and objects" width="1027" height="430" loading="lazy">
-<figcaption>The solution used for every demo on this site: cloud flows, connection references and an environment variable, together.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Component</th><th>Why it is in the solution</th></tr></thead><tbody>
-<tr><td>Cloud flows</td><td>The automation itself</td></tr>
-<tr><td>Connection references</td><td>Point to a connection without hard-coding whose connection it is (next article)</td></tr>
-<tr><td>Environment variables</td><td>Values that differ per environment, such as a site address or an email</td></tr>
-<tr><td>Tables, apps, agents, child flows</td><td>Anything else the flow uses, so nothing is left behind</td></tr>
-</tbody></table></div>
+<figcaption>The demo solution's objects.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-scope"></span>Component</th><th>Why it's in the solution</th></tr></thead><tbody><tr><td>Cloud flows</td><td>The automation itself</td></tr><tr><td>Connection references</td><td>Point to a connection without hard-coding whose it is</td></tr><tr><td>Environment variables</td><td>Values that differ per environment: site address, email</td></tr><tr><td>Tables, apps, agents, child flows</td><td>Anything else the flow uses</td></tr></tbody></table></div>
 
-<h2 id="managed">Unmanaged and managed</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th>Unmanaged</th><th>Managed</th></tr></thead><tbody>
-<tr><td>Where</td><td>Development</td><td>Test and production</td></tr>
-<tr><td>Can you edit it?</td><td>Yes</td><td>No; change it in development and deploy again</td></tr>
-<tr><td>Removing it</td><td>Removes the container; components stay</td><td>Removes the solution and its components</td></tr>
-</tbody></table></div>
-<p>The rule of thumb: build in an unmanaged solution in a development environment, and deploy it as managed everywhere else.</p>
+<h2 id="managed"><span class="ico ico-check"></span>Unmanaged and managed</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th>Unmanaged</th><th>Managed</th></tr></thead><tbody><tr><td>Where</td><td>Development</td><td>Test and production</td></tr><tr><td>Can you edit it?</td><td>Yes</td><td>No: change in Dev and redeploy</td></tr><tr><td>Removing it</td><td>Removes the container; components stay</td><td>Removes the solution and its components</td></tr></tbody></table></div>
+<p>More on layers and upgrades in Managed and unmanaged solutions (Level 10).</p>
 
-<h2 id="publisher">Publisher and prefix</h2>
-<p>Every solution has a <strong>publisher</strong>, and the publisher has a short <strong>prefix</strong>. Every component you create in the solution gets that prefix on its schema name (in these demos: <code>vm_DemoGreeting</code>, <code>vm_websitedemos_teams</code>). Create your own publisher before you start; the default publisher's prefix is hard to change later.</p>
+<h2 id="publisher"><span class="ico ico-data"></span>Publisher and prefix</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Where the prefix comes from</p><div class="fl"><div class="nd">Create a <strong>publisher</strong> with prefix <code>contoso</code></div><div class="ar"></div><div class="nd">Create the solution with that publisher</div><div class="ar"></div><div class="nd ok">Every new component gets it: <code>contoso_SiteUrl</code>, <code>contoso_sharepoint</code></div></div></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Environment</strong>: a separate space with its own data, apps and flows, usually one each for development, test and production.</p>
-<p><strong>Solution-aware flow</strong>: a flow created inside a solution, or added to one. Only these can be moved with the solution.</p>
+<div class="layer-body"><p><strong>Solution-aware flow</strong>: created in, or added to, a solution. Only these can move with it.</p>
 <p><strong>ALM</strong>: the way changes move from idea to production safely and repeatably.</p></div></details>
-
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>In Power Automate, go to <strong>Solutions</strong> &gt; <strong>New solution</strong>.</li><li>Create a new publisher with your own prefix, and give the solution a clear name.</li><li>Open the solution and select <strong>New</strong> &gt; <strong>Automation</strong> &gt; <strong>Cloud flow</strong>. Flows made here are solution-aware from the start.</li><li>To bring in an older flow, select <strong>Add existing</strong> &gt; <strong>Automation</strong> &gt; <strong>Cloud flow</strong>.</li><li>When it is ready, <strong>Export</strong> as managed for test and production, or deploy with a pipeline.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Building production flows under My flows. They can't be deployed cleanly or handed over easily.</li>
-<li>Editing directly in production. The change is lost at the next deployment and isn't in development.</li>
-<li>Using the default publisher, so everything carries a random prefix.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/overview-solution-flows">Overview of solution-aware cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/solution-concepts-alm">Solution concepts (managed and unmanaged)</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/overview-alm">Overview of ALM with Microsoft Power Platform</a></li></ul>
+<div class="layer-body"><ol><li>Solutions → New solution; create your own publisher and prefix.</li><li>Open it → New → Automation → Cloud flow (solution-aware from the start).</li><li>Bring older flows in with Add existing → Automation → Cloud flow.</li><li>Export as managed for Test and Prod, or deploy with a pipeline.</li></ol></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Production flows under My flows.</li><li>Editing directly in production.</li><li>The default publisher's random prefix.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/overview-solution-flows">Overview of solution-aware cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/solution-concepts-alm">Solution concepts (managed and unmanaged)</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/overview-alm">Overview of ALM with Microsoft Power Platform</a></li></ul>
       </div>
 
       <div class="pager"><a href="./">← All Power Automate topics</a><a href="connection-references.html">Connection references →</a></div>
@@ -97,7 +82,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#inside">What a solution holds</a></li><li><a href="#managed">Unmanaged and managed</a></li><li><a href="#publisher">Publisher and prefix</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#why">Why solutions</a></li><li><a href="#inside">What a solution holds</a></li><li><a href="#managed">Unmanaged and managed</a></li><li><a href="#publisher">Publisher and prefix</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

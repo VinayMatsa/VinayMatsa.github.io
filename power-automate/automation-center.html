@@ -49,43 +49,22 @@
       </div>
 
       <div class="prose">
-<p>Run history shows one flow at a time. Once you look after many flows, you need one view of all of them: what ran, what failed and what needs attention. <strong>Automation center</strong> in Power Automate gives that view for the current environment.</p>
+<p>Run history shows one flow at a time. Once you look after many flows you need one view: what ran, what failed, what needs attention. <strong>Automation center</strong> gives that view for the current environment.</p>
 
-<h2 id="overview">The Runs overview</h2>
+<h2 id="overview"><span class="ico ico-data"></span>The Runs overview</h2>
+<div class="cards"><div><strong>What</strong>A dashboard of runs, errors and recommendations across every flow in the environment.</div><div><strong>Why</strong>Spot failing flows and common root causes without opening runs one by one.</div><div><strong>Demo</strong>The demo environment: 33 flows, 48 runs, 10% error rate.</div></div>
 <figure class="shot"><img src="../assets/img/pa/l6-automation-center.webp" alt="Automation Center Runs overview: Recommendations (1) Fix failing automations; Activity filters Last 7 days, All flows, All run statuses, All errors, All trigger types; tiles Top-level flows 33, Total runs 48, Flow runs error rate 10%" width="1317" height="538" loading="lazy">
-<figcaption>The overview for the demo environment over the last 7 days.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Area</th><th>Use it to</th></tr></thead><tbody>
-<tr><td>Recommendations</td><td>See suggested fixes, such as failing automations, with a link to the details</td></tr>
-<tr><td>Activity filters</td><td>Narrow by time, flow, run status, error or trigger type</td></tr>
-<tr><td>Tiles</td><td>Spot trends: number of flows, total runs and the error rate</td></tr>
-<tr><td>Run history tab</td><td>A single list of runs across flows, with status and duration</td></tr>
-<tr><td>Errors</td><td>Group failures by error so one root cause doesn't look like many problems</td></tr>
-</tbody></table></div>
-<p>In this demo environment, the 10% error rate comes from the Level 4 demos, which fail on purpose.</p>
+<figcaption>The overview. The 10% comes from Level 4 demos that fail on purpose.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Area</th><th>Use it to</th></tr></thead><tbody><tr><td>Recommendations</td><td>See suggested fixes, such as failing automations</td></tr><tr><td>Activity filters</td><td>Narrow by time, flow, status, error, trigger type</td></tr><tr><td>Tiles</td><td>Spot trends: flows, runs, error rate</td></tr><tr><td>Run history tab</td><td>One list of runs across flows</td></tr><tr><td>Errors</td><td>Group failures by error, so one cause doesn't look like many</td></tr></tbody></table></div>
 
-<h2 id="routine">A simple monitoring routine</h2>
-<ol>
-<li>Each morning, open Automation center and check the error rate and recommendations.</li>
-<li>Open <strong>Errors</strong> and deal with the most common error first.</li>
-<li>For each critical flow, also add an alert inside the flow itself (see Error alerts and Terminate), so you hear about failures without checking.</li>
-</ol>
+<h2 id="routine"><span class="ico ico-check"></span>A simple monitoring routine</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Each morning</p><div class="fl"><div class="nd">Open Automation center: check error rate and recommendations</div><div class="ar"></div><div class="nd">Open <strong>Errors</strong>: fix the most common error first</div><div class="ar"></div><div class="nd ok">Critical flows also alert from inside (Error alerts and Terminate)</div></div></div>
+<p>For reports across all runs, see Monitoring flows at scale (Level 10).</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Top-level flow</strong>: a flow that was triggered directly, not called as a child flow.</p>
-<p><strong>Error rate</strong>: the share of runs that failed in the selected period.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>In Power Automate, select <strong>Automation center</strong> on the left.</li><li>On <strong>Runs</strong> &gt; <strong>Overview</strong>, set the time range filter.</li><li>Open a recommendation to see the affected flows.</li><li>Use the <strong>Run history</strong> tab to open a specific failed run.</li><li>Ask Copilot in the pane questions such as which flows failed most this week.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Relying on the owner's failure emails alone. They are easy to miss and go to one person.</li>
-<li>Treating every failed run as a new problem. Group by error first.</li>
-<li>Monitoring only production. Failures in test are cheaper to fix.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/automation-center-overview">Automation center overview</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-checker">Find and fix errors with Flow checker</a></li></ul>
+<div class="layer-body"><p><strong>Top-level flow</strong>: triggered directly, not called as a child.</p><p><strong>Error rate</strong>: the share of runs that failed.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Relying on the owner's failure emails alone.</li><li>Treating every failed run as a new problem.</li><li>Monitoring only production.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/automation-center-overview">Automation center overview</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-checker">Find and fix errors with Flow checker</a></li></ul>
       </div>
 
       <div class="pager"><a href="dlp-policies.html">← Data loss prevention (DLP) policies</a><a href="./">Back to all topics →</a></div>

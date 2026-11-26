@@ -49,45 +49,31 @@
       </div>
 
       <div class="prose">
-<p>A flow in development posts to the test site and emails the test team. In production it must use the real site and the real team. Editing the flow after every deployment is slow and easy to get wrong. An <strong>environment variable</strong> holds the value outside the flow, so each environment can have its own value while the flow stays the same.</p>
+<p>In development a flow posts to the test site and emails the test team; in production it must use the real ones. An <strong>environment variable</strong> holds the value outside the flow, so the flow never changes.</p>
 
-<h2 id="values">Default value and current value</h2>
+<h2 id="values"><span class="ico ico-data"></span>Default value and current value</h2>
+<div class="cards"><div><strong>What</strong>A solution component with a default value and an optional per-environment current value.</div><div><strong>Why</strong>No editing flows after each deployment, and no wrong site in production.</div><div><strong>Demo</strong>A greeting that says which environment it's in.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Which value does the flow get?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Does this environment have a <strong>current value</strong>?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">Current value wins: <span class="chip ">Hello from the Contoso TEST environment</span></div></div><div><span class="lbl f">No</span><div class="nd ok">Default value: <span class="chip ">Hello from the Contoso support team</span></div></div></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l6-envvar-values.webp" alt="Edit Demo greeting panel: Name vm_DemoGreeting, Data type Text, Default value Hello from the Contoso support team, Current value Hello from the Contoso TEST environment" width="270" height="430" loading="lazy">
-<figcaption>A demo variable with both a default value and a current value.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Part</th><th>What it does</th></tr></thead><tbody>
-<tr><td>Default value</td><td>Part of the definition. Used when there is no current value.</td></tr>
-<tr><td>Current value</td><td>An override for this environment only. If it exists, it wins.</td></tr>
-</tbody></table></div>
+<figcaption>The variable's default and current values.</figcaption></figure>
 
-<h2 id="demo">Reading it in a flow</h2>
-<p>The demo flow reads the variable in a Compose. The run shows the <strong>current</strong> value, not the default:</p>
+<h2 id="demo"><span class="ico ico-expr"></span>Reading it in a flow</h2>
 <figure class="shot"><img src="../assets/img/pa/l6-envvar-run.webp" alt="Message action inputs: Greeting Hello from the Contoso TEST environment, Flow name Demo – Environment variables, Sent at (UTC)" width="464" height="170" loading="lazy">
-<figcaption>The current value overrides the default.</figcaption></figure>
+<figcaption>The run used the current value.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l6-envvar-code.webp" alt="Code view: Compose with inputs @parameters(&#x27;Demo greeting (vm_DemoGreeting)&#x27;)" width="468" height="75" loading="lazy">
-<figcaption>In the flow's code, the variable is a parameter named after its display name and schema name.</figcaption></figure>
+<figcaption>How a flow reads it.</figcaption></figure>
 <pre><code>@parameters(&#x27;Demo greeting (vm_DemoGreeting)&#x27;)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>parameters(...)</code></td><td>Environment variables reach the flow as parameters.</td></tr><tr><td><code>Demo greeting</code></td><td>The display name.</td></tr><tr><td><code>(vm_DemoGreeting)</code></td><td>The schema name, with the publisher prefix. This part is what stays fixed across environments.</td></tr></tbody></table></div>
-<p>The same Compose also uses <code>workflow()?['tags']?['flowDisplayName']</code>, which returns the flow's own name. It is handy in alert messages so the reader knows which flow sent them.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>parameters(&#x27;Display name (schema name)&#x27;)</code></td><td>Environment variables are read as flow parameters; pick them from dynamic content.</td></tr></tbody></table></div>
+<p>The same Compose uses <code>workflow()?['tags']?['flowDisplayName']</code> for the flow's own name, handy in alerts.</p>
 
-<h2 id="types">Data types</h2>
-<p>Microsoft lists these types: Decimal number, JSON, Text, Yes/No, Data source and Secret. <strong>Secret</strong> points to a secret stored in Azure Key Vault, so passwords and keys never sit in the flow or the solution.</p>
+<h2 id="types"><span class="ico ico-data"></span>Data types</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Type</th><th>Use for</th></tr></thead><tbody><tr><td>Text</td><td>Site addresses, emails, messages</td></tr><tr><td>Decimal number</td><td>Thresholds, limits</td></tr><tr><td>Yes/No</td><td>Feature flags</td></tr><tr><td>JSON</td><td>A group of settings in one variable (Level 8)</td></tr><tr><td>Data source</td><td>A SharePoint site or list picked from a connector</td></tr><tr><td>Secret</td><td>Passwords and keys, stored in Azure Key Vault</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Values are read when a run starts; a change doesn't affect runs already in progress.</li><li>Decide before export whether the current value travels with the solution.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Hard-coding</strong>: typing a value such as a URL directly into an action. It then has to be changed by hand in every environment.</p>
-<p><strong>Schema name</strong>: the fixed internal name of a component, including the publisher prefix.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>In your solution, select <strong>New</strong> &gt; <strong>More</strong> &gt; <strong>Environment variable</strong>.</li><li>Enter a display name, choose the data type and add a default value if one makes sense everywhere.</li><li>In the flow, find the variable under the <strong>Environment variables</strong> section of dynamic content.</li><li>Before exporting, decide whether the current value should travel with the solution (under <strong>Advanced</strong>), or remove it so each environment sets its own.</li><li>On import, enter the value for the target environment when the wizard asks.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Exporting the development current value, which then overrides production's setting.</li>
-<li>Storing passwords in a Text variable. Use the Secret type with Azure Key Vault.</li>
-<li>Expecting a changed value to show up in a run that is already in progress. It is read when the flow runs.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/environment-variables">Create environment variables (Power Automate)</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables">Environment variables overview</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables-azure-key-vault-secrets">Use environment variables for Azure Key Vault secrets</a></li></ul>
+<div class="layer-body"><p><strong>Hard-coding</strong>: typing a value straight into an action.</p><p><strong>Schema name</strong>: the fixed internal name, with the publisher prefix.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Exporting Dev's current value, which then overrides production.</li><li>Passwords in a Text variable.</li><li>Hard-coded site URLs alongside variables.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/environment-variables">Create environment variables (Power Automate)</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables">Environment variables overview</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables-azure-key-vault-secrets">Use environment variables for Azure Key Vault secrets</a></li></ul>
       </div>
 
       <div class="pager"><a href="connection-references.html">← Connection references</a><a href="pipelines.html">Deploying with pipelines →</a></div>

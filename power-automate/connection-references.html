@@ -49,37 +49,27 @@
       </div>
 
       <div class="prose">
-<p>A flow action needs a <strong>connection</strong>: a signed-in account for SharePoint, Outlook, Dataverse and so on. If the flow pointed straight at your connection, moving it to production would carry your account with it. A <strong>connection reference</strong> sits in between. The flow points at the reference, and each environment decides which real connection the reference uses.</p>
+<p>An action needs a <strong>connection</strong>: a signed-in account for SharePoint, Outlook, Dataverse. If the flow pointed straight at your connection, production would carry your account with it. A <strong>connection reference</strong> sits in between.</p>
 
-<h2 id="demo">The references in the demo solution</h2>
+<h2 id="how"><span class="ico ico-arrow"></span>Flow → reference → connection</h2>
+<div class="cards"><div><strong>What</strong>A solution component that names a connector and points to one connection in the current environment.</div><div><strong>Why</strong>The same flow uses a different account in each environment, without editing it.</div><div><strong>Demo</strong>Every demo flow that posts to Teams uses one Teams reference.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Same flow, different accounts</p><div class="fl"><div class="nd act">Flow action: <em>Post message in Teams</em></div><div class="ar"></div><div class="nd">→ Connection reference: <strong>Teams</strong></div><div class="ar"></div><div class="br"><div><span class="lbl c">In Dev</span><div class="nd">→ your connection</div></div><div><span class="lbl c">In Test</span><div class="nd">→ test service account</div></div><div><span class="lbl c">In Prod</span><div class="nd ok">→ production service account</div></div></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l6-connection-references.webp" alt="Website Demos &gt; Connection references: Website Demos approvals, office365, sharepointonline and teams" width="810" height="220" loading="lazy">
-<figcaption>Four references, one per connector, shared by all the demo flows.</figcaption></figure>
-<p>Every demo flow that sends a Teams message uses the same <em>Website Demos teams</em> reference. In the flow's definition the action names the reference, not a person:</p>
+<figcaption>The demo solution's references: one per connector.</figcaption></figure>
 <pre><code>&quot;connectionReferenceLogicalName&quot;: &quot;vm_websitedemos_teams&quot;</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>connectionReferenceLogicalName</code></td><td>The setting in the flow's code that links an action to a connection reference.</td></tr><tr><td><code>vm_websitedemos_teams</code></td><td>The reference's schema name, with the publisher prefix. It is the same in every environment.</td></tr></tbody></table></div>
+<p>In the flow's definition the action names the <em>reference</em>, not a person.</p>
 
-<h2 id="import">What happens on import</h2>
-<p>When the solution is imported into test or production, Power Automate asks you to choose or create a connection for each reference. Choose a connection owned by the right account there, usually a service account (see Flow ownership and service accounts). The flows don't change; only the reference's connection does.</p>
+<h2 id="import"><span class="ico ico-check"></span>What happens on import</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Import wizard</p><div class="fl"><div class="nd">Import the solution into Test or Prod</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>A connection for each reference?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Pick or create one</span><div class="nd ok">Flows can be turned on</div></div><div><span class="lbl f">Skip</span><div class="nd mute">Flows stay off until it's set</div></div></div></div></div>
+<p>Choose connections owned by the right account there, usually a service account (see Flow ownership and service accounts).</p>
 
-<h2 id="share">One reference or many?</h2>
-<p>Reuse one reference per connector per solution when the flows should all run as the same account. Create separate references when some flows must act as a different account, for example sending mail from a shared mailbox.</p>
+<h2 id="share"><span class="ico ico-data"></span>One reference or many?</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Situation</th><th>Use</th></tr></thead><tbody><tr><td>All flows run as the same account</td><td>One reference per connector per solution</td></tr><tr><td>Some flows act as a different account (e.g. a shared mailbox)</td><td>A separate reference for those</td></tr></tbody></table></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Connection</strong>: a stored sign-in to a service. It belongs to one account.</p>
-<p><strong>Connection reference</strong>: a solution component that names a connector and points to one connection in the current environment.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Create the flow inside a solution. When you add a connector action, Power Automate creates or reuses a connection reference automatically.</li><li>In the solution, open <strong>Connection references</strong> to see them and give them clear names.</li><li>Export the solution and import it into the target environment.</li><li>In the import wizard, select or create a connection for each reference.</li><li>Turn the flows on and run a test.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Letting the designer create a new reference for every flow. You end up with many to fix on every import.</li>
-<li>Choosing your own account's connection in production. The flow stops when your password or role changes.</li>
-<li>Deleting a reference that flows still use. Those flows can't turn on until it is replaced.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/create-connection-reference">Use a connection reference in a solution</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/overview-solution-flows">Overview of solution-aware cloud flows</a></li></ul>
+<div class="layer-body"><p><strong>Connection</strong>: a stored sign-in to a service; it belongs to one account.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>A new reference for every flow, so every import has dozens to fix.</li><li>Your own connection in production.</li><li>Deleting a reference flows still use.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/create-connection-reference">Use a connection reference in a solution</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/overview-solution-flows">Overview of solution-aware cloud flows</a></li></ul>
       </div>
 
       <div class="pager"><a href="solutions.html">← Solutions and solution-aware flows</a><a href="environment-variables.html">Environment variables →</a></div>
@@ -88,7 +78,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#demo">The references in the demo solution</a></li><li><a href="#import">What happens on import</a></li><li><a href="#share">One reference or many?</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#how">Flow → reference → connection</a></li><li><a href="#import">What happens on import</a></li><li><a href="#share">One reference or many?</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

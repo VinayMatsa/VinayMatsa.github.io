@@ -49,47 +49,25 @@
       </div>
 
       <div class="prose">
-<p>Exporting a zip file and importing it by hand works, but it is easy to deploy the wrong version, skip a test stage or forget a variable. <strong>Pipelines in Power Platform</strong> automate that path. An admin or maker sets up the stages once; after that, deploying is choosing a solution and pressing Deploy.</p>
+<p>Exporting a zip and importing it by hand works, but it's easy to deploy the wrong version, skip a test stage or forget a variable. <strong>Pipelines in Power Platform</strong> automate that path.</p>
 
-<h2 id="how">How a pipeline is built</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Part</th><th>What it is</th></tr></thead><tbody>
-<tr><td>Development environment</td><td>Where the unmanaged solution is built. Deployments start here.</td></tr>
-<tr><td>Stages</td><td>The targets in order, for example Test, then Production</td></tr>
-<tr><td>Host environment</td><td>Stores the pipeline setup, permissions and deployment history</td></tr>
-<tr><td>Run</td><td>One deployment of one solution version to one stage, deployed as managed</td></tr>
-</tbody></table></div>
+<h2 id="how"><span class="ico ico-arrow"></span>How a pipeline works</h2>
+<div class="cards"><div><strong>What</strong>A set of stages (Test, Prod) configured once; deploying is choosing the next stage.</div><div><strong>Why</strong>Every deployment is validated, recorded and repeatable.</div><div><strong>Demo</strong>Website Demos: Dev → Test → Prod.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>One deployment</p><div class="fl"><div class="nd act">In Dev: open the solution → <strong>Pipelines</strong> → <em>Deploy here</em> on the next stage</div><div class="ar"></div><div class="nd">Validation against the target</div><div class="ar"></div><div class="nd">Set connections for each reference, values for each variable</div><div class="ar"></div><div class="nd ok">Deployed as <strong>managed</strong>; recorded in history</div><div class="ar"></div><div class="nd">Test, then deploy to the next stage</div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-arrow"></span>Part</th><th>What it is</th></tr></thead><tbody><tr><td>Development environment</td><td>Where the unmanaged solution is built</td></tr><tr><td>Stages</td><td>Targets in order: Test, then Production</td></tr><tr><td>Host environment</td><td>Stores the pipeline setup, permissions and history</td></tr><tr><td>Run</td><td>One deployment of one version to one stage</td></tr></tbody></table></div>
 
-<h2 id="hosts">Two ways to host</h2>
-<ul>
-<li><strong>Platform host</strong>: the default, tenant-wide host. Makers can create personal pipelines to environments they can already import into.</li>
-<li><strong>Custom host</strong>: an environment an admin sets up to govern pipelines centrally, with approvals and extensions.</li>
-</ul>
-<p>Per Microsoft's documentation, all environments in a pipeline need a Dataverse database, and target environments must be <strong>managed environments</strong>.</p>
+<h2 id="hosts"><span class="ico ico-scope"></span>Two ways to host</h2>
+<div class="cards"><div><strong><span class="ico ico-scope"></span>Platform host</strong>The default tenant-wide host. Makers can create personal pipelines to environments they can import into.</div><div><strong><span class="ico ico-check"></span>Custom host</strong>An environment an admin sets up to govern pipelines centrally, with approvals and extensions.</div></div>
+<p>Per Microsoft's documentation, all pipeline environments need a Dataverse database, and target environments must be <strong>managed environments</strong>.</p>
 
-<h2 id="checks">What pipelines check for you</h2>
-<ul>
-<li>The solution is validated against the target before it is deployed.</li>
-<li>Connection references and environment variable values are asked for up front, so the flows can be turned on straight away.</li>
-<li>Deployments can be scheduled, and every run is kept in history, with deployment notes that Copilot can draft.</li>
-</ul>
-<p>This page has no screenshots, because a pipeline view shows real environment names. The steps below follow the Microsoft Learn guide.</p>
+<h2 id="checks"><span class="ico ico-check"></span>What pipelines check for you</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-check"></span>Check</th><th>Saves you from</th></tr></thead><tbody><tr><td>Solution validated against the target</td><td>Failed imports from missing dependencies</td></tr><tr><td>Connections and variable values asked up front</td><td>Flows that import turned off</td></tr><tr><td>Scheduled deployments and full history (with AI-drafted notes)</td><td>Not knowing what's deployed where</td></tr></tbody></table></div>
+<p>No screenshots here: a pipeline view shows real environment names.</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Managed environment</strong>: an environment with extra governance features switched on, such as sharing limits, usage insights and pipelines.</p>
-<p><strong>Stage</strong>: one step in the path to production, tied to a target environment.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Open your solution in the development environment and select <strong>Pipelines</strong> on the left.</li><li>If there is no pipeline yet, create one and add the target stages (for example Test and Production).</li><li>Select <strong>Deploy here</strong> on the next stage.</li><li>Review the validation results, set connections for each connection reference, and enter environment variable values.</li><li>Deploy, then test in the target before deploying to the next stage.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Skipping the test stage because the change is small.</li>
-<li>Editing the deployed managed solution in the target. Fix it in development and deploy again.</li>
-<li>Forgetting to increase the solution version, which makes the history hard to follow.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/pipelines">Overview of pipelines in Power Platform</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/set-up-pipelines">Set up pipelines in Power Platform</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/platform-host-pipelines">Create pipelines using the platform host</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview">Managed environments overview</a></li></ul>
+<div class="layer-body"><p><strong>Stage</strong>: one step to production, tied to a target environment.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Skipping Test because the change is small.</li><li>Editing the managed solution in the target.</li><li>Not raising the solution version.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/pipelines">Overview of pipelines in Power Platform</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/set-up-pipelines">Set up pipelines in Power Platform</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/platform-host-pipelines">Create pipelines using the platform host</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview">Managed environments overview</a></li></ul>
       </div>
 
       <div class="pager"><a href="environment-variables.html">← Environment variables</a><a href="ownership-service-accounts.html">Flow ownership and service accounts →</a></div>
@@ -98,7 +76,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#how">How a pipeline is built</a></li><li><a href="#hosts">Two ways to host</a></li><li><a href="#checks">What pipelines check for you</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#how">How a pipeline works</a></li><li><a href="#hosts">Two ways to host</a></li><li><a href="#checks">What pipelines check for you</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

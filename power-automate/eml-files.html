@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Building .eml files | Vinay Matsa</title>
-<meta name="description" content="Save an email as a file that opens in Outlook, for records, audits or drafts to send later.">
+<meta name="description" content="Save an email as a file that opens in Outlook, for records, audits or ready-to-send drafts.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Building .eml files">
-<meta property="og:description" content="Save an email as a file that opens in Outlook, for records, audits or drafts to send later.">
+<meta property="og:description" content="Save an email as a file that opens in Outlook, for records, audits or ready-to-send drafts.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,10 +49,11 @@
       </div>
 
       <div class="prose">
-<p>An <strong>.eml</strong> file is an email saved as a text file. Double-click it and Outlook opens it as a message. Flows create them to keep a copy of what was sent, to hand someone a ready-made draft, or to archive an email next to the record it belongs to.</p>
+<p>An <strong>.eml</strong> file is an email saved as text. Double-click it and Outlook opens it as a message. Flows create them to keep a copy of what was sent, to hand someone a draft, or to archive an email next to its record.</p>
 
-<h2 id="demo">An .eml built in a Compose</h2>
-<p>An .eml file is just headers, a blank line, then the body. The demo builds one in a Compose and saves it with SharePoint Create file:</p>
+<h2 id="demo"><span class="ico ico-data"></span>An .eml built in a Compose</h2>
+<div class="cards"><div><strong>What</strong>Headers, a blank line, then the body, saved with Create file as <code>.eml</code>.</div><div><strong>Why</strong>A complete, openable record of a message, stored where the team works.</div><div><strong>Demo</strong>A confirmation for request REQ-1042.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Structure of an .eml</p><div class="fl"><div class="nd act">Headers: From, To, Subject, Date, MIME-Version, Content-Type</div><div class="ar"></div><div class="nd">A blank line</div><div class="ar"></div><div class="nd">Body (HTML)</div><div class="ar"></div><div class="nd ok">Create file <code>website-demo-REQ-1042.eml</code></div></div></div>
 <pre><code>From: Contoso Support &lt;support@contoso.com&gt;
 To: Alex Johnson &lt;alex@contoso.com&gt;
 Subject: Request REQ-1042 received
@@ -62,32 +63,20 @@ Content-Type: text/html; charset=utf-8
 
 &lt;p&gt;Hello Alex,&lt;/p&gt;&lt;p&gt;We received request &lt;b&gt;REQ-1042&lt;/b&gt;.&lt;/p&gt;</code></pre>
 <figure class="shot"><img src="../assets/img/pa/l7-files-result.webp" alt="Result output: .eml file moved to /Shared Documents/Website demo archive/website-demo-REQ-1042.eml" width="618" height="155" loading="lazy">
-<figcaption>The .eml file was saved, then moved into an archive folder.</figcaption></figure>
+<figcaption>Saved and filed.</figcaption></figure>
 
-<h2 id="line-breaks">The line-break detail</h2>
-<p>Email headers must be separated by a carriage return and line feed. A Compose box doesn't make that obvious, so the demo inserts them with an expression:</p>
+<h2 id="line-breaks"><span class="ico ico-expr"></span>The line-break detail</h2>
+<p>Headers must be separated by a carriage return + line feed (CRLF). A Compose box doesn't make that obvious, so insert them with an expression:</p>
 <pre><code>concat(&#x27;From: ...&#x27;, decodeUriComponent(&#x27;%0D%0A&#x27;), &#x27;To: ...&#x27;, decodeUriComponent(&#x27;%0D%0A&#x27;), ...)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>decodeUriComponent(&#x27;%0D%0A&#x27;)</code></td><td>Produces a real carriage return and line feed between headers.</td></tr><tr><td><code>two in a row</code></td><td>Make the blank line that separates the headers from the body.</td></tr><tr><td><code>Content-Type: text/html</code></td><td>Tells Outlook the body is HTML; use text/plain for plain text.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>decodeUriComponent(&#x27;%0D%0A&#x27;)</code></td><td>Produces a real CRLF line break.</td></tr><tr><td><code>concat(...)</code></td><td>Joins headers with the breaks between them.</td></tr></tbody></table></div>
 
-<h2 id="draft">Drafts that open ready to send</h2>
-<p>Add the header <code>X-Unsent: 1</code> and Outlook opens the file as a <strong>new draft</strong> instead of a received message, so a person can review and press Send. Leave out <em>From</em> in that case; Outlook uses the person's own account.</p>
+<h2 id="draft"><span class="ico ico-check"></span>Received message or draft?</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>How Outlook opens it</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Header <code>X-Unsent: 1</code>?</div><div class="ar"></div><div class="br"><div><span class="lbl c">No</span><div class="nd ok">As a received message (record)</div></div><div><span class="lbl c">Yes</span><div class="nd ok">As a new draft, ready to review and Send</div><div class="ar"></div><div class="nd mute">Leave out From</div></div></div></div></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Headers</strong>: the lines at the top of an email (From, To, Subject, Date) that describe it.</p>
-<p><strong>MIME</strong>: the standard format for email content, including how attachments are added.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Add a Compose that builds the headers and body with <code>concat()</code> and <code>decodeUriComponent('%0D%0A')</code> between lines.</li><li>Add SharePoint <strong>Create file</strong> with a name ending in <code>.eml</code> and the Compose output as content.</li><li>Download the file and open it in Outlook to check the layout.</li><li>For a draft, add <code>X-Unsent: 1</code> and remove the From line.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Plain line breaks typed in the box. Some clients then show headers as body text.</li>
-<li>No blank line between headers and body. The body disappears.</li>
-<li>Putting real customer emails into archived .eml files without a retention plan.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference (Create file)</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference</a></li></ul>
+<div class="layer-body"><p><strong>Headers</strong>: the lines at the top of an email describing it.</p><p><strong>MIME</strong>: the standard email format.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Plain line breaks instead of CRLF, so headers merge.</li><li>Missing the blank line before the body.</li><li>Keeping From in a draft.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference (Create file)</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="word-template-pdf.html">← Word templates and PDF conversion</a><a href="sharepoint-attachments-folders.html">SharePoint attachments, folders and moving files →</a></div>
@@ -96,7 +85,7 @@ Content-Type: text/html; charset=utf-8
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#demo">An .eml built in a Compose</a></li><li><a href="#line-breaks">The line-break detail</a></li><li><a href="#draft">Drafts that open ready to send</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#demo">An .eml built in a Compose</a></li><li><a href="#line-breaks">The line-break detail</a></li><li><a href="#draft">Received message or draft?</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

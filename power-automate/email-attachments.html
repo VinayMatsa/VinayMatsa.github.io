@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Email attachments and file content | Vinay Matsa</title>
-<meta name="description" content="Send a file as an attachment, read attachments from incoming mail, and save them to SharePoint.">
+<meta name="description" content="Send a file as an attachment, read attachments from incoming mail, and save them to SharePoint, with how file content moves.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Email attachments and file content">
-<meta property="og:description" content="Send a file as an attachment, read attachments from incoming mail, and save them to SharePoint.">
+<meta property="og:description" content="Send a file as an attachment, read attachments from incoming mail, and save them to SharePoint, with how file content moves.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,43 +49,29 @@
       </div>
 
       <div class="prose">
-<p>Many business processes start with a file in an email: an order sheet, an invoice, a signed form. A flow can send files as attachments, read the attachments of incoming mail, and save them where the team works. The key is understanding how file content travels between actions.</p>
+<p>Many processes start with a file in an email: an order sheet, an invoice, a signed form. A flow can send files as attachments, read attachments from incoming mail and save them where the team works.</p>
 
-<h2 id="demo">One flow, both directions</h2>
-<p>The demo reads an Excel file from SharePoint, emails it as an attachment, waits for the email to arrive, reads it back from the Inbox and saves the attachment to SharePoint under a new name.</p>
+<h2 id="demo"><span class="ico ico-data"></span>One flow, both directions</h2>
+<div class="cards"><div><strong>What</strong>Attachments are file content (Base64) plus a name, going out through Send an email and in through Get emails.</div><div><strong>Why</strong>Getting files out of inboxes and into libraries is one of the most common automations.</div><div><strong>Demo</strong>Email an order workbook, read it back from the Inbox, save the attachment to SharePoint.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The demo flow</p><div class="fl"><div class="nd act"><strong>Get order file</strong> from SharePoint</div><div class="ar"></div><div class="nd"><strong>Send test email</strong> with it attached</div><div class="ar"></div><div class="nd">Wait for delivery (31 s)</div><div class="ar"></div><div class="nd"><strong>Get emails</strong> with attachments</div><div class="ar"></div><div class="nd"><strong>Save each attachment</strong> (loop) → SharePoint</div><div class="ar"></div><div class="nd ok">Reply, then move the email to Archive</div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l7-email-canvas.webp" alt="Flow canvas: Get order file, Send test email, Wait for delivery (31 seconds), Get emails, Save each attachment loop, Reply to email, Move email" width="220" height="463" loading="lazy">
-<figcaption>Read a file, send it, receive it, save it.</figcaption></figure>
+<figcaption>The demo flow.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l7-email-summary.webp" alt="Summary output: Subject Contoso: order file for review, Attachments 1, First attachment website-demo-orders.xlsx" width="618" height="190" loading="lazy">
-<figcaption>The email came back with its one attachment, ready to save.</figcaption></figure>
+<figcaption>What arrived.</figcaption></figure>
 
-<h2 id="send">Sending a file</h2>
-<p>In <strong>Send an email (V2)</strong>, open <em>Show all</em> and add an attachment with a <strong>Name</strong> and <strong>Content</strong>. The content comes straight from a file action:</p>
-<pre><code>body(&#x27;Get_order_file&#x27;)?[&#x27;$content&#x27;]</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>Get_order_file</code></td><td>SharePoint <strong>Get file content using path</strong>.</td></tr><tr><td><code>?[&#x27;$content&#x27;]</code></td><td>The file itself, as Base64 text. Outlook turns it back into a file.</td></tr></tbody></table></div>
+<h2 id="send"><span class="ico ico-arrow"></span>Sending a file</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>File → attachment</p><div class="fl"><div class="nd">Get file content → <span class="chip ">{"$content-type":…, "$content":"…"}</span></div><div class="ar"></div><div class="nd ok">Send an email (V2) → Show all → Attachments: Name + Content <code>body('Get_order_file')?['$content']</code></div></div></div>
 
-<h2 id="save">Saving attachments that arrive</h2>
-<p><strong>Get emails (V3)</strong> (or the trigger <em>When a new email arrives</em>) has an <strong>Include attachments</strong> setting. Turn it on, then loop over the attachments:</p>
+<h2 id="save"><span class="ico ico-check"></span>Saving attachments that arrive</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Attachment → file</p><div class="fl"><div class="nd">Get emails (V3) / trigger with <strong>Include attachments</strong> = Yes</div><div class="ar"></div><div class="nd">Apply to each attachment</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Inline image (signature logo)? <code>isInline</code></div><div class="ar"></div><div class="br"><div><span class="lbl f">Yes</span><div class="nd mute">Skip it</div></div><div><span class="lbl t">No</span><div class="nd ok">Create file: name + <code>base64ToBinary(contentBytes)</code></div></div></div></div></div>
 <pre><code>base64ToBinary(items(&#x27;Save_each_attachment&#x27;)?[&#x27;contentBytes&#x27;])</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>items(&#x27;Save_each_attachment&#x27;)</code></td><td>The current attachment in the loop.</td></tr><tr><td><code>?[&#x27;contentBytes&#x27;]</code></td><td>Its content as Base64 text.</td></tr><tr><td><code>base64ToBinary(...)</code></td><td>Turns the text back into the real file for SharePoint <strong>Create file</strong>.</td></tr></tbody></table></div>
-<p>Use <code>items('Save_each_attachment')?['name']</code> for the file name, with a prefix or date so files don't overwrite each other.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[&#x27;contentBytes&#x27;]</code></td><td>The attachment as Base64 text.</td></tr><tr><td><code>base64ToBinary(...)</code></td><td>Back to file bytes for Create file.</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Prefix names with a date or ID so files don't overwrite each other: <code>items('Save_each_attachment')?['name']</code>.</li><li>Signature logos count as attachments; skip <code>isInline</code> ones.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Base64</strong>: a way of writing a file as text so it can travel inside a flow. Attachments arrive as Base64 and must be converted back with <code>base64ToBinary()</code> before saving.</p>
-<p><strong>Inline images</strong>: logos in an email signature also count as attachments. Skip them with a condition on <code>isInline</code>, or by file type.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Add the trigger <strong>When a new email arrives (V3)</strong> and set <em>Include attachments</em> and <em>Only with attachments</em> to Yes.</li><li>Add <strong>Apply to each</strong> over the trigger's <em>Attachments</em>.</li><li>Inside, add a Condition: <code>isInline</code> is equal to <code>false</code>.</li><li>In the Yes branch, add SharePoint <strong>Create file</strong>: file name from the attachment name, content <code>base64ToBinary(items('Apply_to_each')?['contentBytes'])</code>.</li><li>Send yourself a test email with one attachment and a signature logo, and check that only the real file is saved.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Saving <code>contentBytes</code> without <code>base64ToBinary()</code>. The file is created but won't open.</li>
-<li>Forgetting <em>Include attachments</em>. The attachments list is then empty.</li>
-<li>Saving signature images as if they were documents.</li>
-<li>Using the same file name for every email, so each save overwrites the last.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-email-flows">Create flows to manage email</a></li></ul>
+<div class="layer-body"><p><strong>Base64</strong>: a file written as text so it can travel in a flow.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Saving <code>contentBytes</code> without <code>base64ToBinary()</code>: the file is unreadable.</li><li>Include attachments off.</li><li>Same file name every time.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-email-flows">Create flows to manage email</a></li></ul>
       </div>
 
       <div class="pager"><a href="./">← All Power Automate topics</a><a href="reply-move-read-email.html">Reply, move and read email →</a></div>

@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Word templates and PDF conversion | Vinay Matsa</title>
-<meta name="description" content="Fill a Word template with data from a flow, save it, and convert it to PDF.">
+<meta name="description" content="Fill a Word template with data from a flow, save it, and convert it to PDF, ready to email or store.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Word templates and PDF conversion">
-<meta property="og:description" content="Fill a Word template with data from a flow, save it, and convert it to PDF.">
+<meta property="og:description" content="Fill a Word template with data from a flow, save it, and convert it to PDF, ready to email or store.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,41 +49,28 @@
       </div>
 
       <div class="prose">
-<p>Letters, certificates and confirmations usually follow a fixed layout with a few changing values. The <strong>Word Online (Business)</strong> connector fills a Word template with those values and converts the result to PDF, ready to email or store.</p>
+<p>Letters, certificates and confirmations follow a fixed layout with a few changing values. The <strong>Word Online (Business)</strong> connector fills a template and converts the result to PDF.</p>
 
-<h2 id="demo">From template to PDF</h2>
+<h2 id="demo"><span class="ico ico-data"></span>From template to PDF</h2>
+<div class="cards"><div><strong>What</strong>A .docx with content controls, filled by <em>Populate a Microsoft Word template</em>, then converted to PDF.</div><div><strong>Why</strong>Consistent documents without anyone copying values by hand.</div><div><strong>Demo</strong>An order confirmation letter for Contoso, order 101, 250.00.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Template → Word → PDF</p><div class="fl"><div class="nd act"><strong>Order</strong> data</div><div class="ar"></div><div class="nd"><strong>Populate a Word template</strong>: one value per content control</div><div class="ar"></div><div class="nd"><strong>Save Word file</strong> (Create file, .docx)</div><div class="ar"></div><div class="nd"><strong>Convert to PDF</strong></div><div class="ar"></div><div class="nd ok"><strong>Save PDF</strong> → <span class="chip ok">website-demo-letter-101.pdf</span></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l7-word-canvas.webp" alt="Flow canvas: Order, Populate a Word template, Save Word file, Convert to PDF, Save PDF, Result" width="220" height="382" loading="lazy">
-<figcaption>Five steps from data to a stored PDF.</figcaption></figure>
+<figcaption>The demo flow.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Content controls and their values</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Control title</th><th>Value</th></tr></thead><tbody><tr><td>LetterDate</td><td><span class="chip ">22 November 2026</span></td></tr><tr><td>CustomerName</td><td><span class="chip ">Contoso</span></td></tr><tr><td>OrderId</td><td><span class="chip ">101</span></td></tr><tr><td>Amount</td><td><span class="chip ">250.00</span></td></tr></tbody></table></div></div>
 <figure class="shot"><img src="../assets/img/pa/l7-word-pdf.webp" alt="The generated PDF: Contoso Ltd, Date: 22 November 2026, Dear Contoso, Thank you for order 101. The total amount is 250.00." width="793" height="290" loading="lazy">
-<figcaption>The finished PDF. The date, name, order number and amount were filled in by the flow.</figcaption></figure>
+<figcaption>The generated PDF.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l7-word-result.webp" alt="Result output: Word file website-demo-letter-101.docx, PDF file website-demo-letter-101.pdf" width="618" height="155" loading="lazy">
-<figcaption>Both files saved in the library.</figcaption></figure>
+<figcaption>Both files saved.</figcaption></figure>
 
-<h2 id="template">How the template works</h2>
-<p>A template is a normal .docx file with <strong>content controls</strong> where the values go. In Word desktop, turn on the <strong>Developer</strong> tab, place a <em>Plain Text Content Control</em> for each value, and give each one a clear title in Properties (LetterDate, CustomerName, OrderId, Amount). When you pick the file in <strong>Populate a Microsoft Word template</strong>, those titles appear as input boxes.</p>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Action</th><th>Input</th><th>Output</th></tr></thead><tbody>
-<tr><td>Populate a Microsoft Word template</td><td>Template file and a value per control</td><td>The new document's content (not yet saved)</td></tr>
-<tr><td>SharePoint Create file</td><td>A name ending in .docx and the content from above</td><td>The saved Word file</td></tr>
-<tr><td>Convert Word Document to PDF</td><td>The saved Word file</td><td>PDF content to save or attach</td></tr>
-</tbody></table></div>
-<p>The connector is <strong>premium</strong>, so the flow needs a Power Automate Premium (or Process) licence.</p>
+<h2 id="template"><span class="ico ico-scope"></span>How the template works</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>Making a template</p><div class="fl"><div class="nd">Word desktop → Developer tab</div><div class="ar"></div><div class="nd">Insert a <strong>Plain Text Content Control</strong> per value</div><div class="ar"></div><div class="nd ok">Properties → give each a clear title (LetterDate, CustomerName…)</div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-arrow"></span>Action</th><th>Input</th><th>Output</th></tr></thead><tbody><tr><td>Populate a Microsoft Word template</td><td>Template + a value per control</td><td>New document content (not saved yet)</td></tr><tr><td>SharePoint Create file</td><td>Name ending .docx + content</td><td>The saved Word file</td></tr><tr><td>Convert Word Document to PDF</td><td>The saved Word file</td><td>PDF content to save or attach</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>The connector is premium.</li><li>Save the template as .docx (not .dotx).</li><li>Format numbers and dates before filling: the template shows text as given.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Content control</strong>: a marked box in a Word document that a program can fill in. Word desktop shows them on the Developer tab.</p>
-<p><strong>.docx vs .dotx</strong>: save the template as a normal .docx. The action works with .docx files.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>In Word desktop, write the letter and insert a Plain Text Content Control for each value. Give each a title.</li><li>Save it as .docx in a SharePoint library.</li><li>Add <strong>Populate a Microsoft Word template</strong>, select the file, and fill each box with dynamic content.</li><li>Add SharePoint <strong>Create file</strong> with a unique name, such as <code>concat('letter-', variables('OrderId'), '.docx')</code>.</li><li>Add <strong>Convert Word Document to PDF</strong> on the saved file, then Create file again with a .pdf name, or attach it to an email.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Content controls that aren't plain text (rich text, date picker). Use plain text and format the value in the flow.</li>
-<li>Converting before saving. Convert to PDF needs a saved Word file.</li>
-<li>Re-using one output name, so each run overwrites the last letter.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/connectors/wordonlinebusiness/">Word Online (Business) connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types">Types of Power Automate licenses</a></li></ul>
+<div class="layer-body"><p><strong>Content control</strong>: a marked box in a Word document that a program can fill in.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Controls without titles.</li><li>Converting before saving the .docx.</li><li>Unformatted dates in the letter.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/wordonlinebusiness/">Word Online (Business) connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types">Types of Power Automate licenses</a></li></ul>
       </div>
 
       <div class="pager"><a href="excel-patterns.html">← Excel processing patterns</a><a href="eml-files.html">Building .eml files →</a></div>

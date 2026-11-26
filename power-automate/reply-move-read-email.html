@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reply, move and read email | Vinay Matsa</title>
-<meta name="description" content="Reply to the right person, file processed mail into a folder, and read the email body as plain text.">
+<meta name="description" content="Reply to the right person, file processed mail into a folder so it isn't processed twice, and read the body as plain text.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Reply, move and read email">
-<meta property="og:description" content="Reply to the right person, file processed mail into a folder, and read the email body as plain text.">
+<meta property="og:description" content="Reply to the right person, file processed mail into a folder so it isn't processed twice, and read the body as plain text.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,44 +49,25 @@
       </div>
 
       <div class="prose">
-<p>After a flow processes an email it usually does three more things: replies to the sender, moves the email out of the Inbox so it isn't processed twice, and reads the body text to find details. Each has one catch worth knowing.</p>
+<p>After a flow processes an email it usually replies to the sender, moves the email out of the Inbox, and reads the body to find details. Each has one catch.</p>
 
-<h2 id="demo">Reply and move</h2>
+<h2 id="demo"><span class="ico ico-arrow"></span>Reply and move</h2>
+<div class="cards"><div><strong>What</strong>Reply to email (V3) and Move email (V2), both using the email's Message Id.</div><div><strong>Why</strong>Replying confirms receipt; moving stops the same email being processed again.</div><div><strong>Demo</strong>Reply to the test email, then move it to Archive.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>After processing an email</p><div class="fl"><div class="nd act">Message Id from the trigger or Get emails</div><div class="ar"></div><div class="nd"><strong>Reply to email (V3)</strong>: text, Reply All yes/no, To</div><div class="ar"></div><div class="nd ok"><strong>Move email (V2)</strong> → Archive</div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l7-email-canvas-end.webp" alt="Flow canvas: Send test email, Wait for delivery, Get emails, Save each attachment, Reply to email, Move email, Summary" width="175" height="420" loading="lazy">
-<figcaption>After saving the attachment, the flow replies and moves the email.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Action</th><th>Key inputs</th></tr></thead><tbody>
-<tr><td><strong>Reply to email (V3)</strong></td><td>Message Id from the trigger or Get emails, the reply text, and Reply All yes or no</td></tr>
-<tr><td><strong>Move email (V2)</strong></td><td>Message Id and the destination folder (Archive in the demo)</td></tr>
-</tbody></table></div>
-<p><strong>A real failure from the demo.</strong> The first run failed at Reply to email with <em>A message needs to have at least one recipient</em>. The test email was sent by the same account that replied, and Outlook leaves you out of your own reply. Setting the reply's <strong>To</strong> field to the original sender, <code>first(outputs('Get_emails')?['body/value'])?['from']</code>, fixed it. Real senders are usually other people, but shared-mailbox and test setups hit this often.</p>
+<figcaption>Reply and Move at the end of the demo.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>A real failure from the demo</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Run</th><th>Reply's To</th><th>Result</th></tr></thead><tbody><tr><td>1</td><td>(empty: reply to sender)</td><td><span class="lbl f">Failed</span> <em>A message needs to have at least one recipient</em></td></tr><tr><td>2</td><td><code>first(outputs('Get_emails')?['body/value'])?['from']</code></td><td><span class="lbl t">Succeeded</span></td></tr></tbody></table></div><p class="viz-note">The sender and the replying account were the same, and Outlook leaves you out of your own reply. Common with shared mailboxes and tests.</p></div>
 
-<h2 id="read-body">Reading the body as text</h2>
-<p>The email body is HTML. To search it for an order number or a name, you need plain text.</p>
+<h2 id="read-body"><span class="ico ico-expr"></span>Reading the body as text</h2>
 <figure class="shot"><img src="../assets/img/pa/l7-email-summary.webp" alt="Summary output: Body preview (plain text) Hello, The order file for this week is at..., Body (HTML) starts with &lt;html&gt;&lt;head&gt;&lt;meta http-equiv=..." width="618" height="190" loading="lazy">
-<figcaption>The same email as plain text (Body preview) and as HTML.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Option</th><th>Gives you</th><th>Watch out for</th></tr></thead><tbody>
-<tr><td><code>bodyPreview</code> from Get emails or the trigger</td><td>Plain text, no connector needed</td><td>Only the first part of the message (about 255 characters)</td></tr>
-<tr><td><strong>Html to text</strong> (Content Conversion connector)</td><td>The full body as plain text</td><td>A separate connector that your data policy must allow</td></tr>
-<tr><td>Text functions on the HTML</td><td>Values between known markers with <code>split()</code> and <code>substring()</code></td><td>Breaks when the email layout changes</td></tr>
-</tbody></table></div>
-<p>In the environment used for these demos, the data policy blocks Content Conversion (<em>Admin data policy 'Advanced Connector Policy' restricts use of these apis: shared_conversionservice</em>), so the demo uses <code>bodyPreview</code>. Check your own policy before you design around Html to text.</p>
+<figcaption>The body is HTML; bodyPreview is plain text.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Which way to get plain text?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Is the first ~255 characters enough?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok"><code>bodyPreview</code>: no extra connector</div></div><div><span class="lbl f">No</span><div class="nd dec"><span class="ico ico-cond"></span>Is the Content Conversion connector allowed?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok"><strong>Html to text</strong></div></div><div><span class="lbl f">No</span><div class="nd ok">Text functions between known markers</div></div></div></div></div></div></div>
+<p>In the demo environment the data policy blocks Content Conversion, so the demo uses <code>bodyPreview</code>.</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Message Id</strong>: the unique ID of one email. Reply, move, flag and mark-as-read actions all need it.</p>
-<p><strong>Well-known folders</strong>: Inbox, Archive, Sent Items, Deleted Items. Other folders are chosen from the folder list in the action.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>After the trigger or Get emails, add <strong>Reply to email (V3)</strong> with the Message Id and your reply text.</li><li>Under <em>Show all</em>, set <strong>To</strong> to the original sender when the mailbox may reply to itself.</li><li>Add <strong>Move email (V2)</strong> with the same Message Id and a folder such as <em>Processed</em>.</li><li>For the body, use <code>bodyPreview</code> for short checks, or Html to text if your policy allows it.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Leaving processed mail in the Inbox, so a polling flow picks it up again.</li>
-<li>Replying with Reply All to a large distribution list.</li>
-<li>Searching the HTML body for text that is split by tags, such as <code>REQ-&lt;b&gt;1042&lt;/b&gt;</code>.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/conversionservice/">Content Conversion connector (Html to text)</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/advanced-connector-policies">Advanced connector policies</a></li></ul>
+<div class="layer-body"><p><strong>Message Id</strong>: the unique ID of one email; reply, move and flag actions need it.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Not moving processed mail, so it's handled twice.</li><li>Parsing HTML with fixed positions.</li><li>Reply All by default on external mail.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365/">Office 365 Outlook connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/conversionservice/">Content Conversion connector (Html to text)</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/advanced-connector-policies">Advanced connector policies</a></li></ul>
       </div>
 
       <div class="pager"><a href="email-attachments.html">← Email attachments and file content</a><a href="excel-online.html">Excel Online basics →</a></div>

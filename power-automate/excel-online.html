@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Excel Online basics | Vinay Matsa</title>
-<meta name="description" content="Read and write rows in an Excel table, and avoid the date and number surprises the connector brings.">
+<meta name="description" content="Read and write rows in an Excel table, and avoid the date and number surprises and limits the connector brings.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Excel Online basics">
-<meta property="og:description" content="Read and write rows in an Excel table, and avoid the date and number surprises the connector brings.">
+<meta property="og:description" content="Read and write rows in an Excel table, and avoid the date and number surprises and limits the connector brings.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,45 +49,26 @@
       </div>
 
       <div class="prose">
-<p>The <strong>Excel Online (Business)</strong> connector reads and writes data in Excel files stored in SharePoint or OneDrive. It works with <strong>tables</strong>, not loose cells: the data must be formatted as a table (Insert &gt; Table) before a flow can see it.</p>
+<p>The <strong>Excel Online (Business)</strong> connector reads and writes data in Excel files in SharePoint or OneDrive. It works with <strong>tables</strong>, not loose cells: format the data as a table (Insert → Table) first.</p>
 
-<h2 id="demo">Reading a table</h2>
-<p>The demo workbook has a table named <em>Orders</em> with five rows: OrderId, Customer, Amount and OrderDate.</p>
+<h2 id="demo"><span class="ico ico-data"></span>Reading a table</h2>
+<div class="cards"><div><strong>What</strong>Actions that list, add, update and delete rows in a named Excel table.</div><div><strong>Why</strong>Many teams still keep data in Excel; flows can read and update it.</div><div><strong>Demo</strong>A table <em>Orders</em> with 5 rows: OrderId, Customer, Amount, OrderDate.</div></div>
 <figure class="shot"><img src="../assets/img/pa/l7-excel-canvas.webp" alt="Flow canvas: List orders, List orders ISO dates, List payments, Paid order IDs, Unpaid orders, Unpaid customers, Summary" width="220" height="437" loading="lazy">
-<figcaption>The same table is read twice, once with each date setting.</figcaption></figure>
+<figcaption>The demo flow.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l7-excel-summary.webp" alt="Summary output: Orders in the table 5, OrderDate by default 46328, OrderDate with ISO 8601 2026-11-02T00:00:00.000Z, Amount is returned as text, Orders with no payment Fabrikam (102), Tailspin (104)" width="618" height="185" loading="lazy">
-<figcaption>Dates arrive as numbers unless you ask for ISO 8601, and every value arrives as text.</figcaption></figure>
+<figcaption>What the connector returned.</figcaption></figure>
 
-<h2 id="surprises">Two surprises to plan for</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>What you see</th><th>Why</th><th>Fix</th></tr></thead><tbody>
-<tr><td>OrderDate is <strong>46328</strong></td><td>Excel stores dates as a day count. The connector returns that number by default.</td><td>Set <strong>DateTime Format</strong> (advanced parameter) to <em>ISO 8601</em>, or convert with <code>addDays('1899-12-30', ...)</code> (see Dates and time zones).</td></tr>
-<tr><td>Amount is <strong>text</strong></td><td>The connector returns every cell as a string.</td><td>Wrap in <code>float()</code> or <code>int()</code> before any maths or comparison.</td></tr>
-</tbody></table></div>
+<h2 id="surprises"><span class="ico ico-warn"></span>Two surprises to plan for</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>The same row, read two ways</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Column</th><th>Default</th><th>With DateTime Format = ISO 8601</th><th>Fix</th></tr></thead><tbody><tr><td>OrderDate</td><td><span class="chip warn">46328</span></td><td><span class="chip ok">2026-11-02T00:00:00.000Z</span></td><td>Set ISO 8601, or <code>addDays('1899-12-30', …)</code></td></tr><tr><td>Amount</td><td><span class="chip warn">"250"</span> (text)</td><td><span class="chip warn">"250"</span></td><td><code>float()</code> before maths</td></tr></tbody></table></div></div>
 
-<h2 id="limits">Limits from the connector documentation</h2>
-<ul>
-<li>The largest file the Excel Online (Business) connector supports is 25 MB.</li>
-<li><strong>List rows present in a table</strong> returns up to 256 rows unless you turn on pagination in the action's settings.</li>
-<li>Its filter supports only basic functions (eq, ne, contains, startswith, endswith), one filter function per column, and one sort column.</li>
-<li>A file can stay locked for a few minutes after the connector last used it, so avoid people editing the same file while a flow writes to it.</li>
-</ul>
+<h2 id="limits"><span class="ico ico-clock"></span>Limits from the connector documentation</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-warn"></span>Limit</th><th>Value</th></tr></thead><tbody><tr><td>Largest file</td><td>25 MB</td></tr><tr><td>List rows present in a table</td><td>256 rows unless pagination is on</td></tr><tr><td>Filter</td><td>Basic functions only (eq, ne, contains, startswith, endswith), one per column, one sort column</td></tr><tr><td>File locks</td><td>A file can stay locked for a few minutes after the connector used it</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Use a unique key column for Update and Delete a row.</li><li>Don't let people edit the file while a flow writes to it.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Table</strong>: a named range in Excel with headers. The connector reads by table name, not by sheet.</p>
-<p><strong>Key column</strong>: the column used to find a row for Update a row or Delete a row. Use a unique ID column.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>In Excel, select your data and choose <strong>Insert &gt; Table</strong>. Give the table a name on the Table Design tab.</li><li>Add <strong>List rows present in a table</strong>: choose the location, library, file and table.</li><li>Open <em>Advanced parameters</em> and set <strong>DateTime Format</strong> to ISO 8601.</li><li>For more than 256 rows, open the action's <strong>Settings</strong>, turn on Pagination and set a threshold.</li><li>To write, use <strong>Add a row into a table</strong>, or <strong>Update a row</strong> with a key column and value.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Data that isn't formatted as a table. The table drop-down is empty.</li>
-<li>Comparing amounts as text: <em>"80"</em> is greater than <em>"1200"</em> when compared as text.</li>
-<li>One row at a time in a loop for thousands of rows. It is slow and uses many requests; consider a SharePoint list or Dataverse for large data.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/connectors/excelonlinebusiness/">Excel Online (Business) connector reference and known limits</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+<div class="layer-body"><p><strong>Table</strong>: a named range with headers; the connector reads by table name.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Data not formatted as a table.</li><li>Maths on text amounts.</li><li>Forgetting pagination beyond 256 rows.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/excelonlinebusiness/">Excel Online (Business) connector reference and known limits</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
       </div>
 
       <div class="pager"><a href="reply-move-read-email.html">← Reply, move and read email</a><a href="excel-patterns.html">Excel processing patterns →</a></div>

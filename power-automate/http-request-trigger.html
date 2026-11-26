@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Starting a flow with an HTTP request | Vinay Matsa</title>
-<meta name="description" content="Turn a flow into a small web endpoint that other systems can call, and return a JSON response.">
+<meta name="description" content="Turn a flow into a small web endpoint other systems can call, validate the body, and return a JSON response, securely.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Starting a flow with an HTTP request">
-<meta property="og:description" content="Turn a flow into a small web endpoint that other systems can call, and return a JSON response.">
+<meta property="og:description" content="Turn a flow into a small web endpoint other systems can call, validate the body, and return a JSON response, securely.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,19 +49,13 @@
       </div>
 
       <div class="prose">
-<p>The trigger <strong>When an HTTP request is received</strong> gives a flow its own URL. Another system (a website form, a script, a webhook from a SaaS product) sends a request to that URL and the flow starts. With a <strong>Response</strong> action, the flow can also answer. This is a premium trigger.</p>
+<p>The trigger <strong>When an HTTP request is received</strong> gives a flow its own URL. Another system sends a request and the flow starts; with a <strong>Response</strong> action it answers. This is a premium trigger.</p>
 
-<h2 id="setup">The trigger</h2>
+<h2 id="setup"><span class="ico ico-arrow"></span>Request in, response out</h2>
+<div class="cards"><div><strong>What</strong>A trigger with a URL, a method and a JSON schema, plus a Response action.</div><div><strong>Why</strong>Websites, scripts and SaaS webhooks can start your flow and get an answer.</div><div><strong>Demo</strong>Post an order; get back the total.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>One call</p><div class="fl"><div class="nd act">Caller: <strong>POST</strong> to the flow's URL with JSON</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Does the body match the schema?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd">Order total = <code>mul(quantity, unitPrice)</code></div><div class="ar"></div><div class="nd ok">Response 200: <span class="chip ok">{"total": 148.5, …}</span></div></div><div><span class="lbl f">No / invalid</span><div class="nd mute">Respond 400 with a message</div></div></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l9-http-trigger.webp" alt="HTTP trigger settings: Who can trigger the flow set to Anyone, an HTTP URL on environment.api.powerplatform.com (redacted), and a request body JSON schema with orderId, customer, quantity and unitPrice" width="610" height="414" loading="lazy">
-<figcaption>The URL appears after the first save. It is redacted here.</figcaption></figure>
-<ul>
-<li><strong>Who can trigger the flow</strong>: <em>Anyone</em>, <em>Any user in my tenant</em>, or <em>Specific users in my tenant</em>. The last two require the caller to send a Microsoft Entra ID token.</li>
-<li><strong>Request body JSON schema</strong>: describes the body you expect, so later steps get tokens like <em>orderId</em>. Use <em>Use sample payload to generate schema</em> and paste an example.</li>
-<li><strong>Method</strong>: set it (usually POST) so other methods are rejected.</li>
-</ul>
-
-<h2 id="demo">Call it and get an answer</h2>
-<p>The demo multiplies quantity by price and returns a JSON response:</p>
+<figcaption>The trigger. The URL is redacted.</figcaption></figure>
 <pre><code>POST &lt;the flow&#x27;s HTTP URL&gt;
 Content-Type: application/json
 
@@ -78,29 +72,16 @@ Content-Type: application/json
   &quot;total&quot;: 148.5,
   &quot;message&quot;: &quot;Order accepted by the demo flow&quot;
 }</code></pre>
-<pre><code>mul(triggerBody()?[&#x27;quantity&#x27;], triggerBody()?[&#x27;unitPrice&#x27;])</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>triggerBody()</code></td><td>The JSON body that was posted.</td></tr><tr><td><code>?[&#x27;quantity&#x27;]</code></td><td>A property from it. The schema made it available as a token too.</td></tr><tr><td><code>mul(a, b)</code></td><td>Multiplies: 3 × 49.5 = 148.5.</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Values in the demo</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td>quantity</td><td><span class="chip ">3</span></td></tr><tr><td>unitPrice</td><td><span class="chip ">49.5</span></td></tr><tr><td>total</td><td><span class="chip ok">148.5</span></td></tr></tbody></table></div></div>
 
-<h2 id="security">Treat the URL like a password</h2>
-<p>With <em>Anyone</em>, the URL itself is the key: it contains a signature, and anyone holding it can start the flow. Keep it out of code repositories and screenshots, store it in a secret store or an environment variable of type Secret, and prefer the tenant options when the caller can get a token. Validate the body too: the schema describes it, but checking required fields and values (with a Condition and a 400 response) protects the steps that follow.</p>
+<h2 id="who"><span class="ico ico-stop"></span>Who can trigger it</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-stop"></span>Setting</th><th>Caller needs</th><th>Use for</th></tr></thead><tbody><tr><td>Anyone</td><td>The URL (it contains a signature)</td><td>External webhooks; keep the URL secret</td></tr><tr><td>Any user in my tenant</td><td>A Microsoft Entra ID token</td><td>Internal apps and scripts</td></tr><tr><td>Specific users in my tenant</td><td>A token for listed users</td><td>Tightly controlled callers</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Treat an <em>Anyone</em> URL like a password: secret store or Secret environment variable, never in code or screenshots.</li><li>Callers must send <code>Content-Type: application/json</code>, or the body arrives as text.</li><li>Answer fast; for slow work respond 202 first.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Endpoint</strong>: a URL that accepts requests.</p>
-<p><strong>Webhook</strong>: a service calling your URL when something happens, instead of you checking it.</p>
-<p><strong>Status code</strong>: the number in a response that says how it went: 200 OK, 400 bad input, 500 server error.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Create an instant flow with <strong>When an HTTP request is received</strong>.</li><li>Choose who can trigger it, set the method, and generate the schema from a sample body.</li><li>Add your actions, then a <strong>Response</strong> action with a status code, a <code>Content-Type: application/json</code> header and a body.</li><li>Save to get the URL. Test from a tool you trust, such as a PowerShell <code>Invoke-RestMethod</code> call or the caller system's test page.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Sharing the URL in chat or email. If it leaks, replace it: recreating the trigger gives the flow a new URL.</li>
-<li>Not sending <code>Content-Type: application/json</code> from the caller, so the body arrives as text and the tokens are empty.</li>
-<li>Doing long work before the Response. Callers often give up after a few seconds; answer first with 202 if the work is slow.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/oauth-authentication">Add OAuth authentication for HTTP request triggers</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-http-endpoint">Create callable workflows with the Request trigger (same engine)</a></li></ul>
+<div class="layer-body"><p><strong>Endpoint</strong>: a URL that accepts requests.</p><p><strong>Status code</strong>: 200 OK, 400 bad input, 500 server error.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Sharing the URL in chat or email.</li><li>No validation before using the body.</li><li>Long work before the Response.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/oauth-authentication">Add OAuth authentication for HTTP request triggers</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-http-endpoint">Create callable workflows with the Request trigger</a></li></ul>
       </div>
 
       <div class="pager"><a href="sharepoint-rest-batch.html">← SharePoint REST API and $batch</a><a href="sql-server-gateway.html">SQL Server and the on-premises data gateway →</a></div>
@@ -109,7 +90,7 @@ Content-Type: application/json
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#setup">The trigger</a></li><li><a href="#demo">Call it and get an answer</a></li><li><a href="#security">Treat the URL like a password</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#setup">Request in, response out</a></li><li><a href="#who">Who can trigger it</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

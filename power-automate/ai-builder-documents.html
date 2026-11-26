@@ -49,44 +49,22 @@
       </div>
 
       <div class="prose">
-<p><strong>AI Builder</strong> adds ready-made AI to flows. For documents, two kinds of model matter: <strong>prebuilt</strong> models (invoices, receipts, ID documents, business cards) that work without training, and <strong>custom document processing</strong> models that you train on your own forms. Both return each field with a <strong>confidence score</strong>.</p>
+<p><strong>AI Builder</strong> adds ready-made AI to flows. For documents: <strong>prebuilt</strong> models (invoices, receipts, IDs) work without training; <strong>custom document processing</strong> models learn your forms. Both return each field with a <strong>confidence score</strong>.</p>
 
-<h2 id="flow">The shape of a document flow</h2>
-<ol>
-<li>A file arrives: an email attachment, a SharePoint upload, a Teams message.</li>
-<li><strong>Extract information from invoices</strong> (prebuilt) or <strong>Extract information from documents</strong> (custom model) reads it.</li>
-<li>A Condition checks the confidence of the important fields.</li>
-<li>High confidence: write the values to a list or system. Low confidence: send to a person to check, with the extracted values pre-filled.</li>
-</ol>
-
-<h2 id="confidence">Using confidence</h2>
-<p>Every extracted field has a value and a confidence between 0 and 1. Pick a threshold per field based on the cost of a mistake (an amount needs more certainty than a reference note).</p>
+<h2 id="flow"><span class="ico ico-expr"></span>The shape of a document flow</h2>
+<div class="cards"><div><strong>What</strong>Extract fields with a model, then decide per field whether its confidence is high enough.</div><div><strong>Why</strong>AI saves typing, but a wrong amount is costly: uncertain values go to a person.</div><div><strong>Demo</strong>An invoice: number, supplier, total.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Extract, check, route</p><div class="fl"><div class="nd act">A file arrives (email, SharePoint, Teams)</div><div class="ar"></div><div class="nd"><strong>Extract information from invoices</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Total confidence &ge; 0.85 and invoice number present?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">Write the values</div></div><div><span class="lbl f">No</span><div class="nd">Approval with values + file link</div><div class="ar"></div><div class="nd ok">Write the confirmed values</div></div></div><div class="ar"></div><div class="nd">Log the document, confidences and reviewer changes</div></div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Example field results (illustration)</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Field</th><th>Value</th><th>Confidence</th><th>Route</th></tr></thead><tbody><tr><td>invoiceId</td><td><span class="chip ">INV-2048</span></td><td><div class="bar done"><i style="width:96%"></i></div></td><td><span class="lbl t">auto</span></td></tr><tr><td>invoiceTotal</td><td><span class="chip ">1240.50</span></td><td><div class="bar"><i style="width:72%"></i></div></td><td><span class="lbl f">review</span></td></tr><tr><td>vendorName</td><td><span class="chip ">Fabrikam Ltd</span></td><td><div class="bar done"><i style="width:91%"></i></div></td><td><span class="lbl t">auto</span></td></tr></tbody></table></div><p class="viz-note">One low-confidence field sends the document to review.</p></div>
 <pre><code>and(greaterOrEquals(outputs(&#x27;Extract_information_from_invoices&#x27;)?[&#x27;body/responsev2/predictionOutput/invoiceTotal/confidence&#x27;], 0.85), not(empty(outputs(&#x27;Extract_information_from_invoices&#x27;)?[&#x27;body/responsev2/predictionOutput/invoiceId/value&#x27;])))</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>predictionOutput/invoiceTotal/confidence</code></td><td>How sure the model is about the total. Pick the token from dynamic content rather than typing the path.</td></tr><tr><td><code>greaterOrEquals(..., 0.85)</code></td><td>The threshold. Start strict and loosen once you've seen real results.</td></tr><tr><td><code>not(empty(.../invoiceId/value))</code></td><td>A field that must exist at all, whatever its confidence.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>…/invoiceTotal/confidence</code></td><td>How sure the model is about the total. Pick the token rather than typing the path.</td></tr><tr><td><code>greaterOrEquals(..., 0.85)</code></td><td>The threshold: strict first, loosen with experience.</td></tr><tr><td><code>not(empty(.../invoiceId/value))</code></td><td>A field that must exist.</td></tr></tbody></table></div>
 
-<h2 id="review">Human review</h2>
-<p>For the low-confidence branch, a <strong>Start and wait for an approval</strong> (or an Adaptive Card in Teams) shows the reviewer the file link and the extracted values. The reviewer corrects or confirms, and the flow writes the confirmed values. Keep the original file and the model's output in an audit list, so you can measure how often reviewers change values and retrain the model.</p>
-
-<h2 id="cost">Credits</h2>
-<p>AI Builder runs on capacity. Testing a model in AI Builder doesn't consume capacity; each run in a flow does, per page. AI Builder credits are being phased out in favour of Copilot Credits, so check your environment's capacity before scaling up. This page has no live demo, because running AI Builder models in a flow uses paid capacity.</p>
+<h2 id="cost"><span class="ico ico-clock"></span>Capacity</h2>
+<p>Testing a model in AI Builder doesn't use capacity; each run in a flow does, per page. AI Builder credits are being phased out in favour of Copilot Credits. No live demo here, because running models uses paid capacity.</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Model</strong>: an AI component trained to do one task, such as reading invoices.</p>
-<p><strong>Confidence score</strong>: the model's own estimate that a value is correct. 0.95 means very sure, 0.40 means a guess.</p>
-<p><strong>Human in the loop</strong>: a person checks the AI's work before it's used.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>In AI Builder, try the prebuilt invoice model on a sample file. If your documents are specific forms, train a custom document processing model with at least five samples per layout.</li><li>Build a flow that gets the file content and passes it to the extract action.</li><li>Add a Condition on the confidence of the key fields.</li><li>In the Yes branch, create the record. In the No branch, start an approval with the extracted values and the file link.</li><li>Log every document, its confidences and the reviewer's changes.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Trusting every value because the run succeeded. Success means the model ran, not that it was right.</li>
-<li>One threshold for all fields.</li>
-<li>Sending password-protected or very low-resolution scans. The model returns empty values.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/ai-builder/form-processing-model-overview">Document processing model overview</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/form-processing-model-in-flow">Use the document processing model in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/flow-invoice-processing">Use the invoice processing prebuilt model in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/credit-management">Licensing and AI Builder credits</a></li></ul>
+<div class="layer-body"><p><strong>Confidence score</strong>: the model's estimate that a value is correct (0 to 1).</p><p><strong>Human in the loop</strong>: a person checks AI work before it's used.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Trusting values because the run succeeded.</li><li>One threshold for every field.</li><li>Low-resolution or protected scans.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/ai-builder/form-processing-model-overview">Document processing model overview</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/form-processing-model-in-flow">Use the document processing model in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/flow-invoice-processing">Use the invoice processing prebuilt model</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/credit-management">Licensing and AI Builder credits</a></li></ul>
       </div>
 
       <div class="pager"><a href="azure-blob-storage.html">← Azure Blob Storage for files</a><a href="ai-prompts-clean-json.html">AI prompts in flows and cleaning their JSON →</a></div>
@@ -95,7 +73,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#flow">The shape of a document flow</a></li><li><a href="#confidence">Using confidence</a></li><li><a href="#review">Human review</a></li><li><a href="#cost">Credits</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#flow">The shape of a document flow</a></li><li><a href="#cost">Capacity</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

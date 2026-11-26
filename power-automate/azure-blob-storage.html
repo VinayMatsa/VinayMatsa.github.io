@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Azure Blob Storage for files | Vinay Matsa</title>
-<meta name="description" content="Store large files, archives and exports in Azure Blob Storage from a flow.">
+<meta name="description" content="Store large files, archives and exports in Azure Blob Storage from a flow, with dated paths and secure sharing.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Azure Blob Storage for files">
-<meta property="og:description" content="Store large files, archives and exports in Azure Blob Storage from a flow.">
+<meta property="og:description" content="Store large files, archives and exports in Azure Blob Storage from a flow, with dated paths and secure sharing.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,45 +49,25 @@
       </div>
 
       <div class="prose">
-<p><strong>Azure Blob Storage</strong> is cheap, large-scale file storage in Azure. Flows use it to archive attachments, keep exports that are too big or too many for SharePoint, and hand files to other systems. The connector is premium and needs an Azure subscription, so there's no live demo here.</p>
+<p><strong>Azure Blob Storage</strong> is cheap, large-scale file storage. Flows use it to archive attachments, keep exports too big or too many for SharePoint, and hand files to other systems. Premium, and needs an Azure subscription, so no live demo.</p>
 
-<h2 id="terms">How Blob Storage is organised</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody>
-<tr><td>Storage account</td><td>The top-level resource, with its own name and access settings.</td></tr>
-<tr><td>Container</td><td>A folder-like group of blobs inside the account. Access rules apply per container.</td></tr>
-<tr><td>Blob</td><td>One file. Its name can include slashes (<code>2026/11/invoice-2048.pdf</code>), which shows up as virtual folders.</td></tr>
-</tbody></table></div>
+<h2 id="terms"><span class="ico ico-data"></span>How it's organised</h2>
+<div class="cards"><div><strong>What</strong>Storage account → containers → blobs (files), with virtual folders in blob names.</div><div><strong>Why</strong>Large volumes of files at low cost, with fine-grained access.</div><div><strong>Demo</strong>Archive email attachments into year/month folders.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Account, container, blob</p><div class="fl"><div class="nd act">Storage account <em>contosoarchive</em></div><div class="ar"></div><div class="nd">Container <em>attachments</em></div><div class="ar"></div><div class="nd ok">Blob <code>archive/2026/11/invoice-2048.pdf</code></div></div></div>
 
-<h2 id="actions">The actions</h2>
-<ul>
-<li><strong>Create blob (V2)</strong>: write file content to a path. Common source: an email attachment's <em>Content Bytes</em> (decode with <code>base64ToBinary()</code>) or a SharePoint file's content.</li>
-<li><strong>Get blob content (V2)</strong> and <strong>Get blob content using path (V2)</strong>: read a file.</li>
-<li><strong>Lists blobs (V2)</strong>: what's in a folder, with paging.</li>
-<li><strong>Create SAS URI by path (V2)</strong>: a time-limited link that lets someone download one blob without an account.</li>
-<li>Trigger <strong>When a blob is added or modified (properties only) (V2)</strong>: react to new files.</li>
-</ul>
+<h2 id="actions"><span class="ico ico-expr"></span>The actions</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Action</th><th>Use</th></tr></thead><tbody><tr><td>Create blob (V2)</td><td>Write content to a path (e.g. <code>base64ToBinary(contentBytes)</code>)</td></tr><tr><td>Get blob content (using path) (V2)</td><td>Read a file</td></tr><tr><td>Lists blobs (V2)</td><td>What's in a folder, with paging</td></tr><tr><td>Create SAS URI by path (V2)</td><td>A time-limited download link</td></tr><tr><td>When a blob is added or modified (V2)</td><td>React to new files</td></tr></tbody></table></div>
 <pre><code>concat(&#x27;archive/&#x27;, formatDateTime(utcNow(), &#x27;yyyy/MM&#x27;), &#x27;/&#x27;, items(&#x27;Apply_to_each&#x27;)?[&#x27;Name&#x27;])</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>&#x27;archive/&#x27;</code></td><td>Top-level virtual folder.</td></tr><tr><td><code>formatDateTime(utcNow(), &#x27;yyyy/MM&#x27;)</code></td><td>Year and month folders, so the container stays browsable.</td></tr><tr><td><code>items(...)?[&#x27;Name&#x27;]</code></td><td>The attachment's file name.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>&#x27;archive/&#x27;</code></td><td>Top-level folder.</td></tr><tr><td><code>formatDateTime(..., &#x27;yyyy/MM&#x27;)</code></td><td>Year/month folders: <em>2026/11</em>.</td></tr><tr><td><code>?[&#x27;Name&#x27;]</code></td><td>The attachment's name.</td></tr></tbody></table></div>
 
-<h2 id="security">Access</h2>
-<p>Prefer Microsoft Entra ID authentication on the connection, with the account given the <em>Storage Blob Data Contributor</em> role on just the containers it needs. Avoid account access keys in connections: a key opens the whole storage account.</p>
+<h2 id="security"><span class="ico ico-stop"></span>Access</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-stop"></span>Sharing a file safely</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Does someone without an account need it?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">SAS URI with a short expiry</div></div><div><span class="lbl f">No</span><div class="nd ok">Entra ID + a data role on the container</div></div></div></div></div>
+<p>Prefer Entra ID authentication with <em>Storage Blob Data Contributor</em> on just the needed containers; avoid account keys (they open the whole account).</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Azure subscription</strong>: the billing account for Azure resources. Blob Storage is billed by stored data and operations.</p>
-<p><strong>SAS</strong> (shared access signature): a signed link with an expiry time and limited permissions.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Create a storage account and a container (or ask your Azure admin to).</li><li>Grant the flow's account a data role on the container.</li><li>Create an Azure Blob Storage connection with Microsoft Entra ID authentication.</li><li>Add <strong>Create blob (V2)</strong> with a folder path built from the date and the file name.</li><li>Share files with <strong>Create SAS URI by path (V2)</strong> and a short expiry, not by making the container public.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Writing every file to the container root. Use dated paths.</li>
-<li>Public containers for convenience.</li>
-<li>Same file name every run, which silently overwrites the earlier blob.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/connectors/azureblob/">Azure Blob Storage connector reference</a></li></ul>
+<div class="layer-body"><p><strong>SAS</strong>: a signed link with an expiry and limited permissions.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Everything in the container root.</li><li>Public containers.</li><li>The same file name every run.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/azureblob/">Azure Blob Storage connector reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="sql-server-gateway.html">← SQL Server and the on-premises data gateway</a><a href="ai-builder-documents.html">AI Builder document processing and human review →</a></div>
@@ -96,7 +76,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#terms">How Blob Storage is organised</a></li><li><a href="#actions">The actions</a></li><li><a href="#security">Access</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#terms">How it's organised</a></li><li><a href="#actions">The actions</a></li><li><a href="#security">Access</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

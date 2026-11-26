@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SharePoint REST API and $batch | Vinay Matsa</title>
-<meta name="description" content="Use Send an HTTP request to SharePoint for what the standard actions can't do, and create many items in one call.">
+<meta name="description" content="Use Send an HTTP request to SharePoint for what standard actions can't do, and create many items in one call with $batch.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SharePoint REST API and $batch">
-<meta property="og:description" content="Use Send an HTTP request to SharePoint for what the standard actions can't do, and create many items in one call.">
+<meta property="og:description" content="Use Send an HTTP request to SharePoint for what standard actions can't do, and create many items in one call with $batch.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,21 +49,24 @@
       </div>
 
       <div class="prose">
-<p>The SharePoint actions cover the everyday work. <strong>Send an HTTP request to SharePoint</strong> lets you call SharePoint's REST API directly, signed in through the same connection. Use it for things like breaking permission inheritance, reading version history, or creating many items in one call with <strong>$batch</strong>.</p>
+<p><strong>Send an HTTP request to SharePoint</strong> calls SharePoint's REST API with the same connection: for permissions, version history, or many changes in one call with <strong>$batch</strong>.</p>
 
-<h2 id="demo">Read with REST, then write three items in one call</h2>
+<h2 id="demo"><span class="ico ico-arrow"></span>Read with REST, write three items in one call</h2>
+<div class="cards"><div><strong>What</strong>REST URLs under <code>_api/</code> called through the SharePoint connector.</div><div><strong>Why</strong>Reach features the standard actions don't have, and cut many writes to one request.</div><div><strong>Demo</strong>Requests over 500, then three audit rows created in one $batch.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>The demo</p><div class="fl"><div class="nd act"><strong>GET</strong> items over 500, largest first</div><div class="ar"></div><div class="nd"><strong>Big requests</strong> (Select)</div><div class="ar"></div><div class="nd"><strong>POST</strong> <code>_api/$batch</code> with three creates</div><div class="ar"></div><div class="nd ok"><strong>Batch result</strong>: 3 created</div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l9-rest-canvas.webp" alt="Flow canvas: Manually trigger a flow, Get items with REST, Big requests, Create three items in one call, Batch result" width="190" height="345" loading="lazy">
-<figcaption>Two REST calls: one GET, one $batch POST.</figcaption></figure>
+<figcaption>The demo flow.</figcaption></figure>
 
-<h2 id="get">A REST read</h2>
+<h2 id="get"><span class="ico ico-data"></span>A REST read</h2>
 <pre><code>_api/web/lists/getbytitle(&#x27;Requests&#x27;)/items?$select=Title,Amount&amp;$filter=Amount gt 500&amp;$orderby=Amount desc&amp;$top=5</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>_api/web/lists/getbytitle(&#x27;Requests&#x27;)</code></td><td>The list. You can also use <code>lists(guid'...')</code> with the list ID, which survives a rename.</td></tr><tr><td><code>/items</code></td><td>Its items.</td></tr><tr><td><code>$select / $filter / $orderby / $top</code></td><td>OData query options, the same idea as in Get items.</td></tr></tbody></table></div>
-<p>Set the header <code>Accept: application/json;odata=nometadata</code> so the response is plain JSON without extra metadata. Then a <strong>Select</strong> maps <code>body('Get_items_with_REST')?['value']</code> into clean rows:</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>lists/getbytitle(&#x27;Requests&#x27;)</code></td><td>The list (or <code>lists(guid'…')</code>, which survives renames).</td></tr><tr><td><code>$select / $filter / $orderby / $top</code></td><td>OData options.</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Big requests</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Request</th><th>Amount</th></tr></thead><tbody><tr><td>Conference room screen</td><td><span class="chip ">2300</span></td></tr><tr><td>New laptop for design team</td><td><span class="chip ">1450</span></td></tr><tr><td>Software licence renewal</td><td><span class="chip ">990</span></td></tr><tr><td>Office chairs (x4)</td><td><span class="chip ">620</span></td></tr><tr><td>Monitor arms (x6)</td><td><span class="chip ">560</span></td></tr></tbody></table></div></div>
 <figure class="shot"><img src="../assets/img/pa/l9-rest-big-requests.webp" alt="Big requests output: five requests with amounts 2300, 1450, 990, 620 and 560" width="592" height="420" loading="lazy">
-<figcaption>Requests over 500, largest first.</figcaption></figure>
+<figcaption>Five requests over 500.</figcaption></figure>
+<p>Header <code>Accept: application/json;odata=nometadata</code> gives plain JSON.</p>
 
-<h2 id="batch">$batch: many changes, one request</h2>
-<p>A $batch request sends several operations in one HTTP call, wrapped in a multipart body. The demo creates three audit rows. Method <code>POST</code>, URI <code>_api/$batch</code>, header <code>Content-Type: multipart/mixed; boundary=batch_demo</code>, and this body:</p>
+<h2 id="batch"><span class="ico ico-scope"></span>$batch: many changes, one request</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>Inside a $batch body</p><div class="fl"><div class="nd"><code>--batch_demo</code></div><div class="ar"></div><div class="nd"><code>--changeset_demo</code> → POST item 1</div><div class="ar"></div><div class="nd"><code>--changeset_demo</code> → POST item 2</div><div class="ar"></div><div class="nd"><code>--changeset_demo</code> → POST item 3</div><div class="ar"></div><div class="nd"><code>--changeset_demo--</code> / <code>--batch_demo--</code></div><div class="ar"></div><div class="nd ok">Response: one <code>HTTP/1.1 201</code> per created item</div></div></div>
 <pre><code>--batch_demo
 Content-Type: multipart/mixed; boundary=&quot;changeset_demo&quot;
 
@@ -82,30 +85,16 @@ Accept: application/json;odata=nometadata
 --changeset_demo--
 
 --batch_demo--</code></pre>
-<p>Every boundary line must match the header, blank lines matter, and each inner request uses the full site URL. The response is also multipart text; each created item returns <code>HTTP/1.1 201</code>. The demo counts them:</p>
-<figure class="shot"><img src="../assets/img/pa/l9-batch-result.webp" alt="Batch result output: Items created by one call 3, Requests over 500 5" width="618" height="140" loading="lazy">
-<figcaption>Three items from one action instead of three.</figcaption></figure>
 <pre><code>sub(length(split(string(body(&#x27;Create_three_items_in_one_call&#x27;)), &#x27;HTTP/1.1 201&#x27;)), 1)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>string(body(...))</code></td><td>The multipart response as text.</td></tr><tr><td><code>split(..., &#x27;HTTP/1.1 201&#x27;)</code></td><td>Cuts the text at each success marker.</td></tr><tr><td><code>length(...) - 1</code></td><td>Number of pieces minus one = number of successes.</td></tr></tbody></table></div>
-<p>For hundreds of items, build the body with a Select and <code>join()</code> instead of typing it, and keep each batch small (tens of operations, not thousands).</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>split(..., &#x27;HTTP/1.1 201&#x27;)</code></td><td>Cuts at each success.</td></tr><tr><td><code>length - 1</code></td><td>Number of successes: 3.</td></tr></tbody></table></div>
+<figure class="shot"><img src="../assets/img/pa/l9-batch-result.webp" alt="Batch result output: Items created by one call 3, Requests over 500 5" width="618" height="140" loading="lazy">
+<figcaption>Three items from one action.</figcaption></figure>
+<h3>Watch out</h3><ul><li>Boundaries must match the header; blank lines matter.</li><li>A 200 on the batch doesn't mean every item succeeded: check each inner response.</li><li>Use internal column names.</li><li>Keep batches small (tens of operations).</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>REST</strong>: calling a service with plain web requests (GET to read, POST to create, PATCH to update, DELETE to remove).</p>
-<p><strong>Multipart</strong>: a body made of several parts separated by a boundary string, like attachments in an email.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Add <strong>Send an HTTP request to SharePoint</strong> and pick the site.</li><li>Method GET, Uri <code>_api/web/lists/getbytitle('YourList')/items?$top=5</code>, header <code>Accept: application/json;odata=nometadata</code>. Run and look at the output.</li><li>For a batch, use POST to <code>_api/$batch</code> with the multipart header, and build the body with a <code>changeset</code> for the writes.</li><li>Count the <code>201</code> responses, or parse them, to confirm every change succeeded.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Leaving out the <code>Accept</code> header, then fighting with the verbose default format.</li>
-<li>Missing a blank line or a closing boundary in the batch body. SharePoint rejects the whole request.</li>
-<li>Assuming a 200 on the batch call means every item succeeded. Check each inner response.</li>
-<li>Using internal column names wrongly. REST needs internal names (<code>Amount</code>, not <em>Request amount</em>).</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/sharepoint/dev/business-apps/power-automate/guidance/working-with-send-sp-http-request">Working with the SharePoint Send HTTP Request action</a></li><li><a href="https://learn.microsoft.com/en-us/sharepoint/dev/sp-add-ins/make-batch-requests-with-the-rest-apis">Make batch requests with the REST APIs</a></li></ul>
+<div class="layer-body"><p><strong>REST</strong>: GET reads, POST creates, PATCH updates, DELETE removes.</p><p><strong>Multipart</strong>: a body of parts separated by a boundary.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>No Accept header.</li><li>A malformed batch body.</li><li>Display names instead of internal names.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/sharepoint/dev/business-apps/power-automate/guidance/working-with-send-sp-http-request">Working with the SharePoint Send HTTP Request action</a></li><li><a href="https://learn.microsoft.com/en-us/sharepoint/dev/sp-add-ins/make-batch-requests-with-the-rest-apis">Make batch requests with the REST APIs</a></li></ul>
       </div>
 
       <div class="pager"><a href="microsoft-graph-requests.html">← Calling Microsoft Graph from a flow</a><a href="http-request-trigger.html">Starting a flow with an HTTP request →</a></div>
@@ -114,7 +103,7 @@ Accept: application/json;odata=nometadata
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#demo">Read with REST, then write three items in one call</a></li><li><a href="#get">A REST read</a></li><li><a href="#batch">$batch: many changes, one request</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#demo">Read with REST, write three items in one call</a></li><li><a href="#get">A REST read</a></li><li><a href="#batch">$batch: many changes, one request</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

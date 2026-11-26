@@ -49,9 +49,10 @@
       </div>
 
       <div class="prose">
-<p>A <strong>prompt</strong> is an instruction you write once and run from a flow with <strong>Run a prompt</strong>: "extract the invoice number from this email", "classify this request as Hardware, Software or Access". Prompts are built in Copilot Studio or AI Builder and run on the same capacity as other AI features.</p>
+<p>A <strong>prompt</strong> is an instruction you write once and run from a flow with <em>Run a prompt</em>: extract the invoice number, classify a request. Models sometimes wrap their JSON in chatty text, so the flow must clean it.</p>
 
-<h2 id="prompt">Ask for JSON, and say exactly which keys</h2>
+<h2 id="prompt"><span class="ico ico-expr"></span>Ask for JSON, with exact keys</h2>
+<div class="cards"><div><strong>What</strong>A prompt that returns JSON, plus one expression that strips anything around it.</div><div><strong>Why</strong><code>json()</code> fails the first time the model adds a friendly sentence.</div><div><strong>Demo</strong>Invoice fields from a chatty answer.</div></div>
 <pre><code>Extract the invoice number, supplier name, total and currency
 from the email below.
 Return only a JSON object with the keys invoiceNumber, supplier,
@@ -60,10 +61,9 @@ If a value is missing, use null.
 
 Email:
 [Email body]</code></pre>
-<p><em>[Email body]</em> is an input you add to the prompt; the flow fills it with the email text. Many prompts let you choose JSON as the output format, which gives you tokens directly. Even then, models sometimes add a sentence before the JSON or wrap it in a code fence, so a flow that parses the output should be able to clean it.</p>
 
-<h2 id="demo">The demo: a messy answer in, clean fields out</h2>
-<p>The first Compose holds a typical chatty answer (it stands in for a prompt output, so the demo needs no AI capacity):</p>
+<h2 id="demo"><span class="ico ico-data"></span>Messy answer in, clean fields out</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Cleaning step by step</p><div class="fl"><div class="nd act">AI response text: <span class="chip warn">Sure! Here is… ```json {…} ``` Let me know…</span></div><div class="ar"></div><div class="nd"><strong>Only the JSON</strong>: from the first <code>{</code> to the last <code>}</code></div><div class="ar"></div><div class="nd"><strong>As object</strong>: <code>json(…)</code></div><div class="ar"></div><div class="nd ok"><strong>Fields</strong>: <span class="chip ">INV-2048</span><span class="chip ">Fabrikam Ltd</span><span class="chip ">1240.5</span></div></div></div>
 <pre><code>Sure! Here is the extracted data:
 ```json
 {
@@ -74,41 +74,23 @@ Email:
 }
 ```
 Let me know if you need anything else.</code></pre>
-<p><code>json()</code> on that text fails. <strong>Only the JSON</strong> cuts out everything from the first <code>{</code> to the last <code>}</code>:</p>
 <figure class="shot"><img src="../assets/img/pa/l9-json-code.webp" alt="Code view of Only the JSON: a Compose using substring, indexOf and lastIndexOf on the AI response text" width="600" height="220" loading="lazy">
-<figcaption>One expression removes the chat and the code fence.</figcaption></figure>
+<figcaption>The cleaning expression.</figcaption></figure>
 <pre><code>substring(outputs(&#x27;AI_response_text&#x27;), indexOf(outputs(&#x27;AI_response_text&#x27;), &#x27;{&#x27;), add(sub(lastIndexOf(outputs(&#x27;AI_response_text&#x27;), &#x27;}&#x27;), indexOf(outputs(&#x27;AI_response_text&#x27;), &#x27;{&#x27;)), 1))</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>indexOf(text, &#x27;{&#x27;)</code></td><td>Position of the first opening brace: where the JSON starts.</td></tr><tr><td><code>lastIndexOf(text, &#x27;}&#x27;)</code></td><td>Position of the last closing brace: where it ends.</td></tr><tr><td><code>sub(end, start) + 1</code></td><td>The length to keep, including the closing brace.</td></tr><tr><td><code>substring(text, start, length)</code></td><td>The JSON alone.</td></tr></tbody></table></div>
-<p>Then <code>json(outputs('Only_the_JSON'))</code> turns it into an object, and the fields are ready to use:</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>indexOf(text, &#x27;{&#x27;)</code></td><td>Where the JSON starts.</td></tr><tr><td><code>lastIndexOf(text, &#x27;}&#x27;)</code></td><td>Where it ends.</td></tr><tr><td><code>sub(end, start) + 1</code></td><td>Its length.</td></tr><tr><td><code>substring(...)</code></td><td>The JSON alone.</td></tr></tbody></table></div>
 <figure class="shot"><img src="../assets/img/pa/l9-json-fields.webp" alt="Fields output: Invoice INV-2048, Supplier Fabrikam Ltd, Total 1240.5, Total above 1000 true" width="592" height="130" loading="lazy">
-<figcaption>Values read from the cleaned JSON, including a calculated check.</figcaption></figure>
+<figcaption>Clean fields, including a calculated check.</figcaption></figure>
 <pre><code>greater(float(outputs(&#x27;As_object&#x27;)?[&#x27;total&#x27;]), 1000)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[&#x27;total&#x27;]</code></td><td>The total from the AI. It might come back as text or a number.</td></tr><tr><td><code>float(...)</code></td><td>Makes sure it's a number before comparing.</td></tr><tr><td><code>greater(a, 1000)</code></td><td>True when the invoice needs extra approval.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>float(...)</code></td><td>The total may come back as text.</td></tr><tr><td><code>greater(..., 1000)</code></td><td>True: needs extra approval.</td></tr></tbody></table></div>
 
-<h2 id="safety">Before you trust it</h2>
-<ul>
-<li>Put the parse in a Scope. If it fails, route the item to a person instead of failing silently.</li>
-<li>Check required keys with <code>empty()</code> and sensible ranges (a negative total is wrong whatever the model says).</li>
-<li>Keep the raw AI output in your log, so you can see what it said when a value looks odd.</li>
-<li>Don't send confidential data to a prompt unless your organisation has approved it for that data.</li>
-</ul>
+<h2 id="safety"><span class="ico ico-check"></span>Before you trust it</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Safe parsing</p><div class="fl"><div class="nd">Parse inside a <strong>Scope</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Parsed, required keys present, values sensible?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">Use the values</div></div><div><span class="lbl f">No</span><div class="nd mute">Route to a person; keep the raw output in the log</div></div></div></div></div>
+<p>Don't send confidential data to a prompt unless your organisation has approved it.</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Prompt</strong>: written instructions for a generative AI model, with placeholders for inputs.</p>
-<p><strong>JSON</strong>: text that describes objects with keys and values. Flows can read it once it's parsed.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Write the prompt with a clear list of keys and the instruction to return only JSON. Test it with three or four real examples.</li><li>In the flow, add <strong>Run a prompt</strong> and map its inputs.</li><li>Add a Compose with the substring expression above on the prompt's text output.</li><li>Add <code>json()</code> (or Parse JSON with a schema) and read the fields.</li><li>Validate the fields and route failures to review.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Parsing the raw answer directly. It works in testing and fails the first time the model adds a friendly sentence.</li>
-<li>Vague key names in the prompt, so the model invents its own.</li>
-<li>Comparing numbers that arrived as text.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/prompts-overview">Prompts overview</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/use-a-custom-prompt-in-flow">Use your prompt in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Expression functions reference (substring, indexOf, json)</a></li></ul>
+<div class="layer-body"><p><strong>Prompt</strong>: instructions for a generative AI model, with input placeholders.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Parsing the raw answer directly.</li><li>Vague key names.</li><li>Comparing numbers that arrived as text.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/prompts-overview">Prompts overview</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/use-a-custom-prompt-in-flow">Use your prompt in Power Automate</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Expression functions reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="ai-builder-documents.html">← AI Builder document processing and human review</a><a href="copilot-studio-agent-flows.html">Flows for Copilot Studio agents →</a></div>
@@ -117,7 +99,7 @@ Let me know if you need anything else.</code></pre>
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#prompt">Ask for JSON, and say exactly which keys</a></li><li><a href="#demo">The demo: a messy answer in, clean fields out</a></li><li><a href="#safety">Before you trust it</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#prompt">Ask for JSON, with exact keys</a></li><li><a href="#demo">Messy answer in, clean fields out</a></li><li><a href="#safety">Before you trust it</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

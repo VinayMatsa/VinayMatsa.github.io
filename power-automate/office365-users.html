@@ -49,45 +49,30 @@
       </div>
 
       <div class="prose">
-<p>Many flows need to know something about a person: their display name for an email greeting, their manager for an approval, their department for routing. The <strong>Office 365 Users</strong> connector reads that from Microsoft Entra ID (the directory behind Microsoft 365). It is a standard connector, so no premium licence is needed.</p>
+<p>Many flows need to know something about a person: a display name for a greeting, a manager for an approval, a department for routing. The <strong>Office 365 Users</strong> connector (standard) reads that from Microsoft Entra ID.</p>
 
-<h2 id="actions">The actions you'll use most</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Action</th><th>Typical use</th></tr></thead><tbody>
-<tr><td>Get my profile (V2)</td><td>Details of the person running the flow (or the connection owner).</td></tr>
-<tr><td>Get user profile (V2)</td><td>Details of a given user, by email or ID: name, job title, department, office, phone.</td></tr>
-<tr><td>Get manager (V2)</td><td>The user's manager. The basis of "send to my manager" approvals.</td></tr>
-<tr><td>Get direct reports (V2)</td><td>Everyone who reports to a user.</td></tr>
-<tr><td>Search for users (V2)</td><td>Find people whose name or email starts with a term.</td></tr>
-</tbody></table></div>
+<h2 id="actions"><span class="ico ico-data"></span>The actions you'll use</h2>
+<div class="cards"><div><strong>What</strong>Actions that read profiles, managers, direct reports and search results from the directory.</div><div><strong>Why</strong>Routing and personalisation without hard-coding people.</div><div><strong>Demo</strong>Search users, then count disabled accounts and those with a job title.</div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Action</th><th>Typical use</th></tr></thead><tbody><tr><td>Get my profile (V2)</td><td>The person running the flow</td></tr><tr><td>Get user profile (V2)</td><td>Name, job title, department, office of a given user</td></tr><tr><td>Get manager (V2)</td><td>“Send to my manager” approvals</td></tr><tr><td>Get direct reports (V2)</td><td>Everyone reporting to a user</td></tr><tr><td>Search for users (V2)</td><td>People whose name or email starts with a term</td></tr></tbody></table></div>
 
-<h2 id="demo">A search and a few counts</h2>
-<p>The demo runs <strong>Search for users (V2)</strong>, then two <strong>Filter array</strong> steps: accounts that are disabled, and accounts with a job title filled in. To keep real names off this page, the flow returns counts only:</p>
+<h2 id="demo"><span class="ico ico-check"></span>A search and a few counts</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>The demo</p><div class="fl"><div class="nd"><strong>Search for users (V2)</strong>, top 25</div><div class="ar"></div><div class="br"><div><span class="lbl c">Filter array</span><div class="nd"><code>AccountEnabled</code> = false</div></div><div><span class="lbl c">Filter array</span><div class="nd">JobTitle not empty</div></div></div><div class="ar"></div><div class="nd ok">Summary: counts only (no names on this page)</div></div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The results</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Measure</th><th>Value</th></tr></thead><tbody><tr><td>Users found</td><td><span class="chip ">2</span></td></tr><tr><td>Disabled accounts</td><td><span class="chip ">0</span></td></tr><tr><td>With a job title</td><td><span class="chip ">2</span></td></tr><tr><td>Fields per user</td><td><span class="chip ">16</span></td></tr></tbody></table></div></div>
 <figure class="shot"><img src="../assets/img/pa/l9-users-summary.webp" alt="Summary output: Users found 2, Disabled accounts 0, With a job title 2, Fields returned per user 16" width="618" height="175" loading="lazy">
-<figcaption>Each user record carries around 16 fields, including AccountEnabled and JobTitle.</figcaption></figure>
+<figcaption>The summary.</figcaption></figure>
 <pre><code>@equals(item()?[&#x27;AccountEnabled&#x27;], false)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>item()</code></td><td>The user being checked by Filter array.</td></tr><tr><td><code>?[&#x27;AccountEnabled&#x27;]</code></td><td>False for people who have left or been blocked. Check this before assigning work to someone.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[&#x27;AccountEnabled&#x27;]</code></td><td>False for people who left or are blocked. Check before assigning work.</td></tr></tbody></table></div>
 
-<h2 id="manager">Getting a manager safely</h2>
-<p>Get manager fails when the user has no manager (for example a CEO or a test account). Put it in a Scope with a fallback, or set <strong>Configure run after</strong> on the next step to include <em>has failed</em> and send to a default approver instead.</p>
+<h2 id="manager"><span class="ico ico-warn"></span>Getting a manager safely</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>Manager with a fallback</p><div class="fl"><div class="nd"><strong>Get manager (V2)</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Did it fail (no manager)?</div><div class="ar"></div><div class="br"><div><span class="lbl t">No</span><div class="nd ok">Use the manager's email</div></div><div><span class="lbl f">Yes</span><div class="nd ok">Use a default approver</div></div></div></div></div>
 <pre><code>coalesce(outputs(&#x27;Get_manager_(V2)&#x27;)?[&#x27;body/mail&#x27;], &#x27;approvals@contoso.com&#x27;)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>outputs(&#x27;Get_manager_(V2)&#x27;)?[&#x27;body/mail&#x27;]</code></td><td>The manager's email, or null if the action failed.</td></tr><tr><td><code>coalesce(a, b)</code></td><td>Returns the first value that isn't null: the fallback mailbox if there is no manager.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>coalesce(..., default)</code></td><td>The default mailbox when there's no manager.</td></tr></tbody></table></div>
+<p>Set the next step's <strong>run after</strong> to include <em>has failed</em> so it still runs.</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Directory</strong>: the list of every person and group in your organisation, kept in Microsoft Entra ID.</p>
-<p><strong>UPN</strong> (user principal name): the sign-in name, which usually looks like an email address. Most actions accept it as the user ID.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Add <strong>Get user profile (V2)</strong> and pass an email from the trigger, such as <em>Created By Email</em>.</li><li>Use <code>body/displayName</code>, <code>body/jobTitle</code> or <code>body/department</code> in later steps.</li><li>For approvals, add <strong>Get manager (V2)</strong> with the same email, and plan a fallback for users without a manager.</li><li>To search, use <strong>Search for users (V2)</strong> with a term and a Top value, then Filter array on <code>AccountEnabled</code>.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Calling Get user profile inside a loop for the same few people. Look each person up once and reuse the result.</li>
-<li>Assuming everyone has a manager or a department filled in.</li>
-<li>Writing names or emails into logs and screenshots that others can see.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365users/">Office 365 Users connector reference</a></li></ul>
+<div class="layer-body"><p><strong>UPN</strong>: the sign-in name, usually like an email; most actions accept it as the user ID.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Looking up the same person inside a loop.</li><li>Assuming everyone has a manager.</li><li>Names and emails in shared logs and screenshots.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/office365users/">Office 365 Users connector reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="power-apps-to-flow.html">← Calling a flow from Power Apps</a><a href="microsoft-graph-requests.html">Calling Microsoft Graph from a flow →</a></div>
@@ -96,7 +81,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#actions">The actions you'll use most</a></li><li><a href="#demo">A search and a few counts</a></li><li><a href="#manager">Getting a manager safely</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#actions">The actions you'll use</a></li><li><a href="#demo">A search and a few counts</a></li><li><a href="#manager">Getting a manager safely</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

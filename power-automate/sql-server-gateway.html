@@ -49,50 +49,26 @@
       </div>
 
       <div class="prose">
-<p>Many business systems keep their data in SQL Server or Azure SQL Database. The <strong>SQL Server</strong> connector (premium) reads rows, inserts and updates them, runs queries and calls stored procedures. No live demo here, because it needs a database; the patterns below are what you'd build.</p>
+<p>Many business systems keep data in SQL Server or Azure SQL Database. The <strong>SQL Server</strong> connector (premium) reads and writes rows, runs queries and calls stored procedures. No live demo here: it needs a database.</p>
 
-<h2 id="where">Cloud or on-premises?</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Database</th><th>How the flow reaches it</th></tr></thead><tbody>
-<tr><td>Azure SQL Database</td><td>Directly over the internet. Sign in with Microsoft Entra ID or SQL authentication, and allow Azure services in the server firewall.</td></tr>
-<tr><td>SQL Server in your own network</td><td>Through an <strong>on-premises data gateway</strong>: a Windows service installed inside your network that relays requests. The cloud never connects in; the gateway connects out.</td></tr>
-</tbody></table></div>
+<h2 id="where"><span class="ico ico-data"></span>Cloud or on-premises?</h2>
+<div class="cards"><div><strong>What</strong>A connector for SQL databases; on-premises servers are reached through a gateway.</div><div><strong>Why</strong>Line-of-business data often lives in SQL.</div><div><strong>Demo</strong>Orders over a minimum amount for a given status.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>How the flow reaches the database</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Where is the database?</div><div class="ar"></div><div class="br"><div><span class="lbl c">Azure SQL</span><div class="nd ok">Directly (Entra ID or SQL auth; allow Azure services in the firewall)</div></div><div><span class="lbl c">In your network</span><div class="nd">Flow → cloud → <strong>on-premises data gateway</strong> (connects out)</div><div class="ar"></div><div class="nd ok">→ SQL Server</div></div></div></div></div>
 
-<h2 id="actions">The actions</h2>
-<ul>
-<li><strong>Get rows (V2)</strong>: with Filter Query (OData), Order By, Top Count and Select Query. Uses paging like SharePoint's Get items.</li>
-<li><strong>Insert row (V2)</strong>, <strong>Update row (V2)</strong>, <strong>Delete row (V2)</strong>: the table needs a primary key.</li>
-<li><strong>Execute a SQL query (V2)</strong>: your own SELECT with parameters. Check the connector's known limitations for your authentication type before relying on it.</li>
-<li><strong>Execute stored procedure (V2)</strong>: the cleanest way to run logic in the database and return results.</li>
-</ul>
-<p>Pass values as parameters, never by joining them into the query text:</p>
+<h2 id="actions"><span class="ico ico-expr"></span>The actions</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Action</th><th>Use</th></tr></thead><tbody><tr><td>Get rows (V2)</td><td>Filter, order, top, select; paging like Get items</td></tr><tr><td>Insert / Update / Delete row (V2)</td><td>Single-row writes (needs a primary key)</td></tr><tr><td>Execute a SQL query (V2)</td><td>Your own SELECT with parameters (check known limitations)</td></tr><tr><td>Execute stored procedure (V2)</td><td>Logic in the database, cleanest</td></tr></tbody></table></div>
 <pre><code>SELECT OrderId, Customer, Amount
 FROM dbo.Orders
 WHERE Status = @status AND Amount &gt; @minAmount</code></pre>
+<p>Pass values as <strong>parameters</strong>, never by joining them into the query text.</p>
 
-<h2 id="gateway">Gateway basics</h2>
-<ul>
-<li>Install it on a server that is always on and can reach the database, not on a laptop.</li>
-<li>Install it in the same region as your environment if you can, and add a second machine to the gateway cluster for high availability.</li>
-<li>The gateway is shared: one gateway serves many flows, apps and Power BI reports. Gateway admins control who may create connections on it.</li>
-</ul>
+<h2 id="gateway"><span class="ico ico-scope"></span>Gateway basics</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-scope"></span>Rule</th><th>Why</th></tr></thead><tbody><tr><td>Install on an always-on server that reaches the database</td><td>A sleeping laptop stops every flow</td></tr><tr><td>Same region as your environment; add a second cluster member</td><td>Speed and availability</td></tr><tr><td>Gateway admins control who creates connections</td><td>One gateway serves many flows, apps and reports</td></tr></tbody></table></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>SQL</strong>: the language databases understand. <code>SELECT</code> reads, <code>INSERT</code> adds, <code>UPDATE</code> changes.</p>
-<p><strong>Primary key</strong>: the column that uniquely identifies a row.</p>
-<p><strong>Stored procedure</strong>: a saved, named piece of SQL that you call with parameters.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Ask the database owner for a login with only the permissions the flow needs.</li><li>For an on-premises server, install the data gateway and register it in the same region as your environment.</li><li>Create a SQL Server connection (choose the gateway for on-premises).</li><li>Use Get rows with a Filter Query for reads and a stored procedure for anything complex.</li><li>Use connection references and environment variables for the server and database names, so the flow moves between environments.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Building SQL text with user input. Use parameters or stored procedures.</li>
-<li>Running the gateway on a personal machine that sleeps.</li>
-<li>Reading a whole table to find one row. Filter on the server.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/connectors/sql/">SQL Server connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/data-integration/gateway/service-gateway-onprem">What is an on-premises data gateway?</a></li></ul>
+<div class="layer-body"><p><strong>Primary key</strong>: the column that uniquely identifies a row.</p><p><strong>Stored procedure</strong>: saved SQL you call with parameters.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>SQL text built from user input.</li><li>Gateway on a personal machine.</li><li>Reading a whole table to find one row.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/sql/">SQL Server connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/data-integration/gateway/service-gateway-onprem">What is an on-premises data gateway?</a></li></ul>
       </div>
 
       <div class="pager"><a href="http-request-trigger.html">← Starting a flow with an HTTP request</a><a href="azure-blob-storage.html">Azure Blob Storage for files →</a></div>

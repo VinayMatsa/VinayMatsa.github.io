@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Flows for Copilot Studio agents | Vinay Matsa</title>
-<meta name="description" content="How an agent calls a flow to take action or fetch data, and what to keep in mind when building one.">
+<meta name="description" content="How an agent calls a flow to take action or fetch data, what to plan for, and how to build one.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flows for Copilot Studio agents">
-<meta property="og:description" content="How an agent calls a flow to take action or fetch data, and what to keep in mind when building one.">
+<meta property="og:description" content="How an agent calls a flow to take action or fetch data, what to plan for, and how to build one.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,51 +49,22 @@
       </div>
 
       <div class="prose">
-<p>An agent built in <strong>Copilot Studio</strong> can answer questions from knowledge, but to <em>do</em> something (create a ticket, look up an order, send an approval) it calls a flow. Copilot Studio calls these <strong>agent flows</strong>. They use the same designer and connectors as cloud flows, with a trigger and a response made for agents.</p>
+<p>A <strong>Copilot Studio</strong> agent answers from knowledge, but to <em>do</em> something (create a ticket, look up an order, start an approval) it calls a flow: an <strong>agent flow</strong>.</p>
 
-<h2 id="shape">The shape</h2>
-<ol>
-<li>Trigger: <strong>When an agent calls the flow</strong>, with typed inputs (text, number, yes/no).</li>
-<li>Your actions: look up, create, update.</li>
-<li><strong>Respond to the agent</strong>, with typed outputs the agent can use in its reply.</li>
-</ol>
-<p>It's the same pattern as calling a flow from Power Apps: typed inputs in, typed outputs back, and the caller waits for the response.</p>
+<h2 id="shape"><span class="ico ico-arrow"></span>Agent → flow → agent</h2>
+<div class="cards"><div><strong>What</strong>A flow with <em>When an agent calls the flow</em> and <em>Respond to the agent</em>, used by the agent as a tool.</div><div><strong>Why</strong>Agents can act on business data, not just talk about it.</div><div><strong>Demo</strong>“Apply leave for Friday” → the agent calls a flow and confirms.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>One tool call</p><div class="fl"><div class="nd act">User asks the agent</div><div class="ar"></div><div class="nd">Agent picks the tool by its name and description</div><div class="ar"></div><div class="nd">Flow trigger: typed inputs</div><div class="ar"></div><div class="nd">Actions: look up, create, update</div><div class="ar"></div><div class="nd"><strong>Respond to the agent</strong>: typed outputs</div><div class="ar"></div><div class="nd ok">Agent replies using the outputs</div></div></div>
 
-<h2 id="using">Using the flow in an agent</h2>
-<ul>
-<li>Add the flow to the agent as a <strong>tool</strong> (action). Give the tool and each input a clear name and description: the agent uses them to decide when to call it and what to pass.</li>
-<li>Or call it from a <strong>topic</strong> with an action node, mapping topic variables to inputs and outputs to variables.</li>
-<li>Return short, useful outputs (a status, an ID, one or two fields). Large tables slow the conversation.</li>
-</ul>
-
-<h2 id="limits">Things to plan for</h2>
-<ul>
-<li><strong>Time.</strong> The agent waits for the response, and there is a time limit. Respond quickly; for long work, respond with "started" and send the result later (for example by email or Teams).</li>
-<li><strong>Whose identity.</strong> Connections can use the maker's credentials or the user's. For user-specific data, use the user's, so people only see what they're allowed to.</li>
-<li><strong>Billing.</strong> Agent flows created in Copilot Studio run on Copilot Studio capacity, not on Power Automate per-user licences.</li>
-<li><strong>ALM.</strong> Build them in a solution, with connection references, like any other flow.</li>
-</ul>
-
-<h2 id="demo">Why there's no demo here</h2>
-<p>The demos in this series stay inside Power Automate. The flow side is the same as the Power Apps demo: swap the trigger and the response for the agent versions.</p>
+<h2 id="limits"><span class="ico ico-clock"></span>Plan for these</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-warn"></span>Topic</th><th>What to do</th></tr></thead><tbody><tr><td>Time</td><td>The agent waits and there's a time limit: respond quickly; send long results later (email, Teams)</td></tr><tr><td>Identity</td><td>Use the user's credentials for user-specific data</td></tr><tr><td>Billing</td><td>Agent flows created in Copilot Studio use Copilot Studio capacity</td></tr><tr><td>ALM</td><td>Build in a solution with connection references</td></tr><tr><td>Outputs</td><td>Short and useful: a status, an ID, a field or two</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>Long work without timing out</p><div class="fl"><div class="nd act">Agent calls the flow</div><div class="ar"></div><div class="nd ok">Create the record, respond “started” at once</div><div class="ar"></div><div class="nd">A separate flow (e.g. triggered by the new row) does the slow work</div><div class="ar"></div><div class="nd ok">Notify the user when done</div></div></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Agent</strong>: an AI assistant you build in Copilot Studio that people chat with.</p>
-<p><strong>Tool</strong>: something the agent can use to act, such as a flow, a connector action or a prompt.</p>
-<p><strong>Topic</strong>: a scripted conversation path inside an agent.</p></div></details>
-
+<div class="layer-body"><p><strong>Tool</strong>: something an agent can use to act: a flow, connector action or prompt.</p><p><strong>Topic</strong>: a scripted conversation path inside an agent.</p></div></details>
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>In Copilot Studio, open your agent and add a new tool of type agent flow (or create one from the Flows area).</li><li>Define the inputs with clear names and descriptions.</li><li>Add the actions, then <strong>Respond to the agent</strong> with the outputs.</li><li>Publish the flow, then test from the agent's test pane with a natural request.</li><li>Check the activity map to see which inputs the agent passed.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Vague tool descriptions, so the agent calls the wrong flow or none.</li>
-<li>Returning raw JSON blobs that the agent then repeats to the user.</li>
-<li>Running everything as the maker, which can show users data they shouldn't see.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/flows-overview">Agent flows overview</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow">Use agent flows with your agent</a></li></ul>
+<div class="layer-body"><ol><li>In Copilot Studio, add a tool of type agent flow.</li><li>Define inputs with clear names and descriptions.</li><li>Add actions, then <strong>Respond to the agent</strong>.</li><li>Publish and test in the test pane; check the activity map.</li></ol></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Vague tool descriptions.</li><li>Raw JSON returned to the agent.</li><li>Everything running as the maker.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/flows-overview">Agent flows overview</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow">Use agent flows with your agent</a></li></ul>
       </div>
 
       <div class="pager"><a href="ai-prompts-clean-json.html">← AI prompts in flows and cleaning their JSON</a><a href="./">Back to all topics →</a></div>
@@ -102,7 +73,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#shape">The shape</a></li><li><a href="#using">Using the flow in an agent</a></li><li><a href="#limits">Things to plan for</a></li><li><a href="#demo">Why there's no demo here</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#shape">Agent → flow → agent</a></li><li><a href="#limits">Plan for these</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

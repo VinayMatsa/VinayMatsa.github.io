@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Variables vs Compose | Vinay Matsa</title>
-<meta name="description" content="When to store a value in a variable, when a Compose is enough, and why it matters inside loops, with the values from a real run.">
+<title>Variables vs Compose: the complete guide | Vinay Matsa</title>
+<meta name="description" content="When a value needs a variable and when Compose is enough: every variable action, what happens inside loops, collecting results without a variable, and the concurrency trap.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Variables vs Compose">
-<meta property="og:description" content="When to store a value in a variable, when a Compose is enough, and why it matters inside loops, with the values from a real run.">
+<meta property="og:title" content="Variables vs Compose: the complete guide">
+<meta property="og:description" content="When a value needs a variable and when Compose is enough: every variable action, what happens inside loops, collecting results without a variable, and the concurrency trap.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,52 +40,65 @@
         <li class="dark">Power Automate</li>
         <li>Level 1 · Foundations · 5 of 7</li>
       </ul>
-      <h1>Variables vs Compose</h1>
+      <h1>Variables vs Compose: the complete guide</h1>
       <div class="byline">
         <span class="mini" aria-hidden="true">VM</span>
         <strong>Vinay Matsa</strong>
         <time datetime="2026-11-21">21 November 2026</time>
-        <span>3 min read</span>
+        <span>4 min read</span>
       </div>
 
       <div class="prose">
-<p>Both a variable and a Compose hold a value. The difference: a <strong>variable can change</strong> during the run; a <strong>Compose can't</strong>. Picking the right one keeps flows faster and easier to read.</p>
+<p>A <strong>variable</strong> is a named box you can change during the run. A <strong>Compose</strong> works out one value and keeps it. Choosing the right one makes flows faster, safer in parallel loops and easier to read.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Section</th><th>You'll learn</th></tr></thead><tbody><tr><td>1 · The difference</td><td>A decision diagram and comparison</td></tr><tr><td>2 · Every variable action</td><td>Initialize, Set, Increment, Append (string and array)</td></tr><tr><td>3 · Variables in a loop, traced</td><td>Counter, Ids and Log after each iteration</td></tr><tr><td>4 · Compose inside a loop</td><td>Collect every iteration's result without a variable</td></tr><tr><td>5 · Loops running in parallel</td><td>Why variables give wrong totals</td></tr></tbody></table></div>
 
-<h2 id="compare"><span class="ico ico-data"></span>The difference in one picture</h2>
-<div class="cards"><div><strong>What</strong>A variable is a named box you create once and update. A Compose works out one value and keeps it.</div><div><strong>Why</strong>Variables are needed for things that accumulate (counters, totals, lists). Everything else is simpler as Compose.</div><div><strong>Demo</strong>Count how many items a loop processed, then build a sentence.</div></div>
-<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Which one?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Will the value change after it's first set?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok"><strong>Variable</strong>: Initialize at the top, then Set / Increment / Append</div></div><div><span class="lbl f">No</span><div class="nd ok"><strong>Compose</strong>: one action, read with <code>outputs()</code></div></div></div></div></div>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th><span class="ico ico-data"></span>Variable</th><th><span class="ico ico-expr"></span>Compose</th></tr></thead><tbody><tr><td>Can change?</td><td>Yes: Set, Increment, Append</td><td>No, fixed once calculated</td></tr><tr><td>Where created</td><td>Only at the top level, not inside loops, conditions or scopes</td><td>Anywhere</td></tr><tr><td>Read with</td><td><code>variables('Counter')</code></td><td><code>outputs('Company_name')</code></td></tr><tr><td>In parallel loops</td><td>Risky: iterations overwrite each other</td><td>Safe: each iteration has its own result</td></tr><tr><td>Best for</td><td>Counters, totals, building a list</td><td>Constants, calculated values, debugging</td></tr></tbody></table></div>
+<h2 id="difference"><span class="ico ico-data"></span>1 · The difference</h2>
+<div class="cards"><div><strong>What</strong>A variable is created once at the top and changed with Set / Increment / Append. A Compose calculates a value where it stands, and that value never changes.</div><div><strong>Why</strong>Variables are needed for things that build up (counters, totals, lists). Everything else is simpler and faster as Compose.</div><div><strong>Demo</strong>Loop over three orders <code>A-101</code>, <code>B-102</code>, <code>C-103</code>: count them, collect their numbers, keep a log, and label each one.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Which one?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Will the value change after it's first set?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok"><strong>Variable</strong>: Initialize at the top level, then change it</div></div><div><span class="lbl f">No</span><div class="nd ok"><strong>Compose</strong>: read it with <code>outputs('Name')</code></div></div></div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th><span class="ico ico-data"></span>Variable</th><th><span class="ico ico-expr"></span>Compose</th></tr></thead><tbody><tr><td>Can change?</td><td>Yes</td><td>No</td></tr><tr><td>Created where</td><td>Top level only (not in loops, conditions or scopes)</td><td>Anywhere</td></tr><tr><td>Read with</td><td><code>variables('Counter')</code></td><td><code>outputs('Label')</code></td></tr><tr><td>Inside a loop</td><td>One shared value for all iterations</td><td>One result <em>per iteration</em></td></tr><tr><td>Parallel loops</td><td>Risky</td><td>Safe</td></tr><tr><td>Best for</td><td>Counters, totals, building lists</td><td>Constants, calculated values, debugging</td></tr></tbody></table></div>
 
-<h2 id="demo"><span class="ico ico-loop"></span>The demo: count items in a loop</h2>
-<div class="viz"><p class="viz-title"><span class="ico ico-loop"></span>The flow</p><div class="fl"><div class="nd">Initialize variable <strong>Counter</strong> = <span class="chip ">0</span></div><div class="ar"></div><div class="nd">Compose <strong>Company name</strong> = <span class="chip ">"Contoso"</span></div><div class="ar"></div><div class="nd act">Apply to each over <code>createArray(1, 2, 3)</code>: <strong>Increment Counter</strong> by 1</div><div class="ar"></div><div class="nd ok">Compose <strong>Final counter</strong> → <span class="chip ok">"Contoso processed 3 items"</span></div></div></div>
-<div class="viz"><p class="viz-title"><span class="ico ico-loop"></span>Counter, iteration by iteration</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Iteration</th><th>Item</th><th>Counter before</th><th>Counter after</th></tr></thead><tbody><tr><td>1 of 3</td><td><span class="chip ">1</span></td><td>0</td><td><span class="chip ">1</span></td></tr><tr><td>2 of 3</td><td><span class="chip ">2</span></td><td>1</td><td><span class="chip ">2</span></td></tr><tr><td>3 of 3</td><td><span class="chip ">3</span></td><td>2</td><td><span class="chip ok">3</span></td></tr></tbody></table></div><p class="viz-note">The Compose <em>Company name</em> never changes, so it doesn't need to be a variable.</p></div>
-<figure class="shot"><img src="../assets/img/pa/loop-iterations.webp" alt="Run view showing Company name, then an Apply to each number loop at iteration 1 of 3 containing Increment Counter" width="536" height="416" loading="lazy">
-<figcaption>The loop at iteration 1 of 3. Use the arrows to step through.</figcaption></figure>
-<figure class="shot"><img src="../assets/img/pa/final-counter.webp" alt="Final counter run results showing: Contoso processed 3 items" width="900" height="290" loading="lazy">
-<figcaption>The final sentence after the loop.</figcaption></figure>
-<pre><code>concat(outputs(&#x27;Company_name&#x27;), &#x27; processed &#x27;, string(variables(&#x27;Counter&#x27;)), &#x27; items&#x27;)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>outputs(&#x27;Company_name&#x27;)</code></td><td>The Compose value: <em>Contoso</em>.</td></tr><tr><td><code>variables(&#x27;Counter&#x27;)</code></td><td>The variable after the loop: 3 (an integer).</td></tr><tr><td><code>string(...)</code></td><td>Converts 3 to text so <code>concat</code> can join it.</td></tr></tbody></table></div>
+<h2 id="actions"><span class="ico ico-data"></span>2 · Every variable action</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Action</th><th>Works on</th><th>Demo</th><th>Note</th></tr></thead><tbody><tr><td>Initialize variable</td><td>Any type</td><td>Counter (Integer, 0), Log (String, ""), Ids (Array, []), Status (String, "New")</td><td>Top level only; the type is fixed here</td></tr><tr><td>Set variable</td><td>Any type</td><td>Status = "Done"</td><td>Replaces the value</td></tr><tr><td>Increment / Decrement variable</td><td>Integer, Float</td><td>Counter + 1</td><td>Default step is 1</td></tr><tr><td>Append to string variable</td><td>String</td><td>Log += "A-101; "</td><td>Adds to the end</td></tr><tr><td>Append to array variable</td><td>Array</td><td>Ids += 101</td><td>Adds one item</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>A variable can't be set from itself: <code>Set Counter = add(variables('Counter'), 1)</code> is refused. Use Increment.</li><li>Initialize every variable at the top, even ones used only in a later branch.</li></ul>
 
-<h2 id="actions"><span class="ico ico-data"></span>The variable actions</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Action</th><th>Works on</th><th>Example</th></tr></thead><tbody><tr><td>Initialize variable</td><td>Any type; top level only</td><td>Counter, Integer, 0</td></tr><tr><td>Set variable</td><td>Any type; replaces the value</td><td>Status = 'Done'</td></tr><tr><td>Increment / Decrement variable</td><td>Integer or Float</td><td>Counter + 1</td></tr><tr><td>Append to string variable</td><td>String</td><td>Log += 'line'</td></tr><tr><td>Append to array variable</td><td>Array</td><td>Ids += 42</td></tr></tbody></table></div>
-<h3>Watch out</h3><ul><li>A variable can't be set from itself (<code>Set Counter = add(variables('Counter'), 1)</code> is refused). Use Increment.</li><li>Turning on loop concurrency with variables gives wrong totals. Keep such loops sequential, or collect Compose outputs after the loop (see Conditions, Switch and loops).</li><li>A variable just to hold a constant adds an action and hides intent. Use Compose.</li></ul>
+<h2 id="loop"><span class="ico ico-loop"></span>3 · Variables in a loop, traced</h2>
+<figure class="shot"><img src="../assets/img/pa/b1-loop-canvas.webp" alt="Apply to each order loop at iteration 1 of 3 containing Increment Counter, Append to Ids, Append to Log and Label" width="280" height="470" loading="lazy">
+<figcaption>The demo loop: three variable actions and one Compose, run once per order.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/pa/b1-append-ids.webp" alt="Append to Ids run details at iteration 1: Name Ids, Value 101" width="600" height="360" loading="lazy">
+<figcaption>Iteration 1: <code>int(last(split(item(), '-')))</code> turned <em>A-101</em> into the number 101.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-loop"></span>After each iteration</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Iteration</th><th>item()</th><th>Counter</th><th>Ids</th><th>Log</th><th class="hide-sm"></th></tr></thead><tbody><tr><td>1 of 3</td><td><span class="chip ">A-101</span></td><td><span class="chip ">1</span></td><td><span class="chip ">[101]</span></td><td><span class="chip ">"A-101; "</span></td><td class="hide-sm"><div class="bar"><i style="width:33%"></i></div></td></tr><tr><td>2 of 3</td><td><span class="chip ">B-102</span></td><td><span class="chip ">2</span></td><td><span class="chip ">[101,102]</span></td><td><span class="chip ">"A-101; B-102; "</span></td><td class="hide-sm"><div class="bar"><i style="width:66%"></i></div></td></tr><tr><td>3 of 3</td><td><span class="chip ">C-103</span></td><td><span class="chip ok">3</span></td><td><span class="chip ok">[101,102,103]</span></td><td><span class="chip ok">"A-101; B-102; C-103; "</span></td><td class="hide-sm"><div class="bar done"><i style="width:100%"></i></div></td></tr></tbody></table></div><p class="viz-note">Then <strong>Set Status</strong> changes “New” to “Done”.</p></div>
+<pre><code>int(last(split(item(), &#x27;-&#x27;)))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>split(item(), &#x27;-&#x27;)</code></td><td><em>A-101</em> → ["A", "101"]</td></tr><tr><td><code>last(...)</code></td><td>"101"</td></tr><tr><td><code>int(...)</code></td><td>101 as a number, so Ids is a list of numbers</td></tr></tbody></table></div>
 
+<h2 id="compose-loop"><span class="ico ico-expr"></span>4 · Compose inside a loop: every result, no variable</h2>
+<div class="cards"><div><strong>What</strong>A Compose inside a loop keeps one result per iteration. Referenced <em>after</em> the loop, <code>outputs('Label')</code> returns all of them as a list.</div><div><strong>Why</strong>You get a collected list without Append to array, and it stays correct when the loop runs in parallel.</div><div><strong>Demo</strong><em>Label</em> = <code>Item @{item()}</code> inside the loop.</div></div>
+<figure class="shot"><img src="../assets/img/pa/b1-var-results.webp" alt="Variable_results raw output: Counter 3, Ids 101 102 103, Log A-101; B-102; C-103;, Status Done, All labels (Compose in loop) Item A-101, Item B-102, Item C-103" width="592" height="335" loading="lazy">
+<figcaption>After the loop: the variables, and the Compose's three results collected automatically.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Same list, two ways</p><div class="fl"><div class="br"><div><span class="lbl c">Variable</span><div class="nd">Initialize <em>Ids</em> (top)</div><div class="ar"></div><div class="nd">Append inside the loop</div><div class="ar"></div><div class="nd"><code>variables('Ids')</code></div></div><div><span class="lbl c">Compose</span><div class="nd"><em>Label</em> inside the loop</div><div class="ar"></div><div class="nd ok"><code>outputs('Label')</code> after the loop</div></div></div></div></div>
+<p>For turning one list into another, <strong>Select</strong> is better still: no loop at all (see Select, Filter array and Join).</p>
+
+<h2 id="parallel"><span class="ico ico-par"></span>5 · Loops running in parallel</h2>
+<div class="cards"><div><strong>What</strong>With concurrency on, iterations run at the same time and share one variable.</div><div><strong>Why</strong>Set and Append can interleave, so totals and lists can come out wrong or in a random order.</div><div><strong>Demo</strong>Turning on concurrency for the demo loop.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-par"></span>Is it safe to turn on concurrency?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Does the loop change a variable?</div><div class="ar"></div><div class="br"><div><span class="lbl t">No</span><div class="nd ok">Safe: use Compose inside, read the list after</div></div><div><span class="lbl f">Yes</span><div class="nd mute">Keep it sequential, or replace the variable with Compose / Select</div></div></div></div></div>
+<p>Increment and Decrement are applied one at a time, so a counter still adds up, but the value you read with <code>variables()</code> mid-iteration may belong to another iteration. Order-dependent logic needs a sequential loop.</p>
+
+<figure class="shot"><img src="../assets/img/pa/loop-iterations.webp" alt="Run view showing Company name, then Apply to each at iteration 1 of 3 containing Increment Counter" width="536" height="416" loading="lazy">
+<figcaption>Step through iterations with the arrows to see each one's values.</figcaption></figure>
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Initialize variable</strong>: creates a variable with a name, type and starting value. Top level only.</p>
-<p><strong>Apply to each</strong>: a loop that runs its actions once per item in a list.</p></div></details>
+<div class="layer-body"><p><strong>Initialize variable</strong>: creates a variable with a name, type and starting value.</p><p><strong>Apply to each</strong>: runs its actions once per item in a list.</p></div></details>
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Create an instant flow <em>Variables vs Compose</em>.</li><li>Add Initialize variable: Counter, Integer, 0. Add a Compose <em>Company name</em> = Contoso.</li><li>Add Apply to each over <code>createArray(1, 2, 3)</code>; inside, Increment variable Counter by 1.</li><li>After the loop, add Compose <em>Final counter</em> with the concat expression.</li><li>Test and step through the iterations.</li></ol></div></details>
-<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Concurrency on a loop that changes a variable.</li><li>A variable for a value that never changes.</li><li>Trying to Initialize a variable inside a loop or condition.</li></ul>
+<div class="layer-body"><ol><li>Initialize Counter (Integer 0), Log (String), Ids (Array) and Status (String “New”) at the top.</li><li>Add Apply to each over <code>createArray('A-101','B-102','C-103')</code> with Increment, Append to array, Append to string and a Compose <em>Label</em>.</li><li>After the loop: Set Status to “Done” and a Compose that shows all four variables plus <code>outputs('Label')</code>.</li><li>Run, step through iterations, then open the final Compose.</li></ol></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>A variable for a value that never changes.</li><li>Concurrency on a loop that sets or appends.</li><li>Initializing inside a loop or condition (not allowed).</li><li>A loop with Append to array where Select would do.</li></ul>
 <h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/create-variable-store-values">Store and manage values in variables</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/data-operations">Use data operations (Compose, Select, Filter array)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/apply-to-each">Use the Apply to each action</a></li></ul>
       </div>
 
-      <div class="pager"><a href="data-types.html">← Data types and conversions</a><a href="conditions-switch-loops.html">Conditions, Switch and loops: the complete guide →</a></div>
+      <div class="pager"><a href="data-types.html">← Data types and conversions: the complete guide</a><a href="conditions-switch-loops.html">Conditions, Switch and loops: the complete guide →</a></div>
     </article>
 
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#compare">The difference in one picture</a></li><li><a href="#demo">The demo: count items in a loop</a></li><li><a href="#actions">The variable actions</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#difference">1 · The difference</a></li><li><a href="#actions">2 · Every variable action</a></li><li><a href="#loop">3 · Variables in a loop, traced</a></li><li><a href="#compose-loop">4 · Compose inside a loop: every result, no variable</a></li><li><a href="#parallel">5 · Loops running in parallel</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

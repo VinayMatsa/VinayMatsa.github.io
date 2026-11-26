@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dates, times and time zones | Vinay Matsa</title>
-<meta name="description" content="Format dates, add days, count days and working days, convert time zones and Excel dates, and stop being surprised by UTC.">
+<title>Dates, times and time zones: the complete guide | Vinay Matsa</title>
+<meta name="description" content="UTC, converting to local time, the start of a local day, formatting, adding time, differences, parsing non-ISO dates, comparing, working days and Excel dates.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Dates, times and time zones">
-<meta property="og:description" content="Format dates, add days, count days and working days, convert time zones and Excel dates, and stop being surprised by UTC.">
+<meta property="og:title" content="Dates, times and time zones: the complete guide">
+<meta property="og:description" content="UTC, converting to local time, the start of a local day, formatting, adding time, differences, parsing non-ISO dates, comparing, working days and Excel dates.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,61 +40,78 @@
         <li class="dark">Power Automate</li>
         <li>Level 2 · Working with data · 4 of 7</li>
       </ul>
-      <h1>Dates, times and time zones</h1>
+      <h1>Dates, times and time zones: the complete guide</h1>
       <div class="byline">
         <span class="mini" aria-hidden="true">VM</span>
         <strong>Vinay Matsa</strong>
         <time datetime="2026-11-21">21 November 2026</time>
-        <span>3 min read</span>
+        <span>4 min read</span>
       </div>
 
       <div class="prose">
-<p>Power Automate works in <strong>UTC</strong>. That's the most important fact about dates in flows: unless you convert, a flow running late in the evening in India already thinks it's the next day.</p>
+<p>Flows store and calculate time in <strong>UTC</strong>. That single fact explains most date bugs: an order placed at 1:30 AM in India on 22 November is still 21 November in UTC, so a report built on UTC shows the wrong day. This guide follows one moment through every common date job.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Section</th><th>You'll learn</th></tr></thead><tbody><tr><td>1 · One moment, two dates</td><td>UTC vs local, traced</td></tr><tr><td>2 · Converting</td><td>The Convert time zone action and <code>convertFromUtc</code></td></tr><tr><td>3 · The start of a local day</td><td>For “today” filters</td></tr><tr><td>4 · Formatting</td><td>Format codes</td></tr><tr><td>5 · Date maths</td><td>Adding, differences, overdue checks</td></tr><tr><td>6 · Dates that aren't ISO</td><td><code>parseDateTime</code>, Excel serials</td></tr><tr><td>7 · Working days</td><td>Filter array over a range</td></tr></tbody></table></div>
 
-<h2 id="results"><span class="ico ico-clock"></span>One run, three clocks</h2>
-<div class="cards"><div><strong>What</strong>Flows store and calculate dates in UTC, as ISO text like <code>2026-11-21T18:34Z</code>.</div><div><strong>Why</strong>Emails, reports and due dates must show the reader's local time, or they're off by hours, sometimes by a day.</div><div><strong>Demo</strong>The same moment shown in UTC, India and Pacific time.</div></div>
-<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>The same moment, three ways</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Clock</th><th>Value</th><th>Expression</th></tr></thead><tbody><tr><td>UTC (the flow's clock)</td><td><span class="chip ">2026-11-21T18:34Z</span></td><td><code>utcNow()</code></td></tr><tr><td>India (UTC +5:30)</td><td><span class="chip warn">22 Nov 2026 12:04 AM</span></td><td><code>convertFromUtc(…, 'India Standard Time', …)</code></td></tr><tr><td>Pacific (UTC −8)</td><td><span class="chip ">21 Nov 2026 10:34 AM</span></td><td><code>convertFromUtc(…, 'Pacific Standard Time', …)</code></td></tr></tbody></table></div><p class="viz-note">In India it's already the next day. A report that used UTC would show the wrong date.</p></div>
-<figure class="shot"><img src="../assets/img/pa/l2-dates-results.webp" alt="Results JSON: Now in UTC 2026-11-21T18:34Z, Now in India 22 Nov 2026 12:04 AM, Now in Pacific 21 Nov 2026 10:34 AM, Due in 30 days 2026-12-21, First of month 2026-11-01, Days between 40, Is weekend true" width="514" height="192" loading="lazy">
-<figcaption>All date results from one run.</figcaption></figure>
+<h2 id="moment"><span class="ico ico-clock"></span>1 · One moment, two dates</h2>
+<div class="cards"><div><strong>What</strong>Each moment is stored as ISO text in UTC, like <code>2026-11-21T20:00:00Z</code> (Z = UTC).</div><div><strong>Why</strong>People read local time. Reports, due dates and “today” filters must convert, or they're off by hours, and sometimes by a whole day.</div><div><strong>Demo</strong>An order at <code>2026-11-21T20:00:00Z</code>, shown for a team in India (UTC +5:30).</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>The same moment</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Clock</th><th>Value</th><th>Expression</th></tr></thead><tbody><tr><td>UTC</td><td><span class="chip ">2026-11-21 20:00</span></td><td><code>formatDateTime(t, 'yyyy-MM-dd')</code> → <span class="chip ">2026-11-21</span></td></tr><tr><td>India</td><td><span class="chip warn">2026-11-22 01:30</span></td><td><code>convertFromUtc(t, 'India Standard Time', 'yyyy-MM-dd')</code> → <span class="chip warn">2026-11-22</span></td></tr></tbody></table></div><p class="viz-note">Different date. A daily report for India that used UTC would file this order under the wrong day.</p></div>
 
-<h2 id="convert"><span class="ico ico-clock"></span>Converting to local time</h2>
-<pre><code>convertFromUtc(utcNow(), &#x27;India Standard Time&#x27;, &#x27;dd MMM yyyy, hh:mm tt&#x27;)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>utcNow()</code></td><td>The current moment, in UTC.</td></tr><tr><td><code>&#x27;India Standard Time&#x27;</code></td><td>The target zone, by its Windows name (not IST or UTC+5:30).</td></tr><tr><td><code>&#x27;dd MMM yyyy, hh:mm tt&#x27;</code></td><td>Optional format: <em>22 Nov 2026, 12:04 AM</em>.</td></tr></tbody></table></div>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Format code</th><th>Means</th><th>Example</th></tr></thead><tbody><tr><td><code>yyyy</code> / <code>MM</code> / <code>dd</code></td><td>year / month / day</td><td>2026 / 11 / 21</td></tr><tr><td><code>MMM</code> / <code>MMMM</code></td><td>short / full month</td><td>Nov / November</td></tr><tr><td><code>dddd</code></td><td>day name</td><td>Saturday</td></tr><tr><td><code>HH</code> / <code>hh</code> + <code>tt</code></td><td>24-hour / 12-hour + AM/PM</td><td>18 / 06 PM</td></tr><tr><td><code>mm</code></td><td>minutes (small m)</td><td>34</td></tr></tbody></table></div>
-<p>Use <code>convertTimeZone(value, 'UTC', 'Pacific Standard Time')</code> when the source isn't UTC, or the <strong>Convert time zone</strong> action if you prefer drop-downs.</p>
+<h2 id="convert"><span class="ico ico-clock"></span>2 · Converting to local time</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>Action or expression?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Do I just need a converted value to display?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes, prefer drop-downs</span><div class="nd ok"><strong>Convert time zone</strong> action</div></div><div><span class="lbl f">Inside a bigger formula</span><div class="nd ok"><code>convertFromUtc</code> / <code>convertTimeZone</code></div></div></div></div></div>
+<figure class="shot"><img src="../assets/img/pa/b1-convert-tz.webp" alt="Convert time zone run details: Base time 2026-11-21T20:00:00Z, Source time zone UTC, Destination time zone India Standard Time, Time unit g; output Converted time 11/22/2026 1:30 AM" width="586" height="522" loading="lazy">
+<figcaption>The Convert time zone action in the demo run. <em>Time unit</em> is the format; <code>g</code> is short date and time.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Function</th><th>Use</th><th>Example</th></tr></thead><tbody><tr><td><code>convertFromUtc(t, zone, format?)</code></td><td>UTC → local</td><td><code>convertFromUtc(utcNow(), 'India Standard Time')</code></td></tr><tr><td><code>convertToUtc(t, zone, format?)</code></td><td>local → UTC</td><td>local midnight → UTC</td></tr><tr><td><code>convertTimeZone(t, from, to, format?)</code></td><td>any → any</td><td><code>'Pacific Standard Time'</code> → <code>'GMT Standard Time'</code></td></tr></tbody></table></div>
+<p>Zones use Windows names: <code>India Standard Time</code>, <code>Pacific Standard Time</code>, <code>GMT Standard Time</code>. <code>IST</code> or <code>UTC+5:30</code> fail. Windows zones handle daylight saving for you.</p>
 
-<h2 id="maths"><span class="ico ico-expr"></span>Date maths</h2>
-<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>Date functions with the demo's results</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td><code>formatDateTime(addDays(utcNow(), 30), 'yyyy-MM-dd')</code></td><td><span class="chip ">2026-12-21</span></td></tr><tr><td><code>startOfMonth(utcNow(), 'yyyy-MM-dd')</code></td><td><span class="chip ">2026-11-01</span></td></tr><tr><td><code>dayOfWeek(utcNow())</code></td><td>0 = Sunday … 6 = Saturday</td></tr><tr><td><code>addDays(value, -7)</code></td><td>a week earlier</td></tr></tbody></table></div></div>
-<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Days between two dates</p><div class="fl"><div class="nd"><code>ticks('2026-12-31')</code> and <code>ticks('2026-11-21')</code>: dates as big numbers</div><div class="ar"></div><div class="nd"><code>sub(a, b)</code>: the difference in ticks</div><div class="ar"></div><div class="nd ok"><code>div(…, 864000000000)</code>: ticks per day → <span class="chip ok">40</span></div></div></div>
-<pre><code>div(sub(ticks(&#x27;2026-12-31T00:00:00Z&#x27;), ticks(&#x27;2026-11-21T00:00:00Z&#x27;)), 864000000000)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>ticks(date)</code></td><td>100-nanosecond steps since year 1.</td></tr><tr><td><code>864000000000</code></td><td>Ticks in one day.</td></tr></tbody></table></div>
+<h2 id="daystart"><span class="ico ico-clock"></span>3 · The start of a local day</h2>
+<div class="cards"><div><strong>What</strong>For “orders placed today in India” you need India's midnight expressed in UTC.</div><div><strong>Why</strong>Filters compare against UTC data. Using UTC midnight misses or double-counts 5½ hours.</div><div><strong>Demo</strong>The demo order's India day.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>India's midnight, in UTC</p><div class="fl"><div class="nd"><code>convertFromUtc(t, 'India Standard Time')</code> → <span class="chip ">2026-11-22 01:30</span></div><div class="ar"></div><div class="nd"><code>startOfDay(…)</code> → <span class="chip ">2026-11-22 00:00</span> (India)</div><div class="ar"></div><div class="nd ok"><code>convertToUtc(…, 'India Standard Time')</code> → <span class="chip ok">2026-11-21T18:30:00Z</span></div></div></div>
+<pre><code>Created ge &#x27;@{convertToUtc(startOfDay(convertFromUtc(utcNow(), &#x27;India Standard Time&#x27;)), &#x27;India Standard Time&#x27;)}&#x27;</code></pre>
 
-<h2 id="working-days"><span class="ico ico-check"></span>Working days and Excel dates</h2>
-<figure class="shot"><img src="../assets/img/pa/ext-dates.webp" alt="Dates output: Working days in 14 days from 23 Nov 2026: 10; Excel serial 46348 as a date: 2026-11-22" width="514" height="130" loading="lazy">
-<figcaption>10 working days in a 14-day period, and an Excel number turned into a date.</figcaption></figure>
-<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Counting working days with Filter array</p><div class="fl"><div class="nd"><code>range(0, 14)</code> → day numbers 0 … 13</div><div class="ar"></div><div class="nd"><code>addDays('2026-11-23', item())</code> → each date</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span><code>dayOfWeek</code> is not 0 (Sun) and not 6 (Sat)?</div><div class="ar"></div><div class="nd ok"><code>length(…)</code> of what's left → <span class="chip ok">10</span></div></div></div>
+<h2 id="format"><span class="ico ico-expr"></span>4 · Formatting</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Code</th><th>Means</th><th>Demo</th></tr></thead><tbody><tr><td><code>yyyy-MM-dd</code></td><td>ISO date</td><td>2026-11-21</td></tr><tr><td><code>dd MMM yyyy</code></td><td>short month</td><td>21 Nov 2026</td></tr><tr><td><code>dddd, dd MMMM yyyy</code></td><td>full names</td><td>Saturday, 21 November 2026</td></tr><tr><td><code>HH:mm</code></td><td>24-hour</td><td>20:00</td></tr><tr><td><code>hh:mm tt</code></td><td>12-hour</td><td>08:00 PM</td></tr><tr><td><code>g</code></td><td>short date + time</td><td>11/21/2026 8:00 PM</td></tr></tbody></table></div>
+<p>Capital <code>MM</code> is month; small <code>mm</code> is minutes. Format only for display, at the end.</p>
+
+<h2 id="maths"><span class="ico ico-expr"></span>5 · Date maths</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>The Dates scope</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td><code>addToTime(t, 1, 'Month', 'yyyy-MM-dd')</code></td><td><span class="chip ">2026-12-21</span></td></tr><tr><td><code>addDays(t, -7)</code></td><td>a week earlier</td></tr><tr><td><code>dateDifference('2026-11-21', '2026-12-31')</code></td><td><span class="chip ">"40.00:00:00"</span> days.hours:minutes:seconds</td></tr><tr><td><code>less(ticks('2026-11-20T00:00:00Z'), ticks(t))</code></td><td><span class="chip ok">true</span> due date has passed</td></tr><tr><td><code>formatDateTime(t, 'dddd, dd MMMM yyyy')</code></td><td><span class="chip ">Saturday, 21 November 2026</span></td></tr></tbody></table></div></div>
+<figure class="shot"><img src="../assets/img/pa/b1-date-results.webp" alt="Date_results raw output: Convert time zone action 11/22/2026 1:30 AM, UTC date 2026-11-21, India date 2026-11-22, India day start (UTC) 2026-11-21T18:30:00Z, dateDifference 40.00:00:00, parseDateTime en-GB 2026-11-21T00:00:00, addToTime +1 Month 2026-12-21, Due 20 Nov is overdue true, Long format Saturday, 21 November 2026" width="592" height="260" loading="lazy">
+<figcaption>Every Dates result from the run.</figcaption></figure>
+<pre><code>int(first(split(dateDifference(start, end), &#x27;.&#x27;)))</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>dateDifference</code></td><td>“40.00:00:00”</td></tr><tr><td><code>split(…, &#x27;.&#x27;) then first</code></td><td>“40”</td></tr><tr><td><code>int</code></td><td>40 as a number. Under a day there's no dot: guard with <code>contains</code>.</td></tr></tbody></table></div>
+<p>Comparing with <code>ticks()</code> turns both dates into numbers, so different formats and zones compare correctly.</p>
+
+<h2 id="parse"><span class="ico ico-warn"></span>6 · Dates that aren't ISO</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>21/11/2026 from a UK form</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td><code>formatDateTime('21/11/2026', 'yyyy-MM-dd')</code></td><td><span class="chip no">fails</span></td></tr><tr><td><code>parseDateTime('21/11/2026', 'en-GB')</code></td><td><span class="chip ok">2026-11-21T00:00:00</span></td></tr></tbody></table></div></div>
+<pre><code>In function &#x27;formatDateTime&#x27;, the value provided for date time string &#x27;21/11/2026&#x27; was not valid.
+The datetime string must match ISO 8601 format.</code></pre>
+<p><code>parseDateTime(text, locale, format?)</code> reads local formats; give the exact format (e.g. <code>'dd/MM/yyyy'</code>) when the locale is ambiguous. Excel sends dates as day numbers from 30 Dec 1899:</p>
+<pre><code>formatDateTime(addDays(&#x27;1899-12-30&#x27;, 46348), &#x27;yyyy-MM-dd&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>addDays(&#x27;1899-12-30&#x27;, 46348)</code></td><td>Counts from Excel's start.</td></tr><tr><td><code>formatDateTime</code></td><td>2026-11-22</td></tr></tbody></table></div>
+
+<h2 id="working"><span class="ico ico-check"></span>7 · Working days</h2>
+<figure class="shot"><img src="../assets/img/pa/ext-dates.webp" alt="Working days in 14 days from 23 Nov 2026: 10; Excel serial 46348 as a date: 2026-11-22" width="514" height="130" loading="lazy">
+<figcaption>10 working days in a 14-day period.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Counting working days</p><div class="fl"><div class="nd"><code>range(0, 14)</code> → 0 … 13</div><div class="ar"></div><div class="nd"><code>addDays('2026-11-23', item())</code> each day</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span><code>dayOfWeek</code> not 0 (Sun) and not 6 (Sat)?</div><div class="ar"></div><div class="nd ok"><code>length(…)</code> → <span class="chip ok">10</span></div></div></div>
 <pre><code>From:  range(0, 14)
 Where: and(not(equals(dayOfWeek(addDays(&#x27;2026-11-23&#x27;, item())), 0)),
            not(equals(dayOfWeek(addDays(&#x27;2026-11-23&#x27;, item())), 6)))</code></pre>
-<p>Excel stores dates as days counted from 30 December 1899, so 46348 arrives as a number:</p>
-<pre><code>formatDateTime(addDays(&#x27;1899-12-30&#x27;, 46348), &#x27;yyyy-MM-dd&#x27;)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>addDays(&#x27;1899-12-30&#x27;, 46348)</code></td><td>Counts that many days from Excel's start.</td></tr><tr><td><code>formatDateTime(..., &#x27;yyyy-MM-dd&#x27;)</code></td><td>Shows <em>2026-11-22</em>. A decimal part is the time of day; use <code>int()</code> for the date only.</td></tr></tbody></table></div>
-<h3>Watch out</h3><ul><li>Capital <code>MM</code> is month; small <code>mm</code> is minutes.</li><li>Convert to local time only for display, at the end. Compare and calculate in UTC.</li><li>Holidays: keep them in a list and add a third check to the working-day filter.</li></ul>
+<figure class="shot"><img src="../assets/img/pa/l2-dates-results.webp" alt="Results JSON: now in UTC, India and Pacific, due in 30 days, first of month, days between 40, is weekend" width="514" height="192" loading="lazy">
+<figcaption>Results from the original Dates demo.</figcaption></figure>
 
+<h3>Watch out</h3><ul><li>Calculate and compare in UTC; convert only for display.</li><li><code>utcNow()</code> in an email shows UTC, not the reader's time.</li><li>Windows zone names only.</li><li>Non-ISO text needs <code>parseDateTime</code> first.</li></ul>
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>UTC</strong>: the world's reference clock. India is 5 h 30 min ahead.</p>
-<p><strong>ISO 8601</strong>: the date text flows use, such as <code>2026-11-21T18:34:23Z</code>. Z means UTC.</p></div></details>
-<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Showing <code>utcNow()</code> to users as if it were local time.</li><li>Using <code>IST</code> or <code>UTC+5:30</code> instead of the Windows zone name.</li><li>Comparing dates in different formats or zones as text.</li></ul>
+<div class="layer-body"><p><strong>UTC</strong>: the reference clock. India is 5 h 30 min ahead.</p><p><strong>ISO 8601</strong>: <code>2026-11-21T20:00:00Z</code>.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>UTC midnight used as “today” for a local team.</li><li><code>mm</code> for month.</li><li><code>formatDateTime</code> on <em>21/11/2026</em>.</li><li>Comparing dates as text in different formats.</li></ul>
 <h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/date-time-values">Customize or format date and time values in a flow</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/convert-time-zone">Convert a time zone</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (date and time functions)</a></li></ul>
       </div>
 
-      <div class="pager"><a href="arrays-and-objects.html">← Arrays and objects: first, last, union, intersection</a><a href="text-functions.html">Text functions: split, substring, replace →</a></div>
+      <div class="pager"><a href="arrays-and-objects.html">← Arrays and objects: first, last, union, intersection</a><a href="text-functions.html">Text functions: the complete guide →</a></div>
     </article>
 
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#results">One run, three clocks</a></li><li><a href="#convert">Converting to local time</a></li><li><a href="#maths">Date maths</a></li><li><a href="#working-days">Working days and Excel dates</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#moment">1 · One moment, two dates</a></li><li><a href="#convert">2 · Converting to local time</a></li><li><a href="#daystart">3 · The start of a local day</a></li><li><a href="#format">4 · Formatting</a></li><li><a href="#maths">5 · Date maths</a></li><li><a href="#parse">6 · Dates that aren't ISO</a></li><li><a href="#working">7 · Working days</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

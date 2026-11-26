@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Licensing basics for flows | Vinay Matsa</title>
-<meta name="description" content="Which licence a flow needs, when premium connectors change the picture, and how per-user and per-flow licences differ.">
+<meta name="description" content="Which licence a flow needs, what makes it premium, whose licence counts, per-user vs per-flow, and AI Builder and desktop flow capacity.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Licensing basics for flows">
-<meta property="og:description" content="Which licence a flow needs, when premium connectors change the picture, and how per-user and per-flow licences differ.">
+<meta property="og:description" content="Which licence a flow needs, what makes it premium, whose licence counts, per-user vs per-flow, and AI Builder and desktop flow capacity.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,51 +49,23 @@
       </div>
 
       <div class="prose">
-<p>Licensing decides which connectors a flow may use and how many requests it gets each day. You don't need to know every plan, but a builder should be able to answer: <em>can this flow run on what we have, and who needs a licence?</em> Prices and plan names change, so treat this page as the concepts and check Microsoft's licensing pages for the current details.</p>
+<p>Licensing decides which connectors a flow may use and how many requests it gets each day. A builder should be able to answer: can this flow run on what we have, and who needs a licence? Prices and plan names change, so treat this as orientation.</p>
 
-<h2 id="types">The main licence types</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Licence</th><th>Who or what it covers</th><th>Key points</th></tr></thead><tbody>
-<tr><td>Microsoft 365 (seeded)</td><td>Users with Microsoft 365 or Office 365</td><td>Cloud flows with <strong>standard</strong> connectors only, such as SharePoint, Outlook and Teams</td></tr>
-<tr><td>Power Automate Premium</td><td>One user, all of their flows</td><td>Premium connectors, custom connectors, Dataverse, desktop flows (attended RPA) and more</td></tr>
-<tr><td>Power Automate Process</td><td>One flow (or one machine for unattended RPA)</td><td>Licenses the flow itself, so everyone who uses it is covered. Higher daily request allowance; licences can be stacked.</td></tr>
-<tr><td>Trial</td><td>One user, for a limited time</td><td>Lets you build and test premium features before buying</td></tr>
-</tbody></table></div>
+<h2 id="premium"><span class="ico ico-warn"></span>Is this flow premium?</h2>
+<div class="cards"><div><strong>What</strong>Standard connectors come with Microsoft 365; premium connectors and features need a standalone licence.</div><div><strong>Why</strong>One premium action makes the whole flow premium, for everyone who needs to run it.</div><div><strong>Demo</strong>A SharePoint + Teams flow that gains one HTTP action.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>Check before you build</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Does it use any premium connector (Dataverse, HTTP, SQL Server…), a custom connector, or desktop flows?</div><div class="ar"></div><div class="br"><div><span class="lbl t">No</span><div class="nd ok">Microsoft 365 licence may be enough</div></div><div><span class="lbl f">Yes</span><div class="nd dec"><span class="ico ico-cond"></span>Many makers' flows, or one key flow for many people?</div><div class="ar"></div><div class="br"><div><span class="lbl c">Many flows, one maker</span><div class="nd ok">Premium (per user)</div></div><div><span class="lbl c">One flow, many users</span><div class="nd ok">Process (per flow)</div></div></div></div></div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Licence</th><th>Covers</th><th>Key points</th></tr></thead><tbody><tr><td>Microsoft 365 (seeded)</td><td>Users with Microsoft 365</td><td>Standard connectors only (SharePoint, Outlook, Teams)</td></tr><tr><td>Power Automate Premium</td><td>One user, all their flows</td><td>Premium & custom connectors, Dataverse, attended RPA</td></tr><tr><td>Power Automate Process</td><td>One flow (or one unattended RPA machine)</td><td>Everyone using the flow is covered; higher request allowance</td></tr><tr><td>Trial</td><td>One user, limited time</td><td>Build and test premium features</td></tr></tbody></table></div>
 
-<h2 id="premium">What makes a flow premium</h2>
-<p>A flow is premium if it uses any <strong>premium connector</strong> (Dataverse, HTTP, SQL Server and many others), a <strong>custom connector</strong>, or features such as desktop flows. The designer marks premium connectors with a diamond label. One premium action is enough to make the whole flow premium.</p>
+<h2 id="whose"><span class="ico ico-data"></span>Whose licence counts</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-data"></span>Flow type</th><th>Licence that counts</th></tr></thead><tbody><tr><td>Automated / scheduled</td><td>The <strong>owner's</strong></td></tr><tr><td>Instant (button, Power Apps)</td><td>Generally the <strong>person who runs it</strong>, unless the flow has a Process licence</td></tr><tr><td>Serving a licensed Power Apps / Dynamics 365 app</td><td>Can be covered by that app's licence</td></tr></tbody></table></div>
 
-<h2 id="whose">Whose licence counts</h2>
-<ul>
-<li><strong>Automated and scheduled flows</strong> run under the <strong>owner's</strong> licence.</li>
-<li><strong>Instant flows</strong> (a button or a Power Apps call) generally need the <strong>person who runs them</strong> to be licensed for what the flow uses, unless the flow has a Process licence.</li>
-<li>A flow that runs as part of a licensed Power Apps or Dynamics 365 app can be covered by that app's licence when it serves that app.</li>
-</ul>
-
-<h2 id="choose">Per user or per flow?</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Situation</th><th>Usually fits</th></tr></thead><tbody>
-<tr><td>One maker building many personal or team automations</td><td>Premium per user</td></tr>
-<tr><td>One business-critical flow used by many people, or a high-volume integration</td><td>Process per flow</td></tr>
-<tr><td>Simple notifications and approvals on SharePoint and Outlook</td><td>Microsoft 365 seeded licence may be enough</td></tr>
-</tbody></table></div>
+<h2 id="ai-rpa"><span class="ico ico-clock"></span>AI Builder capacity and desktop flows</h2>
+<div class="cards"><div><strong><span class="ico ico-expr"></span>AI Builder</strong>Licensed by capacity, not by user. Testing models is free; running them in flows uses credits. Microsoft is ending AI Builder credits: AI features can use Copilot Credits when AI Builder credits run out. Check capacity before production.</div><div><strong><span class="ico ico-scope"></span>Desktop flows</strong>Premium covers attended runs (user signed in). Unattended runs need Process licences or pay-as-you-go.</div></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Standard connector</strong>: included with Microsoft 365 licences.</p>
-<p><strong>Premium connector</strong>: needs a standalone Power Automate (or qualifying Power Apps / Dynamics 365) licence.</p>
-<p><strong>Owner</strong>: the account a flow belongs to. Automated flows use its licence and its request allowance.</p></div></details>
-
-<h2 id="ai-rpa">AI Builder capacity and desktop flows</h2>
-<p><strong>AI Builder</strong> (document processing, prompts, text recognition) is licensed by capacity, not by user. Building and testing models doesn't use credits; running them in flows does. Microsoft is ending AI Builder credits: since November 2025, AI Builder features can use <strong>Copilot Credits</strong> when no AI Builder credits are left, and the credits that came with premium licences are being removed. Check the capacity page in the admin center before relying on AI steps in production.</p>
-<p><strong>Desktop flows (RPA):</strong> the Premium user licence covers attended desktop flows, which run while the user is signed in. Running desktop flows <strong>unattended</strong> needs Process licences (or pay-as-you-go).</p>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Building with a trial and discovering at go-live that users only have Microsoft 365 licences.</li>
-<li>Adding one HTTP or Dataverse action to a standard flow without noticing it is now premium.</li>
-<li>Running every production flow under one employee's account. Licence, allowance and access all leave with that person. Level 6 covers service accounts.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types">Types of Power Automate licenses</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/deep-dive-on-specific-license">Deep dive on specific licenses</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/faqs">Power Automate licensing FAQ</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations">Requests limits and allocations</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/administer-licensing">AI Builder licensing overview</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/endofaibcredits">End of AI Builder credits</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/add-ons">Types of Power Automate add-ons</a></li></ul>
+<div class="layer-body"><p><strong>Standard vs premium connector</strong>: included with Microsoft 365 vs needs a standalone licence. The designer marks premium with a diamond.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Building on a trial, then finding users only have Microsoft 365.</li><li>Adding one HTTP or Dataverse action without noticing.</li><li>Every production flow under one employee's account (see Ownership and service accounts).</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types">Types of Power Automate licenses</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/faqs">Power Automate licensing FAQ</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations">Requests limits and allocations</a></li><li><a href="https://learn.microsoft.com/en-us/ai-builder/endofaibcredits">End of AI Builder credits</a></li></ul>
       </div>
 
       <div class="pager"><a href="large-files.html">← Working with large files</a><a href="./">Back to all topics →</a></div>
@@ -102,7 +74,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#types">The main licence types</a></li><li><a href="#premium">What makes a flow premium</a></li><li><a href="#whose">Whose licence counts</a></li><li><a href="#choose">Per user or per flow?</a></li><li><a href="#ai-rpa">AI Builder capacity and desktop flows</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#premium">Is this flow premium?</a></li><li><a href="#whose">Whose licence counts</a></li><li><a href="#ai-rpa">AI Builder capacity and desktop flows</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

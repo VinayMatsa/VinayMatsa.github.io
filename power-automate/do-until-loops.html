@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Do until loops and their limits | Vinay Matsa</title>
-<meta name="description" content="Repeat steps until a condition is true, and understand the count and timeout limits that quietly stop the loop.">
+<meta name="description" content="Repeat steps until a condition is true, see what happens when the count or timeout stops the loop first, and how to detect it.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Do until loops and their limits">
-<meta property="og:description" content="Repeat steps until a condition is true, and understand the count and timeout limits that quietly stop the loop.">
+<meta property="og:description" content="Repeat steps until a condition is true, see what happens when the count or timeout stops the loop first, and how to detect it.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,40 +49,31 @@
       </div>
 
       <div class="prose">
-<p><strong>Do until</strong> repeats the actions inside it until a condition becomes true. It is the right loop when you don't know how many passes you need: waiting for a status to change, paging through an API, or retrying until something is ready.</p>
+<p><strong>Do until</strong> repeats its actions until a condition becomes true. It's the right loop when you don't know how many passes you need: waiting for a status, paging through an API, retrying until something is ready. (The basics are in Conditions, Switch and loops; this page is about its limits.)</p>
 
-<h2 id="demo">Two loops: one that finishes, one that doesn't</h2>
+<h2 id="demo"><span class="ico ico-until"></span>Two loops: one that finishes, one that doesn't</h2>
+<div class="cards"><div><strong>What</strong>A loop that checks its stop rule after each pass, with a Count and Timeout safety limit.</div><div><strong>Why</strong>When a limit stops the loop, it still shows <strong>Succeeded</strong>. Without a check, the flow carries on as if the job were done.</div><div><strong>Demo</strong>Loop 1 counts to 5. Loop 2 waits for <code>equals(1, 2)</code>, which is never true, with Count 3.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>How a Do until ends</p><div class="fl"><div class="nd act">Run the actions inside</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Is the stop rule true?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">Ends: the job is done</div></div><div><span class="lbl f">No</span><div class="nd dec"><span class="ico ico-cond"></span>Count or Timeout reached?</div><div class="ar"></div><div class="br"><div><span class="lbl f">No</span><div class="nd mute">↺ again</div></div><div><span class="lbl f">Yes</span><div class="nd mute">Ends anyway: still <strong>Succeeded</strong></div></div></div></div></div></div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>The two loops</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Loop</th><th>Stop rule</th><th>Count</th><th>Passes</th><th>Ended because</th><th>Status</th></tr></thead><tbody><tr><td>Counter reaches 5</td><td><code>equals(variables('Counter'), 5)</code></td><td>60</td><td><span class="chip ">5</span></td><td>rule true</td><td><span class="lbl t">Succeeded</span></td></tr><tr><td>Something that never happens</td><td><code>equals(1, 2)</code></td><td>3</td><td><span class="chip warn">3</span></td><td>count reached</td><td><span class="lbl t">Succeeded</span></td></tr></tbody></table></div><p class="viz-note">Both show green ticks. Only the first actually reached its goal.</p></div>
 <figure class="shot"><img src="../assets/img/pa/l5-until-canvas.webp" alt="Flow canvas: Initialize Attempts, Do until counter reaches 5 (0.7 seconds), Do until something that never happens (0.6 seconds), Results" width="400" height="399" loading="lazy">
-<figcaption>Both loops show a green tick. Only the first one actually reached its condition.</figcaption></figure>
+<figcaption>Both loops succeeded.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l5-until-results.webp" alt="Results output: Counter after first loop 5, Attempts before the limit stopped it 3" width="514" height="110" loading="lazy">
-<figcaption>The first loop reached 5. The second loop stopped after 3 tries because of its limit, not because the condition came true.</figcaption></figure>
-<p>The second loop waits for <code>equals(1, 2)</code>, which can never be true. It still ends with <strong>Succeeded</strong>. When a Do until hits its limit, it simply stops and the flow carries on as if nothing went wrong. That is the most important thing to know about this loop.</p>
+<figcaption>The second loop gave up after 3 attempts.</figcaption></figure>
 
-<h2 id="limits">Count and timeout</h2>
+<h2 id="limits"><span class="ico ico-clock"></span>Count and timeout</h2>
 <figure class="shot"><img src="../assets/img/pa/l5-until-code.webp" alt="Code view of the Until action: type Until, expression equals(1, 2), limit count 3, timeout PT1H" width="480" height="100" loading="lazy">
-<figcaption>Code view shows both limits on the loop.</figcaption></figure>
-<pre><code>&quot;limit&quot;: { &quot;count&quot;: 3, &quot;timeout&quot;: &quot;PT1H&quot; }</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>count</code></td><td>The most passes allowed. The default is 60, and Microsoft documents 5,000 as the maximum.</td></tr><tr><td><code>timeout</code></td><td>The longest the loop may run, in ISO 8601 duration format. <code>PT1H</code> is one hour, which is the default.</td></tr><tr><td><code>Whichever comes first</code></td><td>The loop stops when the condition is true, or the count is reached, or the timeout passes.</td></tr></tbody></table></div>
+<figcaption>Both limits in code view.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-until"></span>Limit</th><th>Default</th><th>Maximum / format</th></tr></thead><tbody><tr><td>Count</td><td>60</td><td>5,000</td></tr><tr><td>Timeout</td><td><code>PT1H</code> (1 hour)</td><td>ISO 8601: <code>PT30M</code> 30 min, <code>P1D</code> 1 day</td></tr></tbody></table></div>
+<p>The loop stops at whichever comes first: the rule, the count or the timeout.</p>
 
-<h2 id="check">Telling a real finish from a limit</h2>
-<p>Because the loop succeeds either way, check after it. Add a Condition that tests the same thing the loop was waiting for. If it is still false, the loop gave up: send an alert or Terminate the run as Failed.</p>
+<h2 id="check"><span class="ico ico-check"></span>Telling a real finish from a limit</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>After the loop</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Is the stop rule true now?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">Carry on</div></div><div><span class="lbl f">No</span><div class="nd mute">The loop gave up: alert, or Terminate as Failed</div></div></div></div></div>
+<h3>Watch out</h3><ul><li>When polling, put a <strong>Delay</strong> inside and make sure count × delay fits the timeout.</li><li><code>iterationIndexes('Loop_name')</code> gives the pass number (from 0).</li><li>A failing action inside doesn't stop the loop; it keeps going until a limit.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Condition</strong>: the test that ends the loop. It is checked <em>after</em> each pass, so the actions inside always run at least once.</p>
-<p><strong>ISO 8601 duration</strong>: <code>PT30M</code> is 30 minutes, <code>PT1H</code> one hour, <code>P1D</code> one day.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Initialize an integer variable <em>Attempts</em> to 0.</li><li>Add <strong>Do until</strong>. Set the condition to <code>variables('Attempts')</code> is greater than or equal to 5.</li><li>Inside it, add <strong>Increment variable</strong> on Attempts by 1, plus the work you want to repeat (for example a status check and a short <strong>Delay</strong>).</li><li>Open the loop's <strong>Settings</strong> (or Change limits) and set Count and Timeout to sensible values.</li><li>After the loop, add a Condition that checks the goal again and handles the case where it was not reached.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Assuming success means the condition was met. The limit may have stopped it.</li>
-<li>No Delay inside a polling loop. It spends requests as fast as it can and finishes all passes in seconds.</li>
-<li>Forgetting to change the value the condition checks. The loop then always runs to its limit.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-control-flow-loops">Create loops that repeat actions (Until loops)</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config">Limits and configuration: looping</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
+<div class="layer-body"><p><strong>Stop rule</strong>: checked after each pass, so the actions always run at least once.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Trusting Succeeded without checking the rule.</li><li>Polling with no Delay, burning requests.</li><li>Count too low for real-world waits.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-control-flow-loops">Create loops that repeat actions (Until loops)</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config">Limits and configuration: looping</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li></ul>
       </div>
 
       <div class="pager"><a href="request-limits.html">← Request limits and how actions are counted</a><a href="avoid-nested-loops.html">Avoiding nested loops →</a></div>

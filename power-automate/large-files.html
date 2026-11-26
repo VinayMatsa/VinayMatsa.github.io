@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Working with large files | Vinay Matsa</title>
-<meta name="description" content="Create, read and move files in a flow without hitting size and throughput limits.">
+<meta name="description" content="Create, read and move files in a flow without hitting size and throughput limits, and how file content travels.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Working with large files">
-<meta property="og:description" content="Create, read and move files in a flow without hitting size and throughput limits.">
+<meta property="og:description" content="Create, read and move files in a flow without hitting size and throughput limits, and how file content travels.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,45 +49,31 @@
       </div>
 
       <div class="prose">
-<p>Flows often create a report, copy an attachment or read a CSV. Small files just work. Larger ones run into limits on message size and on how much content a flow may move in a period of time. Knowing those limits, and how file content travels through a flow, avoids surprises.</p>
+<p>Small files just work. Larger ones run into limits on message size and on how much content a flow may move in a period of time.</p>
 
-<h2 id="demo">A 2,000-row CSV, end to end</h2>
-<p>The demo builds 2,000 rows, turns them into CSV with <strong>Create CSV table</strong>, saves the file to a SharePoint library and reads it back.</p>
+<h2 id="demo"><span class="ico ico-data"></span>A 2,000-row CSV, end to end</h2>
+<div class="cards"><div><strong>What</strong>File content moves between actions as Base64 text, within size and throughput limits.</div><div><strong>Why</strong>Base64 is about a third larger than the file, so files use more of the limits than their size suggests.</div><div><strong>Demo</strong>Build 2,000 rows → CSV → save to SharePoint → read it back.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The demo flow</p><div class="fl"><div class="nd"><strong>Rows</strong>: 2,000 generated rows</div><div class="ar"></div><div class="nd"><strong>Create CSV table</strong> → 47,556 characters</div><div class="ar"></div><div class="nd"><strong>Create file</strong> in a library (1 s)</div><div class="ar"></div><div class="nd"><strong>Get file content</strong> (0.3 s)</div><div class="ar"></div><div class="nd ok"><strong>File facts</strong>: 2000 rows, 46 KB</div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l5-file-canvas.webp" alt="Flow canvas: Manually trigger a flow, Rows, Create CSV table, Create file (1 second), Get file content (0.3 seconds), File facts" width="400" height="425" loading="lazy">
-<figcaption>Creating and reading a 46 KB file takes about a second.</figcaption></figure>
+<figcaption>The demo run.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l5-file-facts.webp" alt="File facts output: Rows written 2000, Characters in CSV 47556, Size in KB from SharePoint 46, Content type returned application/octet-stream" width="514" height="140" loading="lazy">
-<figcaption>Get file content returns a generic binary type, even for a CSV.</figcaption></figure>
+<figcaption>Facts about the file.</figcaption></figure>
 <pre><code>length(body(&#x27;Create_CSV_table&#x27;))</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>body(&#x27;Create_CSV_table&#x27;)</code></td><td>The CSV as one long text.</td></tr><tr><td><code>length(...)</code></td><td>The number of characters: 47,556 here, which is about 46 KB.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>length(...)</code></td><td>Characters in the CSV text: 47,556.</td></tr></tbody></table></div>
 
-<h2 id="base64">How file content travels</h2>
-<p>File content moves between actions as <code>$content-type</code> plus <code>$content</code> in <strong>Base64</strong>. Base64 is about a third larger than the original file, so a file uses more of the flow's limits than its size on disk suggests. To read a text file as text, wrap it: <code>base64ToString(body('Get_file_content')?['$content'])</code>.</p>
+<h2 id="base64"><span class="ico ico-expr"></span>How file content travels</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Bytes in transit</p><div class="fl"><div class="nd">File on disk: 46 KB</div><div class="ar"></div><div class="nd">In the flow: <span class="chip ">{"$content-type": …, "$content": "…Base64…"}</span></div><div class="ar"></div><div class="nd mute">Base64 ≈ 4/3 of the size</div><div class="ar"></div><div class="nd ok">Pass it straight to Create file, an attachment or an upload</div></div></div>
+<p>To read a text file as text: <code>base64ToString(body('Get_file_content')?['$content'])</code>.</p>
 
-<h2 id="limits">Limits to know</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Limit</th><th>Value (official docs, at time of writing)</th></tr></thead><tbody>
-<tr><td>Message size without chunking</td><td>100 MB</td></tr>
-<tr><td>Content throughput per 5 minutes</td><td>120 MB on the Low performance profile, 1.2 GB on others</td></tr>
-<tr><td>Content throughput per 24 hours</td><td>200 MB (Low), 2 GB (Medium), 10 GB (High)</td></tr>
-</tbody></table></div>
-<p>Some connector actions support <strong>chunking</strong> (a setting called <em>Allow chunking</em>), which splits a large transfer into parts so it can pass the message limit.</p>
+<h2 id="limits"><span class="ico ico-warn"></span>Limits to know</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-warn"></span>Limit</th><th>Value (official docs, at the time of writing)</th></tr></thead><tbody><tr><td>Message size without chunking</td><td>100 MB</td></tr><tr><td>Content throughput per 5 minutes</td><td>120 MB on Low, 1.2 GB on other profiles</td></tr><tr><td>Content throughput per 24 hours</td><td>200 MB (Low), 2 GB (Medium), 10 GB (High)</td></tr></tbody></table></div>
+<p>Some actions support <strong>Allow chunking</strong>, which splits a large transfer into parts.</p>
+<h3>Watch out</h3><ul><li>Don't put file content in Compose or variables just to look at it; it doubles the size moved.</li><li>For very large or frequent files, copy between services directly (e.g. Move file) instead of reading content into the flow.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Base64</strong>: a way of writing binary data as plain text so it can travel inside JSON.</p>
-<p><strong>Chunking</strong>: sending a large file in several smaller pieces.</p>
-<p><strong>Performance profile</strong>: Low, Medium or High, set by the flow owner's licence. It decides several throughput limits.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Build the content (for example Create CSV table or Create HTML table).</li><li>Use SharePoint <strong>Create file</strong> or OneDrive <strong>Create file</strong> with that content and a file name such as <code>concat('report-', utcNow('yyyyMMdd'), '.csv')</code>.</li><li>To read it, use <strong>Get file content</strong> and convert with <code>base64ToString()</code> if it is text.</li><li>For big files, open the action's Settings and turn on chunking where the action offers it.</li><li>If files keep growing, move the work to a connector made for bulk data instead of passing the content through the flow.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Reading a CSV and expecting text. The content comes back as Base64 with a binary type.</li>
-<li>Copying large files through Compose or variables. Each copy adds to throughput and makes run history slow to open.</li>
-<li>Emailing big attachments. Mail services have their own, much smaller, limits. Share a link instead.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-handle-large-messages">Handle large messages with chunking</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config">Limits and configuration: message size</a></li></ul>
+<div class="layer-body"><p><strong>Chunking</strong>: sending a large file in pieces.</p><p><strong>Performance profile</strong>: Low, Medium or High, set by the owner's licence.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Reading whole files to check a property.</li><li>Ignoring the Base64 size overhead.</li><li>Moving gigabytes a day through one flow.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/limits-and-config">Limits of automated, scheduled, and instant flows</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-handle-large-messages">Handle large messages with chunking</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config">Limits and configuration: message size</a></li></ul>
       </div>
 
       <div class="pager"><a href="batch-operations.html">← Batch operations and changesets</a><a href="licensing-basics.html">Licensing basics for flows →</a></div>

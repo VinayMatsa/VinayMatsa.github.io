@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Archival and audit logs | Vinay Matsa</title>
-<meta name="description" content="Move finished records out of the working list and keep a record of what each flow changed.">
+<meta name="description" content="Move finished records out of the working list in a safe order, and keep a record of what each flow changed.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Archival and audit logs">
-<meta property="og:description" content="Move finished records out of the working list and keep a record of what each flow changed.">
+<meta property="og:description" content="Move finished records out of the working list in a safe order, and keep a record of what each flow changed.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,49 +49,26 @@
       </div>
 
       <div class="prose">
-<p>Working lists slow down and get harder to use as they grow. Moving finished items to an <strong>archive</strong> keeps them small. Writing an <strong>audit log</strong> entry for each change means you can always answer "who or what changed this, and when?".</p>
+<p>Working lists slow down and get cluttered as finished items pile up. Archiving moves them out; an <strong>audit log</strong> records what each flow changed.</p>
 
-<h2 id="demo">Archive two completed requests</h2>
-<p>The demo creates two sample requests with status Completed, then for each one: copies it to an archive list, writes an audit entry with a batch ID, and deletes the original.</p>
+<h2 id="demo"><span class="ico ico-data"></span>Archive two completed requests</h2>
+<div class="cards"><div><strong>What</strong>Copy finished items to an archive list, log each change, then delete the original.</div><div><strong>Why</strong>Faster lists, a full history, and a way to trace any run's changes.</div><div><strong>Demo</strong>Two completed requests archived under one batch ID.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Per item, in this order</p><div class="fl"><div class="nd act">Batch ID: <code>guid()</code> once per run</div><div class="ar"></div><div class="nd">1. <strong>Copy to archive</strong></div><div class="ar"></div><div class="nd">2. <strong>Write audit entry</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Did both succeed?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">3. <strong>Delete original</strong></div></div><div><span class="lbl f">No</span><div class="nd mute">Keep the original; next run retries</div></div></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l8-archive-canvas.webp" alt="Flow canvas: Batch id, Create sample A, Create sample B, Get completed, Archive each loop with Copy to archive, Write audit entry, Delete original" width="165" height="530" loading="lazy">
-<figcaption>Copy, log, then delete, one item at a time.</figcaption></figure>
+<figcaption>The demo flow.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l8-archive-summary.webp" alt="Summary output: Batch ID bc06d118-..., Archived 2, Archived titles Archive demo: old request A, Archive demo: old request B" width="618" height="155" loading="lazy">
-<figcaption>Both items were archived under one batch ID.</figcaption></figure>
+<figcaption>Two items archived.</figcaption></figure>
+<div class="callout"><strong>Never delete first.</strong> If the copy fails after a delete, the item is gone.</div>
 
-<h2 id="order">The order matters</h2>
-<ol>
-<li><strong>Copy</strong> to the archive list.</li>
-<li><strong>Log</strong> the change in the audit list.</li>
-<li><strong>Delete</strong> the original only after both succeeded.</li>
-</ol>
-<p>If the copy fails, nothing is lost: the original is still there and the next run tries again. Never delete first.</p>
-
-<h2 id="audit">What an audit entry holds</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Column</th><th>Example</th></tr></thead><tbody>
-<tr><td>RequestId</td><td>The original item's ID</td></tr>
-<tr><td>Action</td><td>Archived, Status changed, Approved</td></tr>
-<tr><td>OldValue / NewValue</td><td>Pending / Approved</td></tr>
-<tr><td>BatchId</td><td>A <code>guid()</code> shared by every entry from one run</td></tr>
-<tr><td>Created / Created By</td><td>Filled in by SharePoint automatically</td></tr>
-</tbody></table></div>
-<p>The batch ID ties every entry from one run together, so you can find all changes from a run that went wrong.</p>
+<h2 id="audit"><span class="ico ico-scope"></span>What an audit entry holds</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>One audit entry</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Column</th><th>Example</th></tr></thead><tbody><tr><td>RequestId</td><td><span class="chip ">42</span></td></tr><tr><td>Action</td><td><span class="chip ">Archived</span></td></tr><tr><td>OldValue / NewValue</td><td><span class="chip ">Completed</span> / <span class="chip ">Archived</span></td></tr><tr><td>BatchId</td><td><span class="chip ">bc06d118-…</span></td></tr><tr><td>Created / Created By</td><td>filled in by SharePoint</td></tr></tbody></table></div><p class="viz-note">The batch ID ties every entry from one run together.</p></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Archive list</strong>: a second list with the same key columns, where finished items are moved.</p>
-<p><strong>Audit log</strong>: an append-only list of changes. Entries are added, never edited.</p></div></details>
-
+<div class="layer-body"><p><strong>Audit log</strong>: an append-only list of changes; entries are added, never edited.</p></div></details>
 <details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Create an archive list with the columns you need to keep, plus OriginalId and ArchivedOn.</li><li>Create an audit list: RequestId, Action, OldValue, NewValue, BatchId.</li><li>Schedule a flow that gets items with <code>Status eq 'Completed'</code> and Modified older than, say, 90 days.</li><li>Loop with concurrency 1: create the archive item, create the audit entry, then delete the original.</li><li>Restrict edit permission on the audit list so people can read it but not change it.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Deleting before copying. One failed copy loses data.</li>
-<li>Letting anyone edit the audit list. It is only trustworthy if entries can't be changed.</li>
-<li>Archiving attachments by forgetting them. Copy attachments too, or keep files in a library instead.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li></ul>
+<div class="layer-body"><ol><li>Create an archive list (key columns + OriginalId, ArchivedOn) and an audit list (RequestId, Action, OldValue, NewValue, BatchId).</li><li>Schedule a flow: Get items with <code>Status eq 'Completed'</code> and Modified older than 90 days.</li><li>Loop with concurrency 1: copy, log, then delete.</li><li>Let people read the audit list but not edit it.</li></ol></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Deleting before copying.</li><li>No batch ID.</li><li>Editable audit entries.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="status-workflows-approvers.html">← Status-driven workflows and approvers from data</a><a href="settings-feature-flags.html">Configurable templates and feature flags →</a></div>
@@ -100,7 +77,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#demo">Archive two completed requests</a></li><li><a href="#order">The order matters</a></li><li><a href="#audit">What an audit entry holds</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#demo">Archive two completed requests</a></li><li><a href="#audit">What an audit entry holds</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

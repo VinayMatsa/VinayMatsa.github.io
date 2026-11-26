@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Split On and trigger batching | Vinay Matsa</title>
-<meta name="description" content="Understand how triggers that return many items start one run per item, and when to turn that off.">
+<meta name="description" content="How triggers that return many items start one run per item, when to turn that off, and how to stop runs overlapping.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Split On and trigger batching">
-<meta property="og:description" content="Understand how triggers that return many items start one run per item, and when to turn that off.">
+<meta property="og:description" content="How triggers that return many items start one run per item, when to turn that off, and how to stop runs overlapping.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,42 +49,27 @@
       </div>
 
       <div class="prose">
-<p>Some triggers check for new data on a schedule and can find several items at once. With <strong>Split On</strong> turned on (the default for many triggers), the trigger starts <strong>one run per item</strong>. With it off, one run receives all the items as an array.</p>
+<p>Some triggers check for changes and find several new items at once. By default, <strong>Split On</strong> starts one run per item. Sometimes you want one run with all of them.</p>
 
-<h2 id="see">Where it shows up</h2>
+<h2 id="see"><span class="ico ico-data"></span>Where it shows up</h2>
+<div class="cards"><div><strong>What</strong>A trigger setting that splits an array of new items into separate runs.</div><div><strong>Why</strong>It decides whether you handle items one by one or as a batch, and how failures spread.</div><div><strong>Demo</strong>A SharePoint trigger that polls every minute.</div></div>
 <figure class="shot"><img src="../assets/img/pa/l8-spliton-code.webp" alt="Trigger code view: recurrence every 1 minute, conditions, splitOn @triggerOutputs()?[&#x27;body/value&#x27;]" width="468" height="172" loading="lazy">
-<figcaption>The SharePoint trigger polls every minute and splits the results into one run per item.</figcaption></figure>
+<figcaption>splitOn in the trigger's code.</figcaption></figure>
 <pre><code>&quot;splitOn&quot;: &quot;@triggerOutputs()?[&#x27;body/value&#x27;]&quot;</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>triggerOutputs()?[&#x27;body/value&#x27;]</code></td><td>The array of items the trigger found in one check.</td></tr><tr><td><code>splitOn</code></td><td>Starts a separate run for each element of that array.</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Three new items found in one check</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Split On?</div><div class="ar"></div><div class="br"><div><span class="lbl c">On (default)</span><div class="nd"><span class="chip ">run 1</span><span class="chip ">run 2</span><span class="chip ">run 3</span></div><div class="ar"></div><div class="nd ok">One run per item</div></div><div><span class="lbl c">Off</span><div class="nd"><span class="chip ">run 1: [item1, item2, item3]</span></div><div class="ar"></div><div class="nd ok">Loop over <code>triggerBody()?['value']</code></div></div></div></div></div>
 
-<h2 id="choose">On or off?</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th>Split On (default)</th><th>Split On off</th></tr></thead><tbody>
-<tr><td>Runs</td><td>One per item</td><td>One per check, with all items</td></tr>
-<tr><td>In the flow</td><td>Fields are available directly from the trigger</td><td>You loop over <code>triggerBody()?['value']</code></td></tr>
-<tr><td>Failures</td><td>One bad item fails only its own run</td><td>One run handles everything; plan error handling per item</td></tr>
-<tr><td>Good for</td><td>Most item-by-item processes</td><td>Batch work: one summary for everything new, or bulk writes</td></tr>
-</tbody></table></div>
-<p>The setting is in the trigger's <strong>Settings</strong>. Trigger conditions are evaluated per item when Split On is on, so they filter individual items.</p>
+<h2 id="choose"><span class="ico ico-cond"></span>On or off?</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th>Split On (default)</th><th>Split On off</th></tr></thead><tbody><tr><td>Runs</td><td>One per item</td><td>One per check, with all items</td></tr><tr><td>In the flow</td><td>Fields directly from the trigger</td><td>Loop over the array</td></tr><tr><td>Failures</td><td>One bad item fails only its run</td><td>Plan per-item error handling</td></tr><tr><td>Good for</td><td>Item-by-item processes</td><td>One summary, bulk writes</td></tr></tbody></table></div>
+<p>With Split On, trigger conditions are evaluated per item, so they filter individual items.</p>
 
-<h2 id="concurrency">Runs at the same time</h2>
-<p>With Split On, ten new items can mean ten runs at once. If the runs update the same record or must happen in order, turn on the trigger's <strong>Concurrency control</strong> and set the degree of parallelism to 1, so runs queue and execute one at a time.</p>
+<h2 id="concurrency"><span class="ico ico-until"></span>Runs at the same time</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>Ten new items, Split On on</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Must runs not overlap?</div><div class="ar"></div><div class="br"><div><span class="lbl c">No</span><div class="nd ok">Up to ten runs at once</div></div><div><span class="lbl c">Yes</span><div class="nd ok">Trigger concurrency = 1: runs queue</div></div></div></div></div>
+<h3>Watch out</h3><ul><li>Turning trigger concurrency on can't be undone without re-adding the trigger.</li><li>With trigger concurrency on, Split On is limited to 100 items.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Polling trigger</strong>: a trigger that checks for changes on a schedule (every minute here) rather than being told instantly.</p>
-<p><strong>Debatching</strong>: another name for splitting an array into separate runs.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Open the trigger's <strong>Settings</strong>.</li><li>Leave <em>Split On</em> on for item-by-item processing, or turn it off to receive all items in one run.</li><li>If runs must not overlap, turn on <em>Concurrency control</em> and set it to 1.</li><li>Test by creating three items at once and checking run history.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Turning Split On off but still reading fields as if there were one item.</li>
-<li>Parallel runs updating the same summary record and overwriting each other.</li>
-<li>Expecting instant starts from a polling trigger. Allow for the polling interval.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-workflow-actions-triggers">Schema reference for triggers and actions (Split On)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/triggers-introduction">Get started with triggers</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config">Limits and configuration (concurrency)</a></li></ul>
+<div class="layer-body"><p><strong>Polling trigger</strong>: checks for changes on a schedule.</p><p><strong>Debatching</strong>: splitting an array into separate runs.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Expecting one run when ten items arrive at once.</li><li>Overlapping runs updating the same record.</li><li>Split On off without per-item error handling.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-workflow-actions-triggers">Schema reference for triggers and actions (Split On)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/triggers-introduction">Get started with triggers</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config">Limits and configuration (concurrency)</a></li></ul>
       </div>
 
       <div class="pager"><a href="batch-counters-summary.html">← Batch counters and run summaries</a><a href="./">Back to all topics →</a></div>

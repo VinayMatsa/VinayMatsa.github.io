@@ -49,44 +49,30 @@
       </div>
 
       <div class="prose">
-<p>A flow that starts <em>When an item is modified</em> and then updates the same item modifies it again, which starts the flow again: an endless loop. The same trigger also fires for any edit, even one that doesn't matter. Two tools solve both problems: <strong>trigger conditions</strong> and <strong>Get changes for an item</strong>.</p>
+<p>A flow that starts <em>When an item is modified</em> and then updates the same item modifies it again, which starts the flow again: an endless loop. The same trigger also fires for edits that don't matter.</p>
 
-<h2 id="loops">Breaking the loop</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Approach</th><th>Trigger condition</th></tr></thead><tbody>
-<tr><td>Ignore edits made by the flow's account</td><td><code>@not(equals(triggerOutputs()?['body/Editor/Email'], 'svc-flows@contoso.com'))</code></td></tr>
-<tr><td>Run only for a specific status</td><td><code>@equals(triggerOutputs()?['body/Status/Value'], 'Approved')</code></td></tr>
-<tr><td>Use a "processed" flag the flow sets</td><td><code>@not(equals(triggerOutputs()?['body/Processed'], true))</code></td></tr>
-</tbody></table></div>
-<p>A trigger condition is checked <em>before</em> a run starts, so skipped edits cost nothing and don't appear in run history. The first option works best when flows run under a service account, which also makes the condition easy to read.</p>
+<h2 id="loops"><span class="ico ico-warn"></span>The loop and how to break it</h2>
+<div class="cards"><div><strong>What</strong>Trigger conditions that ignore the flow's own edits, plus Get changes to see which column changed.</div><div><strong>Why</strong>Endless loops burn requests and can flood people with messages.</div><div><strong>Demo</strong>Change only Status, then ask SharePoint what changed.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>The self-trigger loop</p><div class="fl"><div class="nd act">Item modified → flow runs</div><div class="ar"></div><div class="nd">Flow updates the same item</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Does a trigger condition ignore the flow's own edit?</div><div class="ar"></div><div class="br"><div><span class="lbl f">No</span><div class="nd mute">↺ the update triggers the flow again, forever</div></div><div><span class="lbl t">Yes</span><div class="nd ok">Loop broken</div></div></div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-cond"></span>Approach</th><th>Trigger condition</th></tr></thead><tbody><tr><td>Ignore edits by the flow's account</td><td><code>@not(equals(triggerOutputs()?['body/Editor/Email'], 'svc-flows@contoso.com'))</code></td></tr><tr><td>Only a specific status</td><td><code>@equals(triggerOutputs()?['body/Status/Value'], 'Approved')</code></td></tr><tr><td>A <em>Processed</em> flag the flow sets</td><td><code>@not(equals(triggerOutputs()?['body/Processed'], true))</code></td></tr></tbody></table></div>
 <figure class="shot"><img src="../assets/img/pa/l8-spliton-code.webp" alt="Code view of a SharePoint trigger: recurrence every minute, conditions with expression equals Status Value Approved, splitOn triggerOutputs body value" width="468" height="172" loading="lazy">
-<figcaption>A trigger condition in the trigger's code view.</figcaption></figure>
+<figcaption>A trigger condition in code view.</figcaption></figure>
 
-<h2 id="changes">Did this column change?</h2>
-<p><strong>Get changes for an item or a file (properties only)</strong> compares the item now with an earlier version and returns true or false for every column. The demo reads the version number, changes only Status, then asks what changed:</p>
+<h2 id="changes"><span class="ico ico-check"></span>Did this column change?</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Get changes</p><div class="fl"><div class="nd">Read the item's version: <span class="chip ">3.0</span></div><div class="ar"></div><div class="nd">Change only <strong>Status</strong></div><div class="ar"></div><div class="nd"><strong>Get changes for an item or a file (properties only)</strong> since 3.0</div><div class="ar"></div><div class="nd ok">A true/false per column</div></div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>What changed</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Column</th><th><code>ColumnHasChanged/…</code></th></tr></thead><tbody><tr><td>Status</td><td><span class="chip ok">true</span></td></tr><tr><td>Amount</td><td><span class="chip no">false</span></td></tr><tr><td>Title</td><td><span class="chip no">false</span></td></tr></tbody></table></div></div>
 <figure class="shot"><img src="../assets/img/pa/l8-change-canvas.webp" alt="Flow canvas: Version before, Change status, Get changes since start, What changed" width="190" height="345" loading="lazy">
-<figcaption>Read the version, change the item, compare.</figcaption></figure>
+<figcaption>The demo flow.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l8-change-result.webp" alt="What changed output: Version before 3.0, Status changed true, Amount changed false, Title changed false" width="618" height="175" loading="lazy">
-<figcaption>Only Status is reported as changed.</figcaption></figure>
+<figcaption>Only Status changed.</figcaption></figure>
 <pre><code>outputs(&#x27;Get_changes_since_start&#x27;)?[&#x27;body/ColumnHasChanged/Status&#x27;]</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>ColumnHasChanged</code></td><td>An object with one true/false value per column.</td></tr><tr><td><code>/Status</code></td><td>The column you care about. Use the internal name.</td></tr></tbody></table></div>
-<p><strong>A real error from the demo.</strong> The first try passed a date and time as <em>Since</em> and failed with <em>Invalid format for version input value</em>. Since takes a <strong>version label</strong> (like 3.0, from the item's <code>{VersionNumber}</code>) or, in a triggered flow, the trigger's window start token. Versioning must be on for the list.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>ColumnHasChanged/Status</code></td><td>True if Status changed since the given version.</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>A real error from the demo</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Since =</th><th>Result</th></tr></thead><tbody><tr><td>a date and time</td><td><span class="lbl f">Failed</span> <em>Invalid format for version input value</em></td></tr><tr><td>a version label, e.g. <code>3.0</code> from <code>{VersionNumber}</code></td><td><span class="lbl t">Succeeded</span></td></tr></tbody></table></div><p class="viz-note">In a triggered flow, use the trigger's window start token instead. Versioning must be on for the list.</p></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Trigger condition</strong>: an expression in the trigger's Settings. The flow runs only when it is true.</p>
-<p><strong>Version history</strong>: SharePoint keeps a numbered copy of an item each time it is saved, if versioning is on.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Open the trigger's <strong>Settings</strong> and add a trigger condition that excludes the flow's own edits.</li><li>Turn on versioning in the list settings.</li><li>Add <strong>Get changes for an item or a file (properties only)</strong> with the item ID and <em>Since</em> set to the trigger window start token.</li><li>Add a Condition on <code>ColumnHasChanged/YourColumn</code> and do the work only when it is true.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Updating the triggering item with no guard. The flow runs every minute until someone turns it off.</li>
-<li>Putting the check in a Condition action instead of a trigger condition. The loop still runs; it just ends early each time.</li>
-<li>Passing a date as <em>Since</em>. Use a version label or the trigger token.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/triggers-introduction">Get started with triggers</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference (Get changes for an item or a file)</a></li></ul>
+<div class="layer-body"><p><strong>Version history</strong>: SharePoint keeps a numbered copy each time an item is saved, if versioning is on.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>No guard on a flow that updates its own trigger item.</li><li>Passing a date as <em>Since</em>.</li><li>Versioning off, so Get changes can't compare.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/triggers-introduction">Get started with triggers</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference (Get changes for an item or a file)</a></li></ul>
       </div>
 
       <div class="pager"><a href="upsert-duplicates.html">← Upsert and duplicate checks</a><a href="reminders-recurrence.html">Reminder and recurrence flows →</a></div>
@@ -95,7 +81,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#loops">Breaking the loop</a></li><li><a href="#changes">Did this column change?</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#loops">The loop and how to break it</a></li><li><a href="#changes">Did this column change?</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

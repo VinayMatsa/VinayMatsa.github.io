@@ -49,45 +49,31 @@
       </div>
 
       <div class="prose">
-<p>Data that arrives from emails, forms or files often contains records you already have, and sometimes the same record twice. Creating a new item every time fills the list with copies. Two habits fix this: remove duplicates from the incoming batch, then <strong>upsert</strong> each record (update if it exists, insert if it doesn't).</p>
+<p>Data from emails, forms or files often contains records you already have, and sometimes the same record twice. Creating a new item every time fills the list with copies.</p>
 
-<h2 id="demo">Four records in, three handled, no copies</h2>
-<p>The demo receives four requests. <em>Standing desk</em> appears twice, and <em>Monitor arms (x6)</em> already exists in the list.</p>
+<h2 id="demo"><span class="ico ico-data"></span>Four records in, three handled, no copies</h2>
+<div class="cards"><div><strong>What</strong>Remove duplicates from the input, then for each record: find it by a business key, update if found, create if not (<strong>upsert</strong>).</div><div><strong>Why</strong>Running the flow again then changes nothing extra, so it's safe to retry.</div><div><strong>Demo</strong>Four incoming requests: <em>Standing desk</em> twice, <em>Monitor arms (x6)</em> already in the list.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Dedupe, then upsert</p><div class="fl"><div class="nd act">Incoming: 4 requests</div><div class="ar"></div><div class="nd"><strong>Remove duplicates</strong>: <code>union(x, x)</code> → 3</div><div class="ar"></div><div class="nd">For each: <strong>Find existing</strong> (Get items, <code>Title eq '…'</code>)</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Already exists?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">Update item</div></div><div><span class="lbl f">No</span><div class="nd ok">Create item</div></div></div></div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>What happened to each request</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Request</th><th>Duplicate?</th><th>In the list?</th><th>Action</th></tr></thead><tbody><tr><td>Standing desk</td><td><span class="chip warn">yes</span> (2 copies)</td><td>no</td><td><span class="lbl t">created once</span></td></tr><tr><td>Monitor arms (x6)</td><td>no</td><td>yes</td><td><span class="lbl c">updated</span></td></tr><tr><td>Third request</td><td>no</td><td>no</td><td><span class="lbl t">created</span></td></tr></tbody></table></div><p class="viz-note">Received 4 → 3 after dedupe → 2 created, 1 updated.</p></div>
 <figure class="shot"><img src="../assets/img/pa/l8-upsert-canvas.webp" alt="Flow canvas: Incoming requests, Remove duplicates, Created count, Updated count, Upsert each loop (1 of 3) with Find existing and Already exists condition, Summary" width="190" height="560" loading="lazy">
-<figcaption>The loop runs three times, not four, because the duplicate was removed first.</figcaption></figure>
+<figcaption>The demo flow.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l8-upsert-summary.webp" alt="Summary output: Received 4, After removing duplicates 3, Created 2, Updated 1" width="618" height="175" loading="lazy">
-<figcaption>Two new items were created and the existing one was updated.</figcaption></figure>
+<figcaption>The counts.</figcaption></figure>
 
-<h2 id="dedupe">Removing duplicates in one step</h2>
+<h2 id="dedupe"><span class="ico ico-expr"></span>Removing duplicates in one step</h2>
 <pre><code>union(outputs(&#x27;Incoming_requests&#x27;), outputs(&#x27;Incoming_requests&#x27;))</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>union(a, b)</code></td><td>Joins two arrays and keeps each distinct value once.</td></tr><tr><td><code>the same array twice</code></td><td>A neat trick: the result is the array with exact duplicates removed.</td></tr><tr><td><code>exact</code></td><td>Objects count as duplicates only if every property matches. For a match on one field (such as an email), use the key-based approach below.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>union(a, a)</code></td><td>Combines a list with itself; exact duplicates appear once.</td></tr></tbody></table></div>
+<p>Works for exact copies. For “same key, different details”, dedupe on the key with a lookup object instead.</p>
 
-<h2 id="upsert">The upsert</h2>
-<ol>
-<li><strong>Get items</strong> with a filter on the business key and Top count 1: <code>Title eq 'Standing desk'</code>.</li>
-<li><strong>Condition</strong>: <code>length(outputs('Find_existing')?['body/value'])</code> is greater than 0.</li>
-<li>Yes: <strong>Update item</strong> using <code>first(...)?['ID']</code>. No: <strong>Create item</strong>.</li>
-</ol>
+<h2 id="upsert"><span class="ico ico-check"></span>The upsert lookup</h2>
 <pre><code>Title eq &#x27;@{replace(items(&#x27;Upsert_each&#x27;)?[&#x27;Title&#x27;], &#x27;&#x27;&#x27;&#x27;, &#x27;&#x27;&#x27;&#x27;&#x27;&#x27;)}&#x27;</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>Title eq &#x27;...&#x27;</code></td><td>An OData filter on the key column.</td></tr><tr><td><code>replace(..., &#x27;&#x27;&#x27;&#x27;, &#x27;&#x27;&#x27;&#x27;&#x27;&#x27;)</code></td><td>Doubles any apostrophe, so a value like <em>O'Brien</em> doesn't break the filter.</td></tr></tbody></table></div>
-<p>Run the flow twice and the second run updates everything and creates nothing. That property (running again doesn't create copies) is what makes a flow safe to retry.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>Title eq &#x27;…&#x27;</code></td><td>Find the item by its business key.</td></tr><tr><td><code>replace(..., &#x27;&#x27;&#x27;&#x27;, &#x27;&#x27;&#x27;&#x27;&#x27;&#x27;)</code></td><td>Doubles any apostrophe (O'Brien) so the OData filter doesn't break.</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Use a real business key (order number, email), not the title, when you have one.</li><li>Run it twice: the second run should update everything and create nothing.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Business key</strong>: the value that identifies a record in real life, such as an order number or email, as opposed to SharePoint's own ID.</p>
-<p><strong>Idempotent</strong>: running it again gives the same result. Upserts are idempotent; plain creates are not.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Decide the key column and, if you can, make it unique in the list settings (<em>Enforce unique values</em>).</li><li>Remove duplicates from the incoming data with <code>union()</code>, or with Select plus union on the key.</li><li>Loop over the records with concurrency set to 1 (so two copies of the same key can't both be created).</li><li>Inside: Get items filtered on the key, then a Condition on the result length.</li><li>Update in the Yes branch, Create in the No branch, and count both.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Parallel loop runs on an upsert. Two runs both see "not found" and both create.</li>
-<li>Filtering on a display name that people edit. Use a stable key.</li>
-<li>Forgetting the apostrophe escape. One name like <em>D'Souza</em> fails the run.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference (union)</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Error handling guidance for cloud flows</a></li></ul>
+<div class="layer-body"><p><strong>Business key</strong>: the value that identifies a record in real life.</p><p><strong>Idempotent</strong>: running it again gives the same result.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Create without checking first.</li><li>Not escaping apostrophes in filters.</li><li>Deduping on whole objects when only the key matters.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference (union)</a></li><li><a href="https://learn.microsoft.com/en-us/connectors/sharepointonline/">SharePoint connector reference</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/guidance/coding-guidelines/error-handling">Error handling guidance for cloud flows</a></li></ul>
       </div>
 
       <div class="pager"><a href="./">← All Power Automate topics</a><a href="trigger-loops-column-changes.html">Guarding trigger loops and detecting column changes →</a></div>
@@ -96,7 +82,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#demo">Four records in, three handled, no copies</a></li><li><a href="#dedupe">Removing duplicates in one step</a></li><li><a href="#upsert">The upsert</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#demo">Four records in, three handled, no copies</a></li><li><a href="#dedupe">Removing duplicates in one step</a></li><li><a href="#upsert">The upsert lookup</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

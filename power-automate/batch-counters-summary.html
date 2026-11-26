@@ -49,46 +49,27 @@
       </div>
 
       <div class="prose">
-<p>When a flow processes many rows, a single bad row shouldn't stop the rest, and at the end someone needs to know what happened. The pattern: give the run a <strong>batch ID</strong>, count as you go, collect the problems, and finish with one summary.</p>
+<p>Processing many rows means some will be bad. A good flow keeps going, counts what happened, and ends with one clear summary instead of failing on the first problem.</p>
 
-<h2 id="demo">Eight rows, three problems</h2>
-<p>The demo validates eight rows: Amount must be present and above zero, and Department must be known. Then it walks the rows again in batches of three.</p>
+<h2 id="demo"><span class="ico ico-data"></span>Eight rows, three problems</h2>
+<div class="cards"><div><strong>What</strong>Validate each row, count valid/invalid, process in batches, then send one summary with a batch ID.</div><div><strong>Why</strong>One bad row shouldn't stop the other seven, and someone needs to know which rows failed.</div><div><strong>Demo</strong>8 rows: 5 valid, 3 invalid, processed in batches of 3.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The demo flow</p><div class="fl"><div class="nd act">Batch ID <code>guid()</code>, counters Valid = 0, Invalid = 0</div><div class="ar"></div><div class="nd"><strong>Validate each</strong> (concurrency 1)</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Row valid?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd">Valid + 1</div></div><div><span class="lbl f">No</span><div class="nd">Invalid + 1, append name to Problems</div></div></div><div class="ar"></div><div class="nd"><strong>Process in batches</strong> (Do until) of 3</div><div class="ar"></div><div class="nd ok"><strong>Run summary</strong></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l8-batch-canvas.webp" alt="Flow canvas: Rows, Validate each loop, Process in batches Do until loop, Run summary" width="160" height="285" loading="lazy">
-<figcaption>A validation loop, then a batching loop, then the summary.</figcaption></figure>
-<figure class="shot"><img src="../assets/img/pa/l8-batch-summary.webp" alt="Run summary output: Batch ID, Rows received 8, Valid 5, Invalid 3, Invalid rows Trade show stand, Refund, Plants, Batches of 3: Batch 1: 3 rows, Batch 2: 3 rows, Batch 3: 2 rows" width="618" height="280" loading="lazy">
-<figcaption>Everything a reviewer needs in one object.</figcaption></figure>
-
-<h2 id="counting">Counting</h2>
-<ul>
-<li><strong>Increment variable</strong> on Valid or Invalid in each branch of the validation condition.</li>
-<li><strong>Append to array variable</strong> with the row's name when it fails, so the summary can list them.</li>
-<li>Set the loop's concurrency to 1. Parallel loops and shared counters don't mix (see Concurrency control).</li>
-</ul>
-
-<h2 id="batches">Slicing into batches</h2>
+<figcaption>The demo flow.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>Batches of 3</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Pass (iterationIndexes)</th><th><code>skip</code></th><th>Rows</th><th></th></tr></thead><tbody><tr><td>0</td><td>0</td><td>1–3</td><td><div class="bar"><i style="width:37.5%"></i></div></td></tr><tr><td>1</td><td>3</td><td>4–6</td><td><div class="bar"><i style="width:75%"></i></div></td></tr><tr><td>2</td><td>6</td><td>7–8</td><td><div class="bar done"><i style="width:100%"></i></div></td></tr></tbody></table></div></div>
 <pre><code>take(skip(outputs(&#x27;Rows&#x27;), mul(iterationIndexes(&#x27;Process_in_batches&#x27;), 3)), 3)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>iterationIndexes(&#x27;Process_in_batches&#x27;)</code></td><td>Which pass of the Do until loop this is: 0, 1, 2 ...</td></tr><tr><td><code>mul(..., 3)</code></td><td>How many rows earlier passes have already taken.</td></tr><tr><td><code>skip(rows, ...)</code></td><td>Skips those rows.</td></tr><tr><td><code>take(..., 3)</code></td><td>Takes the next three. The last batch gets whatever is left (2 here).</td></tr></tbody></table></div>
-<p>Batching suits APIs that accept many records per call, or work that must pause between groups. The loop ends when the processed count reaches the number of rows.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>iterationIndexes(...)</code></td><td>The pass number: 0, 1, 2.</td></tr><tr><td><code>mul(..., 3)</code></td><td>How many rows to skip.</td></tr><tr><td><code>skip(rows, n)</code></td><td>Drop rows already done.</td></tr><tr><td><code>take(..., 3)</code></td><td>The next 3.</td></tr></tbody></table></div>
+<figure class="shot"><img src="../assets/img/pa/l8-batch-summary.webp" alt="Run summary output: Batch ID, Rows received 8, Valid 5, Invalid 3, Invalid rows Trade show stand, Refund, Plants, Batches of 3: Batch 1: 3 rows, Batch 2: 3 rows, Batch 3: 2 rows" width="618" height="280" loading="lazy">
+<figcaption>One summary for the whole run.</figcaption></figure>
 
-<h2 id="summary">The summary</h2>
-<p>End with one Compose (or email, or Teams message) holding the batch ID, counts and the list of problems. If anything was invalid, also write it to the audit log or an error list so it can be fixed and re-run.</p>
+<h2 id="counting"><span class="ico ico-check"></span>Counting safely</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-check"></span>Do</th><th>Why</th></tr></thead><tbody><tr><td>Increment Valid / Invalid in each branch</td><td>Counts per outcome</td></tr><tr><td>Append failing row names to Problems</td><td>The summary can list them</td></tr><tr><td>Concurrency 1 on the loop</td><td>Shared counters and parallel loops don't mix</td></tr></tbody></table></div>
+<p>If anything was invalid, also write it to an error list so it can be fixed and re-run.</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Batch ID</strong>: a <code>guid()</code> created once per run and stored with every record it touches.</p>
-<p><strong>iterationIndexes()</strong>: the current pass number of a Do until loop, starting at 0.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Initialize variables: BatchId (<code>guid()</code>), Valid, Invalid (integers) and Problems (array).</li><li>Loop over the rows with concurrency 1 and a Condition holding your validation rules.</li><li>Increment the right counter in each branch, and append failing rows to Problems.</li><li>After the loop, build one summary and send it to the process owner.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Terminating the run on the first bad row. Count it and carry on.</li>
-<li>Counters inside a parallel loop. The totals come out wrong.</li>
-<li>No batch ID. Afterwards nobody can tell which records one run changed.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference (iterationIndexes, take, skip)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-variable-store-values">Store and manage values in variables</a></li></ul>
+<div class="layer-body"><p><strong>Batch ID</strong>: a <code>guid()</code> created once per run and stored with every record it touches.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Failing the whole run on one bad row.</li><li>Counters in a parallel loop.</li><li>A summary per row instead of one per run.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference (iterationIndexes, take, skip)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/create-variable-store-values">Store and manage values in variables</a></li></ul>
       </div>
 
       <div class="pager"><a href="settings-feature-flags.html">← Configurable templates and feature flags</a><a href="split-on.html">Split On and trigger batching →</a></div>
@@ -97,7 +78,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#demo">Eight rows, three problems</a></li><li><a href="#counting">Counting</a></li><li><a href="#batches">Slicing into batches</a></li><li><a href="#summary">The summary</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#demo">Eight rows, three problems</a></li><li><a href="#counting">Counting safely</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

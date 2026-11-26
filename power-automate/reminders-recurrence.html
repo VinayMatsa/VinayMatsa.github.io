@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reminder and recurrence flows | Vinay Matsa</title>
-<meta name="description" content="Run a flow on a schedule in the right time zone and remind people about items that are still waiting.">
+<meta name="description" content="Run a flow on a schedule in the right time zone, remind people about items still waiting, and process everything since the last run.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Reminder and recurrence flows">
-<meta property="og:description" content="Run a flow on a schedule in the right time zone and remind people about items that are still waiting.">
+<meta property="og:description" content="Run a flow on a schedule in the right time zone, remind people about items still waiting, and process everything since the last run.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,46 +49,31 @@
       </div>
 
       <div class="prose">
-<p>Some work isn't started by an event but by the clock: a daily digest, a weekly reminder, a monthly clean-up. These are <strong>scheduled flows</strong>, started by the <strong>Recurrence</strong> trigger.</p>
+<p>Some work is started by the clock: a daily digest, a weekly reminder, a monthly clean-up. These are scheduled flows, started by the <strong>Recurrence</strong> trigger.</p>
 
-<h2 id="schedule">The schedule</h2>
+<h2 id="schedule"><span class="ico ico-clock"></span>The schedule</h2>
+<div class="cards"><div><strong>What</strong>A Recurrence trigger with frequency, days, hours and a time zone.</div><div><strong>Why</strong>Without a time zone, 9:00 means 9:00 UTC: 2:30 PM in India.</div><div><strong>Demo</strong>Weekdays at 9:00 India time, remind about requests still waiting.</div></div>
 <figure class="shot"><img src="../assets/img/pa/l8-recurrence-code.webp" alt="Recurrence trigger code: frequency Week, interval 1, weekDays Monday to Friday, hours 9, minutes 0, timeZone India Standard Time" width="468" height="335" loading="lazy">
-<figcaption>Weekdays at 9:00, in a named time zone.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Setting</th><th>What it does</th></tr></thead><tbody>
-<tr><td>Frequency and interval</td><td>Every 1 week, every 2 days, every 15 minutes, and so on</td></tr>
-<tr><td>On these days</td><td>Only for Week frequency: pick weekdays to skip weekends</td></tr>
-<tr><td>At these hours / minutes</td><td>The time of day in the chosen time zone</td></tr>
-<tr><td>Time zone</td><td>Without it, times are UTC. Set it so 9:00 means 9:00 for the people being reminded.</td></tr>
-</tbody></table></div>
+<figcaption>The schedule in code view.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-clock"></span>Setting</th><th>Demo</th><th>Does</th></tr></thead><tbody><tr><td>Frequency / interval</td><td>Week / 1</td><td>How often</td></tr><tr><td>On these days</td><td>Mon–Fri</td><td>Skip weekends (Week frequency only)</td></tr><tr><td>At these hours / minutes</td><td>9 / 0</td><td>Time of day in the chosen zone</td></tr><tr><td>Time zone</td><td>India Standard Time</td><td>So 9:00 means 9:00 locally</td></tr></tbody></table></div>
 
-<h2 id="demo">Reminding about waiting requests</h2>
+<h2 id="demo"><span class="ico ico-data"></span>Reminding about waiting requests</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>Each weekday at 9:00</p><div class="fl"><div class="nd act">Recurrence</div><div class="ar"></div><div class="nd"><strong>Get waiting requests</strong> (Status New or Pending)</div><div class="ar"></div><div class="nd"><strong>Reminder rows</strong> (Select): title, status, days waiting</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Any waiting?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">Send one summary with the table</div></div><div><span class="lbl f">No</span><div class="nd mute">Send nothing</div></div></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l8-reminder-canvas.webp" alt="Flow canvas: Recurrence, Time window, Get waiting requests, Reminder rows, Reminder table, Any waiting condition" width="190" height="450" loading="lazy">
-<figcaption>Find what's waiting, build a table, send one message.</figcaption></figure>
+<figcaption>The demo flow.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l8-reminder-rows.webp" alt="Reminder rows output: Monitor arms (x6) New 0 days, Whiteboard markers Pending 0 days, Printer toner New 0 days" width="618" height="360" loading="lazy">
-<figcaption>One row per waiting request, with days waiting.</figcaption></figure>
+<figcaption>Three waiting requests.</figcaption></figure>
 <pre><code>div(sub(ticks(utcNow()), ticks(item()?[&#x27;Created&#x27;])), 864000000000)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>ticks(...)</code></td><td>A date as a count of 100-nanosecond steps.</td></tr><tr><td><code>sub(now, created)</code></td><td>How long the item has existed, in ticks.</td></tr><tr><td><code>div(..., 864000000000)</code></td><td>Ticks in one day, so the result is whole days waiting.</td></tr></tbody></table></div>
-<p>Send <strong>one</strong> summary message per person per run, not one per item, and only when there is something to send. The demo's <em>Any waiting</em> condition skips the message when the list is empty.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>ticks / sub / div</code></td><td>Whole days since the item was created.</td></tr></tbody></table></div>
+<p>Send <strong>one summary per person per run</strong>, not one per item, and only when there's something to send.</p>
 
-<h2 id="window">Looking back since the last run</h2>
-<p>A scheduled flow that should process "everything since last time" needs a time window. Calculate it from the run's start: for a daily flow, <code>addDays(utcNow(), -1)</code> to <code>utcNow()</code>, and filter on <em>Modified</em> between them. Logic Apps has a Sliding Window trigger that passes the window for you; in Power Automate you build it yourself like this, or store the last successful run time in a list.</p>
+<h2 id="window"><span class="ico ico-until"></span>Looking back since the last run</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>A daily time window</p><div class="fl"><div class="nd">Start: <code>addDays(utcNow(), -1)</code></div><div class="ar"></div><div class="nd">End: <code>utcNow()</code></div><div class="ar"></div><div class="nd ok">Filter: <code>Modified ge 'start' and Modified lt 'end'</code></div></div><p class="viz-note">Nothing is processed twice and nothing is missed, as long as runs aren't skipped.</p></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Scheduled flow</strong>: a flow started by Recurrence instead of an event.</p>
-<p><strong>Ticks</strong>: a precise count of time used to subtract dates and get whole days or hours.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Create a <strong>Scheduled cloud flow</strong>, choose the start time and repeat interval.</li><li>Open the Recurrence trigger and set <em>Time zone</em> and <em>On these days</em>.</li><li>Add <strong>Get items</strong> with a filter for what's waiting, such as <code>Status eq 'Pending'</code>.</li><li>Use <strong>Select</strong> and <strong>Create HTML table</strong> to build one summary.</li><li>Wrap the send step in a Condition so nothing is sent when the list is empty.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>No time zone, so the 9:00 reminder arrives at 2:30 in the afternoon.</li>
-<li>One email per item, so people get twenty messages and ignore all of them.</li>
-<li>A one-minute schedule for something that only matters daily. It wastes requests (see Request limits).</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/run-scheduled-tasks">Run flows on a schedule</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/concepts-schedule-automated-recurring-tasks-workflows">Schedule and run recurring workflows</a></li></ul>
+<div class="layer-body"><p><strong>Scheduled flow</strong>: started by Recurrence instead of an event.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>No time zone set.</li><li>One message per item.</li><li>Messages sent when nothing is waiting.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/run-scheduled-tasks">Run flows on a schedule</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/concepts-schedule-automated-recurring-tasks-workflows">Schedule and run recurring workflows</a></li></ul>
       </div>
 
       <div class="pager"><a href="trigger-loops-column-changes.html">← Guarding trigger loops and detecting column changes</a><a href="status-workflows-approvers.html">Status-driven workflows and approvers from data →</a></div>

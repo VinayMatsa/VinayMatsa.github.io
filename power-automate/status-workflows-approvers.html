@@ -49,46 +49,33 @@
       </div>
 
       <div class="prose">
-<p>Most business processes are a series of statuses: New, Pending, Approved, Completed. A good flow knows which moves are allowed, refuses the rest, and sends each request to the right approver without a hard-coded email address.</p>
+<p>Most processes are a series of statuses: New, Pending, Approved, Completed. A good flow knows which moves are allowed, refuses the rest, and sends each request to the right approver without hard-coded emails.</p>
 
-<h2 id="transitions">Allowed transitions as data</h2>
-<p>The demo keeps the rules in a Compose (in production, a list or JSON environment variable):</p>
+<h2 id="transitions"><span class="ico ico-switch"></span>Allowed moves, as data</h2>
+<div class="cards"><div><strong>What</strong>A JSON object listing, for each status, the statuses it may move to; plus a department → approver lookup.</div><div><strong>Why</strong>Rules in data can change without editing the flow; illegal jumps are caught.</div><div><strong>Demo</strong>Four requested status changes, checked and routed.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-switch"></span>The allowed moves</p><div class="fl"><div class="nd">New → Pending or Rejected</div><div class="ar"></div><div class="nd">Pending → Approved or Rejected</div><div class="ar"></div><div class="nd">Approved → Completed</div><div class="ar"></div><div class="nd mute">Rejected and Completed: nowhere (final)</div></div></div>
 <pre><code>{
-  "New":       ["Pending", "Rejected"],
-  "Pending":   ["Approved", "Rejected"],
-  "Approved":  ["Completed"],
-  "Rejected":  [],
-  "Completed": []
+  &quot;New&quot;:       [&quot;Pending&quot;, &quot;Rejected&quot;],
+  &quot;Pending&quot;:   [&quot;Approved&quot;, &quot;Rejected&quot;],
+  &quot;Approved&quot;:  [&quot;Completed&quot;],
+  &quot;Rejected&quot;:  [],
+  &quot;Completed&quot;: []
 }</code></pre>
-<p>It then checks four requested changes, and looks up an approver by department:</p>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Four requested changes</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Request</th><th>From → To</th><th>Allowed?</th><th>Approver</th></tr></thead><tbody><tr><td>Monitor arms</td><td>New → Pending</td><td><span class="chip ok">true</span></td><td>it-lead</td></tr><tr><td>Team lunch</td><td>New → Completed</td><td><span class="chip no">false</span></td><td>–</td></tr><tr><td>Office chairs</td><td>Approved → Completed</td><td><span class="chip ok">true</span></td><td>–</td></tr><tr><td>Visitor badges</td><td>Completed → New</td><td><span class="chip no">false</span></td><td>default</td></tr></tbody></table></div></div>
 <figure class="shot"><img src="../assets/img/pa/l8-status-checks.webp" alt="Check each change output: Monitor arms New to Pending allowed true approver it-lead; Team lunch New to Completed allowed false; Office chairs Approved to Completed allowed true; Visitor badges Completed to New allowed false approver default" width="618" height="560" loading="lazy">
-<figcaption>Two changes are allowed and two are refused. The unknown department falls back to a default approver.</figcaption></figure>
+<figcaption>The checks in the run.</figcaption></figure>
 <pre><code>contains(outputs(&#x27;Allowed_transitions&#x27;)?[item()?[&#x27;From&#x27;]], item()?[&#x27;To&#x27;])</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>outputs(&#x27;Allowed_transitions&#x27;)?[item()?[&#x27;From&#x27;]]</code></td><td>The list of statuses allowed after the current one, such as ["Pending", "Rejected"] for New.</td></tr><tr><td><code>contains(..., item()?[&#x27;To&#x27;])</code></td><td>True if the requested next status is in that list.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[item()?[&#x27;From&#x27;]]</code></td><td>The list of allowed targets for the current status.</td></tr><tr><td><code>contains(..., To)</code></td><td>Is the requested status in it?</td></tr></tbody></table></div>
 <pre><code>coalesce(outputs(&#x27;Approver_by_department&#x27;)?[item()?[&#x27;Department&#x27;]], &#x27;requests@contoso.com (default)&#x27;)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[item()?[&#x27;Department&#x27;]]</code></td><td>Looks up the approver for this department.</td></tr><tr><td><code>coalesce(..., default)</code></td><td>Uses a default when the department isn't in the table, instead of failing.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>?[Department]</code></td><td>The approver for that department.</td></tr><tr><td><code>coalesce(..., default)</code></td><td>A default when the department isn't listed.</td></tr></tbody></table></div>
 
-<h2 id="build">Putting it in a flow</h2>
-<ol>
-<li>Trigger on the item being modified, with a trigger condition on the Status column changing (see Guarding trigger loops).</li>
-<li>Check the move against the allowed transitions. If it isn't allowed, set the status back and tell the editor.</li>
-<li>Use a <strong>Switch</strong> on the new status for what happens next: start an approval, notify the requester, or archive.</li>
-<li>Look up approvers from a list keyed by department or product, so changes don't need a flow edit.</li>
-</ol>
+<h2 id="build"><span class="ico ico-arrow"></span>Putting it in a flow</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Status change handler</p><div class="fl"><div class="nd act">Item modified, trigger condition: Status changed</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Is the move allowed?</div><div class="ar"></div><div class="br"><div><span class="lbl f">No</span><div class="nd mute">Set it back, tell the editor</div></div><div><span class="lbl t">Yes</span><div class="nd dec"><span class="ico ico-cond"></span>Switch on the new status</div><div class="ar"></div><div class="br"><div><span class="lbl c">Pending</span><div class="nd">Start approval with the looked-up approver</div></div><div><span class="lbl c">Approved</span><div class="nd">Notify requester</div></div><div><span class="lbl c">Completed</span><div class="nd">Archive</div></div></div></div></div></div></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>State machine</strong>: a process where an item is always in one state and only certain moves between states are allowed.</p>
-<p><strong>coalesce()</strong>: returns the first value that isn't empty.</p></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Rules spread across many Conditions. Keep them in one table so they are easy to read and change.</li>
-<li>No default approver. A new department stops every request.</li>
-<li>Letting people edit Status freely in the list. Use the flow (or a Power Apps form) to move status.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/use-expressions-in-conditions">Use expressions in conditions</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/modern-approvals">Get started with approvals</a></li></ul>
+<div class="layer-body"><p><strong>State machine</strong>: an item is always in one state, and only certain moves are allowed.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Rules hard-coded in nested Conditions.</li><li>Approver emails typed into the flow.</li><li>No default approver.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/use-expressions-in-conditions">Use expressions in conditions</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/modern-approvals">Get started with approvals</a></li></ul>
       </div>
 
       <div class="pager"><a href="reminders-recurrence.html">← Reminder and recurrence flows</a><a href="archival-audit.html">Archival and audit logs →</a></div>
@@ -97,7 +84,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#transitions">Allowed transitions as data</a></li><li><a href="#build">Putting it in a flow</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#transitions">Allowed moves, as data</a></li><li><a href="#build">Putting it in a flow</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

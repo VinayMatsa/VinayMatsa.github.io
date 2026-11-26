@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Parse JSON and schemas | Vinay Matsa</title>
-<meta name="description" content="Turn JSON text into named fields you can pick from dynamic content, and know when you don't need it.">
+<meta name="description" content="Turn JSON text into named fields you can pick from dynamic content, generate the schema from a sample, and know when json() is enough.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Parse JSON and schemas">
-<meta property="og:description" content="Turn JSON text into named fields you can pick from dynamic content, and know when you don't need it.">
+<meta property="og:description" content="Turn JSON text into named fields you can pick from dynamic content, generate the schema from a sample, and know when json() is enough.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,51 +49,39 @@
       </div>
 
       <div class="prose">
-<p>Data often arrives as JSON <em>text</em>: from an HTTP call, a Copilot Studio agent, a text column or a file. Power Automate cannot offer fields from text in the dynamic content list until it knows the shape. <strong>Parse JSON</strong> reads the text against a <strong>schema</strong> (a description of the shape) and gives you every field by name.</p>
+<p>Data often arrives as JSON <em>text</em>: from an HTTP call, an agent, a text column or a file. Until the flow knows its shape, it can't offer the fields in dynamic content.</p>
 
-<h2 id="the-flow">The demo flow</h2>
+<h2 id="what"><span class="ico ico-data"></span>What Parse JSON does</h2>
+<div class="cards"><div><strong>What</strong>Reads JSON text against a <strong>schema</strong> (a description of the shape) and gives every field a name.</div><div><strong>Why</strong>So you can pick fields from the dynamic content list, and the flow checks the shape for you.</div><div><strong>Demo</strong>An order with a customer object and an items list.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Text in, fields out</p><div class="fl"><div class="nd act">JSON <strong>text</strong> <span class="chip ">{"customer":{…},"items":[…]}</span></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Parse JSON: does it match the schema?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">Fields in dynamic content: <em>customer name, city, items, sku, qty</em></div></div><div><span class="lbl f">No</span><div class="nd mute">The action fails with a schema validation error</div></div></div></div></div>
+<pre><code>{&quot;customer&quot;:{&quot;name&quot;:&quot;Contoso&quot;,&quot;city&quot;:&quot;Seattle&quot;},
+ &quot;items&quot;:[{&quot;sku&quot;:&quot;LAP-01&quot;,&quot;qty&quot;:2},{&quot;sku&quot;:&quot;MOU-07&quot;,&quot;qty&quot;:5}]}</code></pre>
 <figure class="shot"><img src="../assets/img/pa/l2-parse-json-inputs.webp" alt="Parse JSON run details: Content is a JSON text with a customer object and an items list, and the Schema table starts with type object and properties.customer.type object" width="505" height="425" loading="lazy">
-<figcaption>Content is the JSON text. Schema describes it: an object with a customer object and an items list.</figcaption></figure>
-<pre><code>{"customer":{"name":"Contoso","city":"Seattle"},
- "items":[{"sku":"LAP-01","qty":2},{"sku":"MOU-07","qty":5}]}</code></pre>
+<figcaption>The Content (text) and the Schema in the run.</figcaption></figure>
 
-<h2 id="read">Reading the parsed fields</h2>
+<h2 id="read"><span class="ico ico-expr"></span>Reading the parsed fields</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>The demo's paths and values</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody><tr><td><code>body('Parse_JSON')?['customer']?['city']</code></td><td><span class="chip ok">"Seattle"</span></td></tr><tr><td><code>first(body('Parse_JSON')?['items'])?['sku']</code></td><td><span class="chip ok">"LAP-01"</span></td></tr><tr><td><code>length(body('Parse_JSON')?['items'])</code></td><td><span class="chip ">2</span></td></tr><tr><td><code>body('Parse_JSON')?['items'][1]?['qty']</code></td><td><span class="chip ">5</span></td></tr></tbody></table></div></div>
 <figure class="shot"><img src="../assets/img/pa/l2-customer-city.webp" alt="Customer city output: Seattle" width="505" height="240" loading="lazy">
-<figcaption><code>body('Parse_JSON')?['customer']?['city']</code> returns Seattle.</figcaption></figure>
+<figcaption>Customer city from the parsed object.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l2-first-sku.webp" alt="First item SKU output: LAP-01" width="505" height="240" loading="lazy">
-<figcaption><code>first(body('Parse_JSON')?['items'])?['sku']</code> returns LAP-01.</figcaption></figure>
+<figcaption>The first item's SKU.</figcaption></figure>
 <pre><code>first(body(&#x27;Parse_JSON&#x27;)?[&#x27;items&#x27;])?[&#x27;sku&#x27;]</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>body(&#x27;Parse_JSON&#x27;)</code></td><td>The parsed object.</td></tr><tr><td><code>?[&#x27;items&#x27;]</code></td><td>The items list inside it.</td></tr><tr><td><code>first(...)</code></td><td>The first item of the list.</td></tr><tr><td><code>?[&#x27;sku&#x27;]</code></td><td>The sku field of that item: <em>LAP-01</em>.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>body(&#x27;Parse_JSON&#x27;)</code></td><td>The parsed object.</td></tr><tr><td><code>?[&#x27;items&#x27;]</code></td><td>The items list inside it.</td></tr><tr><td><code>first(...)</code></td><td>The first item.</td></tr><tr><td><code>?[&#x27;sku&#x27;]</code></td><td>Its sku: <em>LAP-01</em>.</td></tr></tbody></table></div>
 
-<h2 id="schema">Getting the schema</h2>
-<p>You rarely write a schema by hand. In Parse JSON select <strong>Use sample payload to generate schema</strong>, paste a real example, and Power Automate writes it. Then review two things:</p>
-<ul>
-<li><strong>required</strong>: the list of fields that must be present. If a real message is missing one, Parse JSON fails. Remove fields that are sometimes absent.</li>
-<li><strong>Nullable fields</strong>: a field that can be empty should allow null, for example <code>"type": ["string", "null"]</code>. Otherwise a null value fails validation.</li>
-</ul>
+<h2 id="schema"><span class="ico ico-check"></span>Getting the schema right</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Schema in three steps</p><div class="fl"><div class="nd">Select <strong>Use sample payload to generate schema</strong></div><div class="ar"></div><div class="nd">Paste a real example and select Done</div><div class="ar"></div><div class="nd ok">Review: required fields and types</div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-warn"></span>Check</th><th>Why</th><th>Fix</th></tr></thead><tbody><tr><td><code>required</code> list</td><td>A field listed as required that's sometimes missing fails the action</td><td>Remove it from <code>required</code></td></tr><tr><td>Fields that can be null</td><td><code>"type": "string"</code> rejects null</td><td>Use <code>"type": ["string", "null"]</code></td></tr><tr><td>Numbers sent as text</td><td>Type mismatch</td><td>Match the type the source really sends</td></tr></tbody></table></div>
 
-<h2 id="without">When you don't need Parse JSON</h2>
-<p>The <code>json()</code> function converts text to an object inside any expression. The demo's last step returns <em>Contoso</em> with no Parse JSON at all:</p>
-<pre><code>json(outputs('Response_text'))?['customer']?['name']</code></pre>
-<p>Use Parse JSON when you want fields in the dynamic content list, or want the shape validated. Use <code>json()</code> for a one-off value in an expression.</p>
+<h2 id="without"><span class="ico ico-expr"></span>When you don't need Parse JSON</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th><span class="ico ico-data"></span>Parse JSON</th><th><span class="ico ico-expr"></span><code>json()</code></th></tr></thead><tbody><tr><td>Fields in dynamic content</td><td>Yes</td><td>No</td></tr><tr><td>Validates the shape</td><td>Yes</td><td>No</td></tr><tr><td>Extra action</td><td>Yes</td><td>No: inside any expression</td></tr><tr><td>Best for</td><td>Many fields, used often</td><td>One value, once</td></tr></tbody></table></div>
+<pre><code>json(outputs(&#x27;Response_text&#x27;))?[&#x27;customer&#x27;]?[&#x27;name&#x27;]</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>json(...)</code></td><td>Turns the text into an object, inline.</td></tr><tr><td><code>?[&#x27;customer&#x27;]?[&#x27;name&#x27;]</code></td><td>Reads the field: <em>Contoso</em>.</td></tr></tbody></table></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>JSON text vs JSON object</strong>: the same characters can be plain text (a string) or a real object. Only an object lets you read fields with <code>?['name']</code>.</p>
-<p><strong>Schema</strong>: a description of the expected shape: which fields exist and what type each one is.</p>
-<p><strong>body('Parse_JSON')</strong>: the parsed result of the action named Parse JSON.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Add a Compose named <em>Response text</em> and paste the JSON above as plain text.</li><li>Add <strong>Parse JSON</strong>. Content: Outputs of Response text.</li><li>Select <strong>Use sample payload to generate schema</strong>, paste the same JSON and select Done.</li><li>Add a Compose with the dynamic content <em>city</em>; it appears under Parse JSON once the schema exists.</li><li>Add a Compose with <code>first(body('Parse_JSON')?['items'])?['sku']</code>.</li><li>Test the flow. Then delete <code>city</code> from the text, test again, and see how the schema reacts (it only fails if city is in <em>required</em>).</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Generating the schema from one sample and never checking <em>required</em>. The flow then fails the first time a field is missing.</li>
-<li>Parsing something that is already an object (such as the body of most connector actions). You can read its fields directly.</li>
-<li>Selecting an array field from dynamic content and getting a surprise loop. Power Automate wraps the step in Apply to each when you pick a field inside a list.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/data-operations">Use data operations (includes Parse JSON)</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (json, first)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li></ul>
+<div class="layer-body"><p><strong>JSON text vs object</strong>: the same characters can be plain text or a real object. Only an object lets you read fields with <code>?['name']</code>.</p>
+<p><strong>Schema</strong>: which fields exist and what type each one is.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Parsing something that's already an object (from a connector). You don't need to.</li><li>Leaving every field in <code>required</code>, so optional data breaks the flow.</li><li>Not allowing null in the schema for fields that can be empty.</li><li>Calling <code>json()</code> on an object instead of text.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/data-operations">Use data operations (includes Parse JSON)</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (json, first)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/error-reference">Cloud flow error code reference</a></li></ul>
       </div>
 
       <div class="pager"><a href="select-filter-join.html">← Select, Filter array and Join</a><a href="arrays-and-objects.html">Arrays and objects: first, last, union, intersection →</a></div>
@@ -102,7 +90,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#the-flow">The demo flow</a></li><li><a href="#read">Reading the parsed fields</a></li><li><a href="#schema">Getting the schema</a></li><li><a href="#without">When you don't need Parse JSON</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#what">What Parse JSON does</a></li><li><a href="#read">Reading the parsed fields</a></li><li><a href="#schema">Getting the schema right</a></li><li><a href="#without">When you don't need Parse JSON</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

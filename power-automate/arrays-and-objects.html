@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Arrays and objects: first, last, union, intersection | Vinay Matsa</title>
-<meta name="description" content="The everyday list and record functions: pick items, combine lists, find overlaps, and change a record.">
+<meta name="description" content="The everyday list and record functions: pick items, combine lists, find overlaps, sort, and change a record, with the results of one run.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Arrays and objects: first, last, union, intersection">
-<meta property="og:description" content="The everyday list and record functions: pick items, combine lists, find overlaps, and change a record.">
+<meta property="og:description" content="The everyday list and record functions: pick items, combine lists, find overlaps, sort, and change a record, with the results of one run.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,59 +49,33 @@
       </div>
 
       <div class="prose">
-<p>Lists (arrays) and records (objects) are everywhere in flows: rows from a table, people in a team, fields of an item. A small set of functions answers most questions about them without a loop.</p>
+<p>Lists (<strong>arrays</strong>) and records (<strong>objects</strong>) are everywhere in flows: rows from a table, people in a team, fields of an item. A small set of functions answers most questions about them without a loop.</p>
 
-<h2 id="results">All results in one view</h2>
+<h2 id="inputs"><span class="ico ico-data"></span>The demo inputs</h2>
+<div class="cards"><div><strong>What</strong>Functions that pick, combine, count and change lists and records.</div><div><strong>Why</strong>They replace loops for everyday questions: who's in both teams, how many, is X in the list.</div><div><strong>Demo</strong>Two teams and one customer record.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Two lists and one record</p><div class="fl"><div class="br"><div><span class="lbl c">Team A</span><div class="nd"><span class="chip ">"Alex"</span><span class="chip ">"Sam"</span><span class="chip ">"Priya"</span></div></div><div><span class="lbl c">Team B</span><div class="nd"><span class="chip ">"Sam"</span><span class="chip ">"Jordan"</span><span class="chip ">"Priya"</span></div></div><div><span class="lbl c">Customer</span><div class="nd"><span class="chip ">{"name":"Contoso","city":"Seattle"}</span></div></div></div></div></div>
+
+<h2 id="lists"><span class="ico ico-loop"></span>List functions</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-loop"></span>Each function on the demo lists</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Expression</th><th>Result</th><th>Answers</th></tr></thead><tbody><tr><td><code>first(Team A)</code> / <code>last(Team A)</code></td><td><span class="chip ">"Alex"</span><span class="chip ">"Priya"</span></td><td>first / last item</td></tr><tr><td><code>union(Team A, Team B)</code></td><td><span class="chip ">Alex</span><span class="chip ">Sam</span><span class="chip ">Priya</span><span class="chip ">Jordan</span></td><td>everyone, no duplicates</td></tr><tr><td><code>intersection(Team A, Team B)</code></td><td><span class="chip ">Sam</span><span class="chip ">Priya</span></td><td>who's in both</td></tr><tr><td><code>length(union(…))</code></td><td><span class="chip ">4</span></td><td>how many</td></tr><tr><td><code>contains(Team B, 'Alex')</code></td><td><span class="chip no">false</span></td><td>is it in the list?</td></tr><tr><td><code>take(Team A, 2)</code> / <code>skip(Team A, 1)</code></td><td><span class="chip ">Alex</span><span class="chip ">Sam</span> / <span class="chip ">Sam</span><span class="chip ">Priya</span></td><td>first n / all after n</td></tr><tr><td><code>outputs('Team_A')[0]</code></td><td><span class="chip ">"Alex"</span></td><td>item by position (from 0)</td></tr></tbody></table></div></div>
 <figure class="shot"><img src="../assets/img/pa/l2-arrays-results.webp" alt="Results JSON: First and last Alex ... Priya; Everyone union Alex, Sam, Priya, Jordan; In both intersection Sam, Priya; Head count 4; Is Alex in Team B false; Add a property adds tier Gold; Change a property sets city to London" width="514" height="400" loading="lazy">
-<figcaption>One Compose collects every answer so you can compare them side by side.</figcaption></figure>
-<p>The inputs are two small teams and one customer record:</p>
-<pre><code>Team A = ["Alex", "Sam", "Priya"]
-Team B = ["Sam", "Jordan", "Priya"]
-Customer = {"name": "Contoso", "city": "Seattle"}</code></pre>
+<figcaption>All results from one run.</figcaption></figure>
+<div class="callout"><strong>Tip:</strong> <code>union(list, list)</code> with the same list twice removes duplicates from one list.</div>
 
-<h2 id="lists">List functions</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody>
-<tr><td><code>first(outputs('Team_A'))</code></td><td>Alex</td></tr>
-<tr><td><code>last(outputs('Team_A'))</code></td><td>Priya</td></tr>
-<tr><td><code>union(Team A, Team B)</code></td><td>Alex, Sam, Priya, Jordan: everyone, duplicates removed</td></tr>
-<tr><td><code>intersection(Team A, Team B)</code></td><td>Sam, Priya: only people in both</td></tr>
-<tr><td><code>length(union(...))</code></td><td>4: how many items</td></tr>
-<tr><td><code>contains(outputs('Team_B'), 'Alex')</code></td><td>false: is this value in the list?</td></tr>
-<tr><td><code>take(list, 2)</code> / <code>skip(list, 1)</code></td><td>The first 2 items / everything after the first</td></tr>
-</tbody></table></div>
-<div class="callout"><strong>Tip:</strong> <code>union(list, list)</code> with the same list twice is a quick way to remove duplicates from one list.</div>
-
-<h2 id="objects">Object functions</h2>
+<h2 id="objects"><span class="ico ico-data"></span>Object functions</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Functions return a new record; the original doesn't change</p><div class="fl"><div class="nd"><span class="chip ">{"name":"Contoso","city":"Seattle"}</span></div><div class="ar"></div><div class="br"><div><span class="lbl c">addProperty(…, 'tier', 'Gold')</span><div class="nd"><span class="chip ok">{…,"tier":"Gold"}</span></div></div><div><span class="lbl c">setProperty(…, 'city', 'London')</span><div class="nd"><span class="chip ok">{…,"city":"London"}</span></div></div><div><span class="lbl c">removeProperty(…, 'city')</span><div class="nd"><span class="chip ok">{"name":"Contoso"}</span></div></div></div></div></div>
 <pre><code>addProperty(outputs(&#x27;Customer&#x27;), &#x27;tier&#x27;, &#x27;Gold&#x27;)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>outputs(&#x27;Customer&#x27;)</code></td><td>The record to start from.</td></tr><tr><td><code>&#x27;tier&#x27;</code></td><td>The name of the new field.</td></tr><tr><td><code>&#x27;Gold&#x27;</code></td><td>Its value. The result is a new record with name, city and tier.</td></tr></tbody></table></div>
-<p><code>setProperty(record, 'city', 'London')</code> changes an existing field and <code>removeProperty(record, 'city')</code> drops one. None of them change the original; each returns a new record.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>outputs(&#x27;Customer&#x27;)</code></td><td>The record to start from.</td></tr><tr><td><code>&#x27;tier&#x27;, &#x27;Gold&#x27;</code></td><td>The new field and its value.</td></tr></tbody></table></div>
+
+<h2 id="sort-guid"><span class="ico ico-expr"></span>Sorting, reversing and unique IDs</h2>
+<figure class="shot"><img src="../assets/img/pa/ext-text-arrays.webp" alt="Text_and_arrays output: Request ID from subject 1042, Filled template Hello Alex, request REQ-1042 is ready., uriComponent Contoso%20%26%20Co, guid() a random ID, sort [1, 2, 3], reverse [3, 2, 1]" width="514" height="300" loading="lazy">
+<figcaption>sort, reverse and guid in the demo run.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Expression</th><th>Result</th><th>Use it for</th></tr></thead><tbody><tr><td><code>sort(createArray(3, 1, 2))</code></td><td><span class="chip ">[1, 2, 3]</span></td><td>Order values. For objects give the property: <code>sort(list, 'Title')</code>.</td></tr><tr><td><code>reverse(…)</code></td><td><span class="chip ">[3, 2, 1]</span></td><td>Newest first, after a sort by date</td></tr><tr><td><code>guid()</code></td><td>a new random ID</td><td>A batch ID every row in one run can be traced to</td></tr></tbody></table></div>
+<h3>Watch out</h3><ul><li>Positions start at 0: <code>[0]</code> is the first item.</li><li><code>first()</code> of an empty list is null. Guard with <code>empty()</code> or <code>coalesce()</code>.</li><li>Functions never edit in place. Save the result in a Compose or Set variable.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Array</strong>: an ordered list in square brackets. Positions start at 0, so <code>outputs('Team_A')[0]</code> is Alex.</p>
-<p><strong>Object</strong>: a record of named fields in curly brackets.</p>
-<p><strong>Returns a new value</strong>: functions never edit the input in place. Save the result in a Compose or Set variable to use it.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Add two Compose actions, <em>Team A</em> and <em>Team B</em>, with the JSON arrays above.</li><li>Add Compose actions for <code>first()</code>, <code>union()</code>, <code>intersection()</code>, <code>length()</code> and <code>contains()</code> as in the table.</li><li>Add a Compose <em>Customer</em> with the record above, then one with <code>addProperty()</code> and one with <code>setProperty()</code>.</li><li>Optional: add a final Compose named <em>Results</em> that builds an object of all outputs, so one screen shows every answer.</li><li>Test and open <strong>Results</strong> &gt; <strong>Show raw outputs</strong>.</li></ol></div></details>
-
-<h2 id="sort-guid">Sorting, reversing and unique IDs</h2>
-<figure class="shot"><img src="../assets/img/pa/ext-text-arrays.webp" alt="Text_and_arrays output: Request ID from subject 1042, Filled template Hello Alex, request REQ-1042 is ready., uriComponent Contoso%20%26%20Co, guid() a random ID, sort [1, 2, 3], reverse [3, 2, 1]" width="514" height="300" loading="lazy">
-<figcaption>sort, reverse and guid next to the text examples from the same run.</figcaption></figure>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Expression</th><th>Result</th><th>Use it for</th></tr></thead><tbody>
-<tr><td><code>sort(createArray(3, 1, 2))</code></td><td>[1, 2, 3]</td><td>Putting values in order. For objects, give the property: <code>sort(body('Get_items')?['value'], 'Title')</code>.</td></tr>
-<tr><td><code>reverse(...)</code></td><td>[3, 2, 1]</td><td>Newest first, after a sort by date.</td></tr>
-<tr><td><code>guid()</code></td><td>A new random ID each time</td><td>A batch ID or reference that must be unique, so every row written in one run can be traced back to it.</td></tr>
-</tbody></table></div>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Calling <code>first()</code> on an empty list returns null, and the next <code>?['field']</code> returns null too. Check <code>empty()</code> before you rely on it.</li>
-<li><code>contains()</code> on a list of objects compares whole objects, not one field. Use Filter array to search by a field.</li>
-<li><code>addProperty()</code> fails if the field already exists. Use <code>setProperty()</code> instead.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (collection and object functions)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/expression-cookbook">Expression cookbook for cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference</a></li></ul>
+<div class="layer-body"><p><strong>Array</strong>: an ordered list in <code>[ ]</code>.</p><p><strong>Object</strong>: named fields in <code>{ }</code>.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Looping to check whether a value is in a list. Use <code>contains()</code>.</li><li>Expecting <code>addProperty</code> to change the original record.</li><li>Using <code>addProperty</code> on a field that exists (it fails). Use <code>setProperty</code>.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (collection and object functions)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/expression-cookbook">Expression cookbook for cloud flows</a></li></ul>
       </div>
 
       <div class="pager"><a href="parse-json.html">← Parse JSON and schemas</a><a href="dates-and-time-zones.html">Dates, times and time zones →</a></div>
@@ -110,7 +84,7 @@ Customer = {"name": "Contoso", "city": "Seattle"}</code></pre>
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#results">All results in one view</a></li><li><a href="#lists">List functions</a></li><li><a href="#objects">Object functions</a></li><li><a href="#sort-guid">Sorting, reversing and unique IDs</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#inputs">The demo inputs</a></li><li><a href="#lists">List functions</a></li><li><a href="#objects">Object functions</a></li><li><a href="#sort-guid">Sorting, reversing and unique IDs</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

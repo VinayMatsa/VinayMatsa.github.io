@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Text functions: split, substring, replace | Vinay Matsa</title>
-<meta name="description" content="Cut, search, clean and rebuild text: email addresses, invoice numbers, names and lists.">
+<meta name="description" content="Cut, search, clean and rebuild text: email addresses, invoice numbers, names, IDs from subjects, templates and safe URLs.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Text functions: split, substring, replace">
-<meta property="og:description" content="Cut, search, clean and rebuild text: email addresses, invoice numbers, names and lists.">
+<meta property="og:description" content="Cut, search, clean and rebuild text: email addresses, invoice numbers, names, IDs from subjects, templates and safe URLs.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,60 +49,37 @@
       </div>
 
       <div class="prose">
-<p>Text arrives messy: lists in one cell, codes with parts you need, extra spaces, inconsistent capitals. Six functions handle most of it.</p>
+<p>Text arrives messy: lists in one cell, codes with parts you need, extra spaces, inconsistent capitals. A handful of functions handles most of it.</p>
 
-<h2 id="results">All results in one view</h2>
+<h2 id="overview"><span class="ico ico-expr"></span>The text toolbox</h2>
+<div class="cards"><div><strong>What</strong>Functions that cut text into parts, take part of it, swap words and clean it up.</div><div><strong>Why</strong>Emails, subjects, codes and names rarely arrive in the shape you need.</div><div><strong>Demo</strong>An email address, an invoice code, a sentence, a messy name and a subject line.</div></div>
 <figure class="shot"><img src="../assets/img/pa/l2-text-results.webp" alt="Results JSON: Split into array Contoso, Fabrikam, Northwind; User name alex.johnson; Domain contoso.com; Invoice year 2026; Invoice number 0042; Replace text Order 101 is on time; Clean and upper CONTOSO LTD; Capitalise name Alex" width="514" height="264" loading="lazy">
-<figcaption>Each line is one function applied to sample text.</figcaption></figure>
+<figcaption>All results from one run.</figcaption></figure>
 
-<h2 id="split">split: text into a list</h2>
-<pre><code>first(split(&#x27;alex.johnson@contoso.com&#x27;, &#x27;@&#x27;))</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>split(text, &#x27;@&#x27;)</code></td><td>Cuts the text at every @, giving <em>["alex.johnson", "contoso.com"]</em>.</td></tr><tr><td><code>first(...)</code></td><td>The part before the @: <em>alex.johnson</em>. Use <code>last()</code> for the domain.</td></tr></tbody></table></div>
-<p>The same idea turns <em>Contoso; Fabrikam; Northwind</em> into a three-item list with <code>split(text, '; ')</code>. Include the space in the separator, or every item after the first starts with one.</p>
+<h2 id="split"><span class="ico ico-expr"></span>split: text into a list</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Splitting an email address</p><div class="fl"><div class="nd"><span class="chip ">"alex.johnson@contoso.com"</span></div><div class="ar"></div><div class="nd"><code>split(…, '@')</code> → <span class="chip ">["alex.johnson", "contoso.com"]</span></div><div class="ar"></div><div class="br"><div><span class="lbl c">first(…)</span><div class="nd"><span class="chip ok">"alex.johnson"</span></div></div><div><span class="lbl c">last(…)</span><div class="nd"><span class="chip ok">"contoso.com"</span></div></div></div></div></div>
+<p>The same idea turns <em>Contoso; Fabrikam; Northwind</em> into a list with <code>split(text, '; ')</code>. Include the space in the separator, or every item after the first starts with one.</p>
 
-<h2 id="parts">Taking part of the text</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Expression</th><th>Result</th></tr></thead><tbody>
-<tr><td><code>substring('INV-2026-0042', 4, 4)</code></td><td>2026: start at position 4, take 4 characters</td></tr>
-<tr><td><code>slice('INV-2026-0042', -4)</code></td><td>0042: the last 4 characters</td></tr>
-<tr><td><code>indexOf('INV-2026-0042', '-')</code></td><td>3: where the first dash is</td></tr>
-<tr><td><code>replace('Order 101 is late', 'late', 'on time')</code></td><td>Order 101 is on time</td></tr>
-<tr><td><code>toUpper(trim('   contoso ltd  '))</code></td><td>CONTOSO LTD: spaces removed, then capitals</td></tr>
-</tbody></table></div>
-<div class="callout"><strong>Tip:</strong> <code>substring</code> fails if you ask for more characters than exist. <code>slice</code> just stops at the end, which makes it safer for text of unknown length.</div>
+<h2 id="parts"><span class="ico ico-expr"></span>Taking part of the text</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Positions in INV-2026-0042 (counted from 0)</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr></thead><tbody><tr><td><span class="chip ">I</span></td><td><span class="chip ">N</span></td><td><span class="chip ">V</span></td><td><span class="chip ">-</span></td><td><span class="chip ">2</span></td><td><span class="chip ">0</span></td><td><span class="chip ">2</span></td><td><span class="chip ">6</span></td><td><span class="chip ">-</span></td><td><span class="chip ">0</span></td><td><span class="chip ">0</span></td><td><span class="chip ">4</span></td><td><span class="chip ">2</span></td></tr></tbody></table></div><p class="viz-note"><code>substring(text, 4, 4)</code> starts at position 4 and takes 4 characters: <em>2026</em>.</p></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Expression</th><th>Result</th><th>Note</th></tr></thead><tbody><tr><td><code>substring('INV-2026-0042', 4, 4)</code></td><td><span class="chip ">2026</span></td><td>start 4, length 4</td></tr><tr><td><code>slice('INV-2026-0042', -4)</code></td><td><span class="chip ">0042</span></td><td>the last 4; never fails on short text</td></tr><tr><td><code>indexOf('INV-2026-0042', '-')</code></td><td><span class="chip ">3</span></td><td>where the first dash is</td></tr><tr><td><code>replace('Order 101 is late', 'late', 'on time')</code></td><td><span class="chip ">Order 101 is on time</span></td><td>case-sensitive</td></tr><tr><td><code>toUpper(trim('   contoso ltd  '))</code></td><td><span class="chip ">CONTOSO LTD</span></td><td>trim spaces, then capitals</td></tr></tbody></table></div>
 
-<h2 id="capitalise">Capitalise a name</h2>
-<pre><code>concat(toUpper(substring(&#x27;alex&#x27;, 0, 1)), substring(&#x27;alex&#x27;, 1))</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>substring(&#x27;alex&#x27;, 0, 1)</code></td><td>The first letter: <em>a</em>.</td></tr><tr><td><code>toUpper(...)</code></td><td>Made capital: <em>A</em>.</td></tr><tr><td><code>substring(&#x27;alex&#x27;, 1)</code></td><td>Everything from position 1: <em>lex</em>.</td></tr><tr><td><code>concat(...)</code></td><td>Joined back together: <em>Alex</em>.</td></tr></tbody></table></div>
+<h2 id="capitalise"><span class="ico ico-expr"></span>Capitalise a name</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Capitalising a name</p><div class="fl"><div class="nd"><code>substring('alex', 0, 1)</code> → <span class="chip ">a</span></div><div class="ar"></div><div class="nd"><code>toUpper(…)</code> → <span class="chip ">A</span></div><div class="ar"></div><div class="nd"><code>substring('alex', 1)</code> → <span class="chip ">lex</span></div><div class="ar"></div><div class="nd ok"><code>concat(…)</code> → <span class="chip ok">Alex</span></div></div></div>
+
+<h2 id="templates"><span class="ico ico-data"></span>IDs from a subject, templates and safe URLs</h2>
+<figure class="shot"><img src="../assets/img/pa/ext-text-arrays.webp" alt="Text_and_arrays output: Request ID from subject 1042, Filled template Hello Alex, request REQ-1042 is ready., uriComponent Contoso%20%26%20Co" width="514" height="300" loading="lazy">
+<figcaption>The three jobs in the demo run.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Pull 1042 out of "RE: Request REQ-1042 needs review"</p><div class="fl"><div class="nd"><code>split(subject, 'REQ-')</code> → <span class="chip ">["RE: Request ", "1042 needs review"]</span></div><div class="ar"></div><div class="nd"><code>last(…)</code> → <span class="chip ">"1042 needs review"</span></div><div class="ar"></div><div class="nd"><code>split(…, ' ')</code> → <span class="chip ">["1042", "needs", "review"]</span></div><div class="ar"></div><div class="nd ok"><code>first(…)</code> → <span class="chip ok">"1042"</span></div></div></div>
+<pre><code>replace(replace(&#x27;Hello ~Name~, request ~ID~ is ready.&#x27;, &#x27;~Name~&#x27;, &#x27;Alex&#x27;), &#x27;~ID~&#x27;, &#x27;REQ-1042&#x27;)</code></pre>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>inner replace</code></td><td>Swaps <code>~Name~</code> for the name.</td></tr><tr><td><code>outer replace</code></td><td>Swaps <code>~ID~</code> for the ID: <em>Hello Alex, request REQ-1042 is ready.</em></td></tr></tbody></table></div>
+<p><code>uriComponent('Contoso &amp; Co')</code> returns <em>Contoso%20%26%20Co</em>, so spaces and <code>&amp;</code> don't break a link or a filter. <code>decodeUriComponent()</code> turns it back.</p>
+<h3>Watch out</h3><ul><li>Positions start at 0. <code>substring(text, 1, 3)</code> skips the first character.</li><li><code>substring</code> fails past the end of the text; <code>slice</code> doesn't.</li><li><code>replace</code> and <code>indexOf</code> are case-sensitive. Use <code>toLower()</code> on both sides.</li></ul>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>String</strong>: another word for text.</p>
-<p><strong>Position</strong>: characters are counted from 0. In <em>INV-2026</em>, I is 0 and the dash is 3.</p>
-<p><strong>Case-sensitive</strong>: <code>replace</code> and <code>indexOf</code> treat <em>Late</em> and <em>late</em> as different. Use <code>toLower()</code> on both sides when case should not matter.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Add a Compose <em>Email</em> with <em>alex.johnson@contoso.com</em>, then two Compose actions with <code>first(split(...))</code> and <code>last(split(...))</code>.</li><li>Add Compose actions for the invoice examples using <code>substring()</code> and <code>slice()</code>.</li><li>Add <code>replace()</code>, <code>trim()</code> + <code>toUpper()</code>, and the capitalise formula.</li><li>Test. Then change the email to one without an @ and see what <code>last(split())</code> returns (the whole text), and think about how you would guard against it.</li></ol></div></details>
-
-<h2 id="templates">Templates, IDs from a subject, and safe URLs</h2>
-<p>Three text jobs that come up in almost every email-driven flow. The demo's subject is <em>RE: Request REQ-1042 needs review</em>.</p>
-<figure class="shot"><img src="../assets/img/pa/ext-text-arrays.webp" alt="Text_and_arrays output: Request ID from subject 1042, Filled template Hello Alex, request REQ-1042 is ready., uriComponent Contoso%20%26%20Co" width="514" height="300" loading="lazy">
-<figcaption>The ID, the filled template and the encoded text from one run.</figcaption></figure>
-<p><strong>Pull an ID out of a subject.</strong> Split on the prefix, take what comes after it, then split on the space and keep the first part:</p>
-<pre><code>first(split(last(split(outputs(&#x27;Subject&#x27;), &#x27;REQ-&#x27;)), &#x27; &#x27;))</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>split(outputs(&#x27;Subject&#x27;), &#x27;REQ-&#x27;)</code></td><td>Cuts the subject at REQ-: <em>RE: Request </em> and <em>1042 needs review</em>.</td></tr><tr><td><code>last(...)</code></td><td>Keeps the part after the prefix.</td></tr><tr><td><code>split(..., &#x27; &#x27;)</code></td><td>Cuts that at spaces.</td></tr><tr><td><code>first(...)</code></td><td>Keeps <strong>1042</strong>. Works whether the subject starts with RE:, FW: or nothing.</td></tr></tbody></table></div>
-<p><strong>Fill a template.</strong> Keep the message text with placeholders like <code>~Name~</code> in one place (a Compose, an environment variable or a settings list), then replace each token:</p>
-<pre><code>replace(replace(&#x27;Hello ~Name~, request ~ID~ is ready.&#x27;, &#x27;~Name~&#x27;, &#x27;Alex&#x27;), &#x27;~ID~&#x27;, &#x27;REQ-1042&#x27;)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>inner replace</code></td><td>Swaps ~Name~ for the person's name.</td></tr><tr><td><code>outer replace</code></td><td>Swaps ~ID~ for the request ID.</td></tr><tr><td><code>~...~</code></td><td>Any marker that will never appear in normal text works. Changing the wording later doesn't touch the flow logic.</td></tr></tbody></table></div>
-<p><strong>Make text safe in a URL.</strong> <code>uriComponent('Contoso &amp; Co')</code> returns <code>Contoso%20%26%20Co</code>, so spaces and &amp; don't break a link or a filter. <code>decodeUriComponent()</code> turns it back.</p>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Counting positions from 1. <code>substring(text, 1, 3)</code> skips the first character.</li>
-<li>Using <code>substring</code> with a fixed length on text that can be shorter. Check <code>length()</code> first or use <code>slice</code>.</li>
-<li>Splitting on <code>','</code> when the data has <code>', '</code>. Every item but the first keeps a leading space; wrap with <code>trim()</code> in a Select.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (string functions)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/expression-cookbook">Expression cookbook for cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/workflow-definition-language-functions-reference">Workflow expression functions reference</a></li></ul>
+<div class="layer-body"><p><strong>String</strong>: another word for text.</p><p><strong>Position</strong>: characters are counted from 0.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Splitting on <code>','</code> when the data has <code>', '</code>: items keep a leading space.</li><li>A fixed-length <code>substring</code> on text that can be shorter.</li><li>Not guarding <code>last(split(…))</code> when the separator is missing: it returns the whole text.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/azure/logic-apps/expression-functions-reference">Reference guide to functions in expressions (string functions)</a></li><li><a href="https://learn.microsoft.com/en-us/power-automate/expression-cookbook">Expression cookbook for cloud flows</a></li></ul>
       </div>
 
       <div class="pager"><a href="dates-and-time-zones.html">← Dates, times and time zones</a><a href="handling-nulls.html">Handling nulls: coalesce, empty and ? →</a></div>
@@ -111,7 +88,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#results">All results in one view</a></li><li><a href="#split">split: text into a list</a></li><li><a href="#parts">Taking part of the text</a></li><li><a href="#capitalise">Capitalise a name</a></li><li><a href="#templates">Templates, IDs from a subject, and safe URLs</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#overview">The text toolbox</a></li><li><a href="#split">split: text into a list</a></li><li><a href="#parts">Taking part of the text</a></li><li><a href="#capitalise">Capitalise a name</a></li><li><a href="#templates">IDs from a subject, templates and safe URLs</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

@@ -45,7 +45,7 @@
         <span class="mini" aria-hidden="true">VM</span>
         <strong>Vinay Matsa</strong>
         <time datetime="2026-11-21">21 November 2026</time>
-        <span>15 min read</span>
+        <span>17 min read</span>
       </div>
 
       <div class="prose">
@@ -53,15 +53,15 @@
 
 <h2 id="root">Start from the root: deciding and repeating</h2>
 <p>A flow runs its actions top to bottom. <strong>Control actions</strong> change that order: they choose a path, repeat a set of actions, or run things side by side. Each control action is a container: the actions inside it only run when the container says so.</p>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Control</th><th>Question it answers</th><th>Example</th></tr></thead><tbody>
-<tr><td>Condition</td><td>Yes or no?</td><td>Is the amount over 1,000?</td></tr>
-<tr><td>Switch</td><td>Which of several exact values?</td><td>North, South or West team?</td></tr>
-<tr><td>Apply to each</td><td>Do this for every item in a list</td><td>Check every order</td></tr>
-<tr><td>Do until</td><td>Repeat until something becomes true</td><td>Poll until a job finishes</td></tr>
-<tr><td>Parallel branches</td><td>Do these at the same time</td><td>Notify two teams at once</td></tr>
-<tr><td>Scope</td><td>Treat these as one group</td><td>Try and Catch blocks</td></tr>
-<tr><td>Terminate</td><td>Stop the run now, with this status</td><td>Fail with a clear message</td></tr>
-</tbody></table></div>
+<div class="viz"><p class="viz-title">The control actions at a glance</p><div class="cards">
+<div><strong><span class="ico ico-cond"></span>Condition</strong>Yes or no? <em>Is the amount over 1,000?</em></div>
+<div><strong><span class="ico ico-switch"></span>Switch</strong>Which exact value? <em>North, South or West team?</em></div>
+<div><strong><span class="ico ico-loop"></span>Apply to each</strong>Do this for every item. <em>Check every order.</em></div>
+<div><strong><span class="ico ico-until"></span>Do until</strong>Repeat until true. <em>Poll until a job finishes.</em></div>
+<div><strong><span class="ico ico-par"></span>Parallel branches</strong>Do these at the same time. <em>Notify two teams.</em></div>
+<div><strong><span class="ico ico-scope"></span>Scope</strong>Treat these as one group. <em>Try and Catch.</em></div>
+<div><strong><span class="ico ico-stop"></span>Terminate</strong>Stop the run now. <em>Fail with a clear message.</em></div>
+</div></div>
 <p>Two more ideas run through the whole guide. A <strong>condition</strong> is really an <strong>expression</strong> that returns <code>true</code> or <code>false</code>; the designer's rows are just a friendly way to write it. And loops cost actions: every action inside a loop runs once per item.</p>
 
 <h2 id="data">The demo data</h2>
@@ -86,7 +86,7 @@
 <h2 id="condition">Condition in depth</h2>
 <h3>Rows and operators</h3>
 <p>A Condition compares a value on the left with a value on the right using an operator. The designer offers twelve operators:</p>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Operator</th><th>Works on</th><th>Watch out for</th></tr></thead><tbody>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-cond"></span>Operator</th><th><span class="ico ico-data"></span>Works on</th><th><span class="ico ico-warn"></span>Watch out for</th></tr></thead><tbody>
 <tr><td>is equal to / is not equal to</td><td>Text, numbers, booleans, null</td><td>Text comparison is case-sensitive: <em>High</em> is not <em>high</em>.</td></tr>
 <tr><td>is greater than / is greater or equal to</td><td>Numbers, dates as ISO text</td><td>Text that looks like a number is compared as text. Convert with <code>float()</code> or <code>int()</code>.</td></tr>
 <tr><td>is less than / is less or equal to</td><td>Numbers, dates as ISO text</td><td>Same as above.</td></tr>
@@ -99,6 +99,21 @@
 <p>Several rows are joined with <strong>And</strong> (all must be true) or <strong>Or</strong> (any can be true). For mixed logic, add a <strong>group</strong>: a set of rows with its own And/Or, which counts as one row of its parent. The demo's approval rule is <em>amount over 1,000, <strong>or</strong> (priority High <strong>and</strong> amount at least 500)</em>:</p>
 <figure class="shot"><img src="../assets/img/pa/cs-condition-groups.webp" alt="Condition editor: Or at the top; first row float(...) is greater than 1000; then an And group with priority is equal to High and float(...) is greater or equal to 500" width="615" height="420" loading="lazy">
 <figcaption>An Or whose second row is an And group. Empty placeholder rows are just the editor offering space for more.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>How the rule decides, for each order</p>
+<div class="fl">
+<div class="nd act"><span class="ico ico-loop"></span>Current order from <strong>Each order</strong></div><div class="ar"></div>
+<div class="nd dec"><span class="ico ico-cond"></span>amount &gt; 1000 <strong>or</strong> (priority = High <strong>and</strong> amount &ge; 500)?</div><div class="ar"></div>
+<div class="br"><div><span class="lbl t">True</span><div class="nd ok">Append id to <strong>NeedApproval</strong></div></div>
+<div><span class="lbl f">False</span><div class="nd mute">Nothing (empty branch)</div></div></div>
+</div></div>
+<div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Order</th><th><span class="ico ico-data"></span>amount → float()</th><th>priority</th><th>&gt; 1000?</th><th>High and &ge; 500?</th><th><span class="ico ico-cond"></span>Result</th></tr></thead><tbody>
+<tr><td>1</td><td><code>250</code></td><td><code>High</code></td><td><span class="chip no">false</span></td><td><span class="chip no">false</span></td><td><span class="lbl f">False</span></td></tr>
+<tr><td>2</td><td><code>"1200"</code> → <code>1200</code></td><td><code>null</code></td><td><span class="chip ok">true</span></td><td><span class="chip no">false</span></td><td><span class="lbl t">True</span></td></tr>
+<tr><td>3</td><td><code>80</code></td><td><em>missing</em></td><td><span class="chip no">false</span></td><td><span class="chip no">false</span></td><td><span class="lbl f">False</span></td></tr>
+<tr><td>4</td><td><code>4500</code></td><td><code>Low</code></td><td><span class="chip ok">true</span></td><td><span class="chip no">false</span></td><td><span class="lbl t">True</span></td></tr>
+<tr><td>5</td><td><code>600</code></td><td><code>High</code></td><td><span class="chip no">false</span></td><td><span class="chip ok">true</span></td><td><span class="lbl t">True</span></td></tr>
+<tr><td>6</td><td><code>640</code></td><td><code>Low</code></td><td><span class="chip no">false</span></td><td><span class="chip no">false</span></td><td><span class="lbl f">False</span></td></tr>
+</tbody></table></div>
 <p>That's why order 5 (600, High) needs approval even though it's under 1,000, and order 1 (250, High) doesn't.</p>
 
 <h3>The same condition as an expression</h3>
@@ -111,7 +126,7 @@
 <p>Expressions are better than rows when the logic is long, when you need functions on both sides, or when you want to copy the rule into another action. Rows are easier for other people to read. Pick one style per condition.</p>
 
 <h3>Functions you'll use in conditions</h3>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Function</th><th>Returns true when</th><th>Example</th></tr></thead><tbody>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Function</th><th><span class="ico ico-check"></span>Returns true when</th><th>Example</th></tr></thead><tbody>
 <tr><td><code>equals(a, b)</code></td><td>a and b are the same value and type</td><td><code>equals(variables('Status'), 'Approved')</code></td></tr>
 <tr><td><code>not(x)</code></td><td>x is false</td><td><code>not(empty(...))</code></td></tr>
 <tr><td><code>and(...)</code>, <code>or(...)</code></td><td>all / any arguments are true</td><td>see above</td></tr>
@@ -141,6 +156,25 @@
 <p>Switch takes <strong>one value</strong> and runs the case whose value matches exactly. If none matches, it runs <strong>Default</strong>. The demo switches on the region, normalised first:</p>
 <pre><code>toLower(trim(items(&#x27;Each_order&#x27;)?[&#x27;region&#x27;]))</code></pre>
 <div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>trim(...)</code></td><td>Removes the trailing space in <em>West </em>.</td></tr><tr><td><code>toLower(...)</code></td><td>Turns <em>South</em>, <em>south</em> and <em>SOUTH</em> into <em>south</em>, so the cases can all be lower case.</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-switch"></span>Each order's region, cleaned up and matched</p>
+<div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Order</th><th><span class="ico ico-data"></span>Raw value</th><th><span class="ico ico-expr"></span>After trim() and toLower()</th><th><span class="ico ico-switch"></span>Case that runs</th></tr></thead><tbody>
+<tr><td>1</td><td><span class="chip">"North"</span></td><td><span class="chip">"north"</span></td><td><span class="lbl c">north</span></td></tr>
+<tr><td>2</td><td><span class="chip">"south"</span></td><td><span class="chip">"south"</span></td><td><span class="lbl c">south</span></td></tr>
+<tr><td>3</td><td><span class="chip">"East"</span></td><td><span class="chip">"east"</span></td><td><span class="lbl d">Default</span></td></tr>
+<tr><td>4</td><td><span class="chip warn">"West "</span> <small>trailing space</small></td><td><span class="chip">"west"</span></td><td><span class="lbl c">west</span></td></tr>
+<tr><td>5</td><td><span class="chip">"North"</span></td><td><span class="chip">"north"</span></td><td><span class="lbl c">north</span></td></tr>
+<tr><td>6</td><td><span class="chip">"Central"</span></td><td><span class="chip">"central"</span></td><td><span class="lbl d">Default</span></td></tr>
+</tbody></table></div>
+<div class="fl" style="margin-top:16px">
+<div class="nd dec"><span class="ico ico-switch"></span>Team by region: <code>toLower(trim(region))</code></div><div class="ar"></div>
+<div class="br">
+<div><span class="lbl c">north</span><div class="nd">Orders <span class="chip">1</span><span class="chip">5</span></div></div>
+<div><span class="lbl c">south</span><div class="nd">Order <span class="chip">2</span></div></div>
+<div><span class="lbl c">west</span><div class="nd">Order <span class="chip">4</span></div></div>
+<div><span class="lbl d">Default</span><div class="nd mute">Orders <span class="chip">3</span><span class="chip">6</span></div></div>
+</div></div>
+<p class="viz-note">Without <code>trim()</code>, order 4 (<em>West</em> with a trailing space) would fall into Default. Without <code>toLower()</code>, orders 1 and 5 would miss the lower-case <em>north</em> case.</p>
+</div>
 <figure class="shot"><img src="../assets/img/pa/cs-iteration-run.webp" alt="Run view of Each order at iteration 2 of 6: the Needs approval condition took the True branch and ran Add to approval list; Team by region ran Case south and its South team action, while Default&#x27;s Central team was skipped" width="812" height="470" loading="lazy">
 <figcaption>Iteration 2: the text amount 1200 still counted as over 1,000, and lower-case south matched Case south. Default shows a grey skipped icon.</figcaption></figure>
 <ul>
@@ -151,7 +185,7 @@
 <li><strong>Always use Default</strong>, even if it only logs the unexpected value. Order 6 (Central) shows why.</li>
 <li><strong>Several values, same actions?</strong> Switch can't share a case. Normalise the value first (for example map <em>S</em> and <em>South</em> to <em>south</em> with an <code>if()</code>), or use a Condition with <code>contains(createArray('a', 'b'), value)</code>.</li>
 </ul>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Need</th><th>Use</th></tr></thead><tbody>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Need</th><th><span class="ico ico-check"></span>Use</th></tr></thead><tbody>
 <tr><td>Yes/no, ranges, several fields, and/or logic</td><td>Condition</td></tr>
 <tr><td>One field, several known exact values</td><td>Switch</td></tr>
 <tr><td>One field, many values that map to data (a team email, a cost centre)</td><td>A lookup object or settings list, not a Switch</td></tr>
@@ -163,7 +197,7 @@
 <p>Apply to each takes an <strong>array</strong> and runs its actions once per item. If you pick a field that belongs to an array item (for example a column from <em>Get items</em>), the designer wraps the action in an Apply to each for you. Giving it a single object instead of an array fails with an error saying it expected an array.</p>
 
 <h3>The current item: items() and item()</h3>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Function</th><th>Where</th><th>Returns</th></tr></thead><tbody>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-expr"></span>Function</th><th>Where</th><th>Returns</th></tr></thead><tbody>
 <tr><td><code>items('Each_order')</code></td><td>Inside the named Apply to each (or nested inside it)</td><td>That loop's current item. Use the loop's name, with spaces as underscores.</td></tr>
 <tr><td><code>item()</code></td><td>Inside Select, Filter array and similar data operations</td><td>The item that operation is currently processing.</td></tr>
 </tbody></table></div>
@@ -175,6 +209,17 @@
 <h3>Concurrency: running iterations at the same time</h3>
 <figure class="shot"><img src="../assets/img/pa/cs-concurrency.webp" alt="Settings of Score in parallel: Concurrency control On, Degree of parallelism 5" width="620" height="215" loading="lazy">
 <figcaption>Concurrency control is in the loop's Settings tab.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>Six iterations, sequential vs concurrency 5 (illustration)</p>
+<div class="tl">
+<div class="row"><span>Sequential</span><span class="s" style="grid-column:2"></span><span class="s" style="grid-column:3"></span><span class="s" style="grid-column:4"></span><span class="s" style="grid-column:5"></span><span class="s" style="grid-column:6"></span><span class="s" style="grid-column:7"></span></div>
+<div class="row"><span>Concurrency 5</span><span class="s alt" style="grid-column:2"></span><span class="s alt" style="grid-column:3"></span></div>
+<div class="row"><span></span><span class="s alt" style="grid-column:2"></span></div>
+<div class="row"><span></span><span class="s alt" style="grid-column:2"></span></div>
+<div class="row"><span></span><span class="s alt" style="grid-column:2"></span></div>
+<div class="row"><span></span><span class="s alt" style="grid-column:2"></span></div>
+</div>
+<p class="viz-note">Each block is one iteration. Sequential runs them one after another; with a degree of 5, five start together and the sixth starts when a slot frees up. Real timing depends on the actions inside.</p></div>
+
 <ul>
 <li>By default iterations run <strong>one at a time</strong>, in order. Turning on concurrency control lets them run in parallel, with a degree from 1 to 50.</li>
 <li>Higher isn't always faster: splitting work and the speed of the system you call add overhead, and connectors throttle.</li>
@@ -188,6 +233,13 @@
 <li><em>Routes</em> holds six lines, one per order.</li>
 <li><em>Scores</em> came from a loop running five iterations at a time, and the array is still in item order (500, 1200, 80, 4500, 1200, 640): each High-priority amount doubled.</li>
 </ul>
+<div class="viz"><p class="viz-title"><span class="ico ico-loop"></span>Referencing a loop's action from after the loop</p>
+<div class="fl"><div class="br">
+<div><span class="lbl d">Iteration 1</span><div class="nd">Route → <span class="chip">"Order 1: auto…"</span></div></div>
+<div><span class="lbl d">Iteration 2</span><div class="nd">Route → <span class="chip">"Order 2: approval…"</span></div></div>
+<div><span class="lbl d">… 6</span><div class="nd">Route → <span class="chip">"Order 6: auto…"</span></div></div>
+</div><div class="ar"></div>
+<div class="nd ok">After the loop: <code>outputs('Route')</code> = <code>[ line 1, line 2, … line 6 ]</code></div></div></div>
 <p>That's safe with concurrency, needs no Initialize or Append actions, and saves one action per item. When you only need to <em>transform</em> each item, a <strong>Select</strong> outside any loop is better still (see Select, Filter array and Join in Level 2).</p>
 
 <h3>Limits and cost</h3>
@@ -205,11 +257,11 @@ Apply to each (over the filtered result only)</code></pre>
 
 <h2 id="do-until">Do until in depth</h2>
 <p>Do until repeats its actions <strong>until a condition becomes true</strong>. The condition is checked <em>after</em> each pass, so the actions always run at least once. The demo adds order amounts until the running total reaches 3,000:</p>
-<ul>
-<li>Pass 1: 250. Pass 2: 1,450. Pass 3: 1,530. Pass 4: 6,030, and the condition <code>greaterOrEquals(variables('Running'), 3000)</code> is true, so the loop stops.</li>
-<li>The summary shows <em>Orders read by Do until</em> 4, <em>Running total</em> 6030, <em>Stopped by its limit</em> false.</li>
-</ul>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Setting</th><th>Default</th><th>Meaning</th></tr></thead><tbody>
+<div class="viz"><p class="viz-title"><span class="ico ico-until"></span>Do until, pass by pass: each pass reads the next order and stops at 3,000</p>
+<div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Pass</th><th>Adds</th><th>Running</th><th class="hide-sm" style="min-width:130px">Progress to 3,000</th><th><span class="ico ico-cond"></span>Check</th></tr></thead><tbody><tr><td>1</td><td><code>250</code></td><td><code>250</code></td><td class="hide-sm"><div class="bar"><i style="width:8.3%"></i></div></td><td><span class="chip no">false → repeat</span></td></tr><tr><td>2</td><td><code>1200</code></td><td><code>1450</code></td><td class="hide-sm"><div class="bar"><i style="width:48.3%"></i></div></td><td><span class="chip no">false → repeat</span></td></tr><tr><td>3</td><td><code>80</code></td><td><code>1530</code></td><td class="hide-sm"><div class="bar"><i style="width:51%"></i></div></td><td><span class="chip no">false → repeat</span></td></tr><tr><td>4</td><td><code>4500</code></td><td><code>6030</code></td><td class="hide-sm"><div class="bar done"><i style="width:100%"></i></div></td><td><span class="chip ok">true → stop</span></td></tr></tbody></table></div>
+<p class="viz-note">The run view shows this loop as <em>1 of 4</em> to <em>4 of 4</em>. Count was 10, so the condition, not the limit, ended it: the summary's <em>Stopped by its limit</em> is false.</p></div>
+
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-until"></span>Setting</th><th><span class="ico ico-clock"></span>Default</th><th>Meaning</th></tr></thead><tbody>
 <tr><td>Count</td><td>60 (maximum 5,000)</td><td>Most passes allowed</td></tr>
 <tr><td>Timeout</td><td>PT1H (one hour)</td><td>Longest the loop may run, as an ISO 8601 duration</td></tr>
 </tbody></table></div>
@@ -235,15 +287,15 @@ Apply to each (over the filtered result only)</code></pre>
 </ul>
 
 <h2 id="choose">Which one to use</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Situation</th><th>Best choice</th></tr></thead><tbody>
-<tr><td>Do something only sometimes</td><td>Condition</td></tr>
-<tr><td>Choose a value, not an action</td><td><code>if()</code> in the field</td></tr>
-<tr><td>Route by one field's exact value</td><td>Switch (with Default)</td></tr>
-<tr><td>Same action for every item</td><td>Apply to each</td></tr>
-<tr><td>Transform every item into a new shape</td><td>Select (no loop)</td></tr>
-<tr><td>Keep only some items</td><td>Filter array (no loop)</td></tr>
-<tr><td>Repeat until something is true, or wait for something</td><td>Do until (with a Delay and a limit check)</td></tr>
-<tr><td>Independent work at the same time</td><td>Parallel branches, or loop concurrency</td></tr>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Situation</th><th><span class="ico ico-check"></span>Best choice</th></tr></thead><tbody>
+<tr><td>Do something only sometimes</td><td><span class="ico ico-cond"></span>Condition</td></tr>
+<tr><td>Choose a value, not an action</td><td><span class="ico ico-expr"></span><code>if()</code> in the field</td></tr>
+<tr><td>Route by one field's exact value</td><td><span class="ico ico-switch"></span>Switch (with Default)</td></tr>
+<tr><td>Same action for every item</td><td><span class="ico ico-loop"></span>Apply to each</td></tr>
+<tr><td>Transform every item into a new shape</td><td><span class="ico ico-data"></span>Select (no loop)</td></tr>
+<tr><td>Keep only some items</td><td><span class="ico ico-data"></span>Filter array (no loop)</td></tr>
+<tr><td>Repeat until something is true, or wait for something</td><td><span class="ico ico-until"></span>Do until (with a Delay and a limit check)</td></tr>
+<tr><td>Independent work at the same time</td><td><span class="ico ico-par"></span>Parallel branches, or loop concurrency</td></tr>
 </tbody></table></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>

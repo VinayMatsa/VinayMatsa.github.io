@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>8 · Test results | Vinay Matsa</title>
+<meta name="description" content="Eight scenarios run in the Copilot Studio test chat, with screenshots, expected and actual results, and one real failure explained.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="8 · Test results">
+<meta property="og:description" content="Eight scenarios run in the Copilot Studio test chat, with screenshots, expected and actual results, and one real failure explained.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="../#projects">Projects</a> / <a href="index.html">Vink Customer Care Agent</a></p>
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Technical specification</li>
+        <li>Vink Customer Care Agent · Part 8 of 9</li>
+      </ul>
+      <h1>8 · Test results</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-26">26 November 2026</time>
+        <span>4 min read</span>
+      </div>
+      <div class="prose">
+<p>All tests were run on 26 November 2026 in the Copilot Studio test chat against the published agent, as the demo customer Alex Kumar (CUST-1001, fictional). The left side of each screenshot is the test pane's activity map: which topic, tool or agent the orchestrator chose, with inputs, outputs and timings.</p>
+<div class="table-wrap"><table class="breakdown spec"><thead><tr><th>#</th><th>Scenario</th><th>Path</th><th>Result</th></tr></thead><tbody><tr><td>1</td><td><a href="#new-ticket">New ticket</a></td><td>New Ticket → Triage prompt → Create Ticket</td><td><span class="pass">PASS</span></td></tr><tr><td>2</td><td><a href="#duplicate">Duplicate ticket</a></td><td>New Ticket → Create Ticket (duplicate) → Add Customer Reply</td><td><span class="pass">PASS</span></td></tr><tr><td>3</td><td><a href="#status">Ticket status</a></td><td>Check Ticket Status → List / Get Ticket Details</td><td><span class="pass">PASS</span></td></tr><tr><td>4</td><td><a href="#track">Track orders</a></td><td>Track an Order → List Customer Orders</td><td><span class="pass">PASS</span></td></tr><tr><td>5</td><td><a href="#billing">Billing question</a></td><td>Orchestrator → Billing child agent</td><td><span class="pass">PASS</span></td></tr><tr><td>6</td><td><a href="#warranty">Warranty claim</a></td><td>Warranty Claim → Fault Summary prompt → RMA Process</td><td><span class="fail">FAIL</span> (Known issue 1)</td></tr><tr><td>7</td><td><a href="#rate">Rate a ticket</a></td><td>Rate a Ticket → List Tickets → Record CSAT</td><td><span class="pass">PASS</span></td></tr><tr><td>8</td><td><a href="#escalate">Escalate</a></td><td>Escalate → List Tickets → Escalate Ticket</td><td><span class="pass">PASS</span></td></tr></tbody></table></div>
+<h2 id="new-ticket"><span class="ico ico-check"></span>1 · New ticket</h2><dl class="kv"><dt>Steps</dt><dd><em>I was charged twice for order ORD-10390, can I get a refund?</em> → email → CUST-1001</dd><dt>Expected</dt><dd>Verification first, then a review card with AI-suggested fields</dd><dt>Actual</dt><dd>Identify Customer ran, then New Ticket. Triage: Billing / <strong>Urgent</strong> (money taken twice). Review card shown; cancelled so no ticket was written.</dd><dt>Result</dt><dd><span class="pass">PASS</span></dd></dl><figure class="shot"><img src="../assets/img/vink/s-test-billing-ticket.webp" alt="Test chat: New Ticket activity with IssueDescription input; review card with category Billing, priority Urgent, order Not about a specific order" width="1472" height="515" loading="lazy">
+<figcaption>The orchestrator wrote the topic input <code>IssueDescription</code> from the message; the card shows the triage result.</figcaption></figure><figure class="shot"><img src="../assets/img/vink/chat-created.webp" alt="Ticket created message in chat" width="440" height="190" loading="lazy">
+<figcaption>From an earlier run: Create Ticket returned TKT-1020 with team and SLA times.</figcaption></figure><h2 id="duplicate"><span class="ico ico-check"></span>2 · Duplicate ticket</h2><dl class="kv"><dt>Steps</dt><dd>New session. <em>My laptop box arrived crushed and the screen is cracked</em> → verify → Create ticket</dd><dt>Expected</dt><dd>Create Ticket finds open Delivery ticket TKT-1020 and returns <code>duplicate = Yes</code>; the topic offers to add to it</dd><dt>Actual</dt><dd>Triage Delivery / High. Create Ticket returned the duplicate; <em>Add to TKT-1020</em> called Add Customer Reply. Topic completed in 64 s.</dd><dt>Result</dt><dd><span class="pass">PASS</span></dd></dl><figure class="shot"><img src="../assets/img/vink/s-test-dup-card.webp" alt="Duplicate prompt: You already have an open Delivery ticket TKT-1020; Add to TKT-1020 or Open a separate ticket" width="1472" height="515" loading="lazy">
+<figcaption>Duplicate detected.</figcaption></figure><figure class="shot"><img src="../assets/img/vink/s-test-dup-done.webp" alt="Thanks, I&#x27;ve added your message to TKT-1020 and the Logistics team will see it" width="1472" height="515" loading="lazy">
+<figcaption>After <em>Add to TKT-1020</em>.</figcaption></figure><h2 id="status"><span class="ico ico-check"></span>3 · Ticket status</h2><dl class="kv"><dt>Steps</dt><dd><em>What's the status of TKT-1020?</em></dd><dt>Expected</dt><dd>Status, team, priority, SLA and the customer-visible timeline</dd><dt>Actual</dt><dd>Get Ticket Details returned the row and the <em>Ticket created</em> timeline entry written by Ticket Created.</dd><dt>Result</dt><dd><span class="pass">PASS</span></dd></dl><figure class="shot"><img src="../assets/img/vink/chat-status.webp" alt="Status reply for TKT-1020" width="440" height="340" loading="lazy">
+<figcaption>Status reply with timeline.</figcaption></figure><h2 id="track"><span class="ico ico-check"></span>4 · Track orders</h2><dl class="kv"><dt>Steps</dt><dd><em>Where are my orders?</em></dd><dt>Expected</dt><dd>The verified customer's orders, newest first, with status and tracking</dd><dt>Actual</dt><dd>ORD-10421 and ORD-10398 listed with tracking numbers. Topic completed in 0.62 s.</dd><dt>Result</dt><dd><span class="pass">PASS</span></dd></dl><figure class="shot"><img src="../assets/img/vink/s-test-track.webp" alt="Track an Order activity completed in 0.62s; chat lists ORD-10421 and ORD-10398 with tracking" width="1472" height="515" loading="lazy">
+<figcaption>Track an Order.</figcaption></figure><h2 id="billing"><span class="ico ico-check"></span>5 · Billing question</h2><dl class="kv"><dt>Steps</dt><dd><em>How long does a refund take to reach my card, and can I pay in instalments?</em></dd><dt>Expected</dt><dd>Handover to the Billing Agent; policy answer; specialist for anything outside policy</dd><dt>Actual</dt><dd>Billing Agent ran (8.82 s): refund timing from policy (5–7 business days after return); instalments not in policy, so a billing specialist will contact within one business day.</dd><dt>Result</dt><dd><span class="pass">PASS</span></dd></dl><figure class="shot"><img src="../assets/img/vink/s-test-billing-child.webp" alt="Billing Agent execution summary and generated result; chat shows refund timing and instalment answer" width="1472" height="515" loading="lazy">
+<figcaption>The child agent's summary output and the answer.</figcaption></figure><h2 id="warranty"><span class="ico ico-warn"></span>6 · Warranty claim</h2><dl class="kv"><dt>Steps</dt><dd><em>I want to make a warranty claim. My laptop SN-LTP-48213 stopped charging…</em> → purchase date → description → Submit claim</dd><dt>Expected</dt><dd>Fault summary card, then claim, RMA and ticket numbers</dd><dt>Actual</dt><dd>The SerialNumber entity captured the serial; the Fault Summary prompt produced the four-line summary. On submit: <code>FlowActionException</code>, output <code>warrantyend</code> missing. The flow had already created the claim and <strong>TKT-1021</strong> (Awaiting return).</dd><dt>Result</dt><dd><span class="fail">FAIL</span></dd></dl><figure class="shot"><img src="../assets/img/vink/s-test-warranty-card.webp" alt="Warranty summary card with Summary for technicians and Submit claim button" width="515" height="320" loading="lazy">
+<figcaption>The confirmation card, including the prompt's fault summary.</figcaption></figure><figure class="shot"><img src="../assets/img/vink/s-test-warranty-error.webp" alt="Error message: output parameter warrantyend on flow Customer Care - RMA Process is missing from the response data; topic status Failed" width="1472" height="515" loading="lazy">
+<figcaption>The real error. Root cause and fix: Known issue 1 on the <a href="index.html">overview</a>.</figcaption></figure><p><strong>Lesson:</strong> renaming a flow output is a breaking change for every agent that uses the flow. The flow ran, but the agent couldn't bind its response, so the customer saw an error even though the data was written. Refresh tools after any change to a flow's inputs or outputs, and keep the Topic checker at zero errors before publishing.</p><h2 id="rate"><span class="ico ico-warn"></span>7 · Rate a ticket</h2><dl class="kv"><dt>Steps</dt><dd><em>I'd like to rate one of my tickets</em> → TKT-1010 → 4 – Good</dd><dt>Expected</dt><dd>Ticket picker, rating card, score saved</dd><dt>Actual</dt><dd>Record CSAT saved 4/5 on TKT-1010. The confirmation appeared twice (Known issue 3).</dd><dt>Result</dt><dd><span class="pass">PASS</span> (with note)</dd></dl><figure class="shot"><img src="../assets/img/vink/s-test-rate-card.webp" alt="Rating card How did we do on TKT-1010" width="515" height="320" loading="lazy">
+<figcaption>Rating card.</figcaption></figure><figure class="shot"><img src="../assets/img/vink/s-test-rate-done.webp" alt="Rate a Ticket completed; recorded 4 out of 5 for TKT-1010" width="1472" height="515" loading="lazy">
+<figcaption>Completed in 41 s, mostly waiting for the customer.</figcaption></figure><h2 id="escalate"><span class="ico ico-check"></span>8 · Escalate</h2><dl class="kv"><dt>Steps</dt><dd><em>I want to speak to a person about my duplicate charge</em> → TKT-1019 → reason</dd><dt>Expected</dt><dd>Ticket set to Escalated, support alerted, customer told who and when</dd><dt>Actual</dt><dd>Escalate Ticket set TKT-1019 to Escalated and alerted the support mailbox; the customer was told the Billing team will contact them within one business day.</dd><dt>Result</dt><dd><span class="pass">PASS</span></dd></dl><figure class="shot"><img src="../assets/img/vink/s-test-escalate-pick.webp" alt="Escalate ticket picker" width="515" height="320" loading="lazy">
+<figcaption>Ticket picker.</figcaption></figure><figure class="shot"><img src="../assets/img/vink/s-test-escalate-done.webp" alt="Done. I&#x27;ve passed TKT-1019 to a senior member of the Billing team" width="1472" height="515" loading="lazy">
+<figcaption>Result.</figcaption></figure>
+<h2 id="background"><span class="ico ico-clock"></span>Background flow runs</h2>
+<figure class="shot"><img src="../assets/img/vink/ticketcreated-run.webp" alt="Ticket Created run" width="340" height="345" loading="lazy">
+<figcaption>Ticket Created ran four seconds after TKT-1020 was created: Try succeeded, Catch skipped.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/vink/sla-run.webp" alt="SLA compose output" width="900" height="504" loading="lazy">
+<figcaption>SLA Compose for a High ticket: 4 h respond, 24 h resolve.</figcaption></figure>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-test-bot">Test your agent</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-improve-agent-effectiveness">Analyze agent effectiveness</a></li></ul>
+      </div>
+      <div class="pager"><a href="spec-build-guide.html">← 7 · Build guide</a><a href="spec-alm.html">9 · ALM and operations →</a></div>
+    </article>
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#new-ticket">1 · New ticket</a></li><li><a href="#duplicate">2 · Duplicate ticket</a></li><li><a href="#status">3 · Ticket status</a></li><li><a href="#track">4 · Track orders</a></li><li><a href="#billing">5 · Billing question</a></li><li><a href="#warranty">6 · Warranty claim</a></li><li><a href="#rate">7 · Rate a ticket</a></li><li><a href="#escalate">8 · Escalate</a></li><li><a href="#background">Background flow runs</a></li><li><a href="#references">References</a></li></ol></nav>
+      <nav class="side-box" aria-label="All parts"><h2>The specification</h2><ol start="0"><li><a href="index.html">Overview</a></li><li><a href="spec-data-model.html">Data model</a></li><li><a href="spec-agent-config.html">Agent configuration</a></li><li><a href="spec-topics.html">Topics</a></li><li><a href="spec-agent-flows.html">Agent flows (tools)</a></li><li><a href="spec-background-flows.html">Background flows and the event trigger</a></li><li><a href="spec-care-hub.html">Care Hub app</a></li><li><a href="spec-build-guide.html">Build guide</a></li><li><a href="spec-test-results.html" aria-current="page">Test results</a></li><li><a href="spec-alm.html">ALM and operations</a></li></ol></nav>
+      <div class="side-box">
+        <strong>Personal project</strong>
+        <p>Built in my own developer environment. Vink Electronics is fictional and all customers and orders are sample data.</p>
+        <a href="https://github.com/VinayMatsa/vink-customer-care-agent">Solution source on GitHub →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

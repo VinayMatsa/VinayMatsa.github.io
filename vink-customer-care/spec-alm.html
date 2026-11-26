@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>11 · Packaging: solution, environment variables and source | Vinay Matsa</title>
-<meta name="description" content="How the whole system ships as one solution, what makes it portable between environments, and how the unpacked source makes it reviewable on GitHub.">
+<title>9 · ALM and operations | Vinay Matsa</title>
+<meta name="description" content="Solution packaging, environment variables, connection references, source control and responsible-AI safeguards.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="11 · Packaging: solution, environment variables and source">
-<meta property="og:description" content="How the whole system ships as one solution, what makes it portable between environments, and how the unpacked source makes it reviewable on GitHub.">
+<meta property="og:title" content="9 · ALM and operations">
+<meta property="og:description" content="Solution packaging, environment variables, connection references, source control and responsible-AI safeguards.">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,10 +36,10 @@
   <div class="wrap article-layout">
     <article class="article">
       <ul class="series">
-        <li class="dark">Project deep dive</li>
-        <li>Vink Customer Care Agent · Part 11 of 11</li>
+        <li class="dark">Technical specification</li>
+        <li>Vink Customer Care Agent · Part 9 of 9</li>
       </ul>
-      <h1>11 · Packaging: solution, environment variables and source</h1>
+      <h1>9 · ALM and operations</h1>
       <div class="byline">
         <span class="mini" aria-hidden="true">VM</span>
         <strong>Vinay Matsa</strong>
@@ -47,9 +47,6 @@
         <span>4 min read</span>
       </div>
       <div class="prose">
-<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Where this page fits</p><div class="fl"><div class="br"><div><span class="lbl c">This page · Step 1</span><div class="nd ok">Customer chat</div></div><div><span class="lbl c">This page · Step 2</span><div class="nd ok">Agent: instructions, topics, knowledge</div></div><div><span class="lbl c">This page · Step 3</span><div class="nd ok">Agent flows (tools)</div></div></div><div class="ar"></div><div class="br"><div><span class="lbl c">This page · Step 4</span><div class="nd ok">Dataverse tables</div></div><div><span class="lbl c">This page · Step 5</span><div class="nd ok">Background flows</div></div><div><span class="lbl c">This page · Step 6</span><div class="nd ok">Care Hub app</div></div></div></div><p class="viz-note">Highlighted boxes are what this page explains. The chain runs left to right, top row then bottom row.</p></div>
-<div class="cards"><div><strong><span class="ico ico-check"></span>The story so far</strong>Every part so far lives in one solution. This part is about moving it safely.</div></div>
-
 <h2 id="solution"><span class="ico ico-scope"></span>One solution, every component</h2>
 <div class="cards"><div><strong>What</strong>A solution is a container that carries tables, the app, flows, the agent, prompts, environment variables and connection references together.</div><div><strong>Why</strong>Moving parts one by one breaks the links between them. A solution moves them as a set.</div><div><strong>Demo</strong><code>CustomerCareAgent_1_0_0_1.zip</code>, imported with Solutions → Import.</div></div>
 <div class="table-wrap"><table class="breakdown"><thead><tr><th>Component type</th><th>In this solution</th></tr></thead><tbody><tr><td>Tables</td><td>7 (Contact extended + 6 custom), choices, views, forms</td></tr><tr><td>Model-driven app</td><td>Vink Care Hub, dashboard, charts</td></tr><tr><td>Agent</td><td>Vink Customer Care Agent: topics, entities, child agent, knowledge, trigger</td></tr><tr><td>Cloud flows</td><td>11 agent flows + Ticket Created, Status Changed, Daily SLA Check, Warehouse scan</td></tr><tr><td>Prompts</td><td>Ticket triage, Fault Summary for Technicians</td></tr><tr><td>Environment variables</td><td>vin_CCSupportMailbox, vin_CCCustomerEmailOverride</td></tr></tbody></table></div>
@@ -63,15 +60,15 @@
 <p>The <code>src</code> folder is the unpacked solution, so every snippet in this deep dive can be checked against the source. See Level 10's <a href="../power-automate/source-control-cli.html">Source control with Git and the CLI</a>.</p>
 
 <h2 id="responsible"><span class="ico ico-stop"></span>Responsible AI, recapped</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Safeguard</th><th>Where</th><th>Part</th></tr></thead><tbody><tr><td>Verification before any account data</td><td>Identify Customer guard in every account topic</td><td><a href="identify-customer.html">4</a></td></tr><tr><td>Never ask for card numbers, passwords or one-time codes</td><td>Main and Billing instructions</td><td><a href="agent-instructions.html">2</a></td></tr><tr><td>AI suggests, customer confirms</td><td>Review card</td><td><a href="ai-triage.html">6</a></td></tr><tr><td>Answers grounded in Vink content, web search off</td><td>Knowledge</td><td><a href="knowledge-billing-agent.html">7</a></td></tr><tr><td>A human when needed</td><td>Escalate topic; specialist handover for disputes</td><td><a href="topics-entities.html">3</a></td></tr><tr><td>Safety first</td><td>Stop using and unplug for swollen batteries or smoke</td><td><a href="agent-instructions.html">2</a></td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Safeguard</th><th>Where</th><th>Part</th></tr></thead><tbody><tr><td>Verification before any account data</td><td>Identify Customer guard in every account topic</td><td><a href="spec-topics.html#t-identifycustomer">4</a></td></tr><tr><td>Never ask for card numbers, passwords or one-time codes</td><td>Main and Billing instructions</td><td><a href="spec-agent-config.html">2</a></td></tr><tr><td>AI suggests, customer confirms</td><td>Review card</td><td><a href="spec-agent-config.html#prompts">6</a></td></tr><tr><td>Answers grounded in Vink content, web search off</td><td>Knowledge</td><td><a href="spec-agent-config.html#knowledge">7</a></td></tr><tr><td>A human when needed</td><td>Escalate topic; specialist handover for disputes</td><td><a href="spec-topics.html">3</a></td></tr><tr><td>Safety first</td><td>Stop using and unplug for swollen batteries or smoke</td><td><a href="spec-agent-config.html">2</a></td></tr></tbody></table></div>
 <p>Explore the source: <a href="https://github.com/VinayMatsa/vink-customer-care-agent">vink-customer-care-agent on GitHub</a>.</p>
 <h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/solution-concepts-alm">Solution concepts</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables">Environment variables overview</a></li></ul>
       </div>
-      <div class="pager"><a href="care-hub-app.html">← 10 · The Vink Care Hub staff app</a><a href="index.html">Back to the overview →</a></div>
+      <div class="pager"><a href="spec-test-results.html">← 8 · Test results</a><a href="index.html">Back to the overview →</a></div>
     </article>
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#solution">One solution, every component</a></li><li><a href="#portable">What makes it portable</a></li><li><a href="#source">Readable source on GitHub</a></li><li><a href="#responsible">Responsible AI, recapped</a></li><li><a href="#references">References</a></li></ol></nav>
-      <nav class="side-box" aria-label="All parts"><h2>The deep dive</h2><ol start="0"><li><a href="index.html">Overview</a></li><li><a href="dataverse-model.html">The Dataverse data model</a></li><li><a href="agent-instructions.html">The agent, orchestration and instructions</a></li><li><a href="topics-entities.html">Topics, inputs, variables and entities</a></li><li><a href="identify-customer.html">Verifying the customer</a></li><li><a href="agent-flows-tools.html">Agent flows as tools</a></li><li><a href="ai-triage.html">AI triage, the review card and duplicate checks</a></li><li><a href="knowledge-billing-agent.html">Knowledge and the Billing child agent</a></li><li><a href="background-flows.html">Background flows: routing, SLA, timeline and email</a></li><li><a href="autonomous-trigger.html">The autonomous warehouse trigger</a></li><li><a href="care-hub-app.html">The Vink Care Hub staff app</a></li><li><a href="alm-packaging.html" aria-current="page">Packaging: solution, environment variables and source</a></li></ol></nav>
+      <nav class="side-box" aria-label="All parts"><h2>The specification</h2><ol start="0"><li><a href="index.html">Overview</a></li><li><a href="spec-data-model.html">Data model</a></li><li><a href="spec-agent-config.html">Agent configuration</a></li><li><a href="spec-topics.html">Topics</a></li><li><a href="spec-agent-flows.html">Agent flows (tools)</a></li><li><a href="spec-background-flows.html">Background flows and the event trigger</a></li><li><a href="spec-care-hub.html">Care Hub app</a></li><li><a href="spec-build-guide.html">Build guide</a></li><li><a href="spec-test-results.html">Test results</a></li><li><a href="spec-alm.html" aria-current="page">ALM and operations</a></li></ol></nav>
       <div class="side-box">
         <strong>Personal project</strong>
         <p>Built in my own developer environment. Vink Electronics is fictional and all customers and orders are sample data.</p>

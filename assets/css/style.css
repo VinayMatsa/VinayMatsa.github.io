@@ -306,3 +306,18 @@ table.breakdown td .chip{margin:0}
 }
 .breakdown.trace code,.breakdown.trace .chip{white-space:nowrap}
 @media (max-width:640px){.breakdown.trace .hide-sm{display:none}}
+
+/* Technical specification tables */
+.spec td code { word-break: break-word; white-space: pre-wrap; font-size: 13px; }
+.spec { font-size: 14px; }
+.spec td:first-child { min-width: 0; width: 44px; color: var(--muted); }
+.spec td.nm { white-space: nowrap; font-weight: 600; }
+.spec td .ind { display: inline-block; color: var(--muted); }
+.spec .br { display: block; font-size: 12px; color: var(--muted); font-weight: 500; }
+.matrix td, .matrix th { text-align: center !important; }
+.matrix td:first-child, .matrix th:first-child { text-align: left !important; white-space: nowrap; }
+.pass { color: #0f7b3f; font-weight: 700; }
+.fail { color: #b42318; font-weight: 700; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; font-size: 15px; margin: 0 0 18px; }
+.kv dt { color: var(--muted); font-weight: 600; }
+.kv dd { margin: 0; }

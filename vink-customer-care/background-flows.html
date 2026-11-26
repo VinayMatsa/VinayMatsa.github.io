@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>8 · Background flows: routing, SLA, timeline and email | Vinay Matsa</title>
+<meta name="description" content="The flows that run with no one chatting: Ticket Created, Ticket Status Changed and the Daily SLA Check, with try/catch, environment variables and a real run.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="8 · Background flows: routing, SLA, timeline and email">
+<meta property="og:description" content="The flows that run with no one chatting: Ticket Created, Ticket Status Changed and the Daily SLA Check, with try/catch, environment variables and a real run.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="../#projects">Projects</a> / <a href="index.html">Vink Customer Care Agent</a></p>
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Project deep dive</li>
+        <li>Vink Customer Care Agent · Part 8 of 11</li>
+      </ul>
+      <h1>8 · Background flows: routing, SLA, timeline and email</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-26">26 November 2026</time>
+        <span>4 min read</span>
+      </div>
+      <div class="prose">
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Where this page fits</p><div class="fl"><div class="br"><div><span class="lbl d">Step 1</span><div class="nd mute">Customer chat</div></div><div><span class="lbl d">Step 2</span><div class="nd mute">Agent: instructions, topics, knowledge</div></div><div><span class="lbl d">Step 3</span><div class="nd mute">Agent flows (tools)</div></div></div><div class="ar"></div><div class="br"><div><span class="lbl c">This page · Step 4</span><div class="nd ok">Dataverse tables</div></div><div><span class="lbl c">This page · Step 5</span><div class="nd ok">Background flows</div></div><div><span class="lbl d">Step 6</span><div class="nd mute">Care Hub app</div></div></div></div><p class="viz-note">Highlighted boxes are what this page explains. The chain runs left to right, top row then bottom row.</p></div>
+<div class="cards"><div><strong><span class="ico ico-check"></span>The story so far</strong>TKT-1020 exists. The moment the row was created, a different kind of flow took over.</div></div>
+
+<h2 id="root"><span class="ico ico-scope"></span>From the root: why separate flows?</h2>
+<div class="cards"><div><strong>What</strong>Background flows start from Dataverse events or a schedule, not from the agent.</div><div><strong>Why</strong>Tickets also come from staff, email or phone. Rules that live on the data apply to <em>every</em> ticket, whatever created it, and they keep the agent flows fast.</div><div><strong>Demo</strong>Ticket Created ran for TKT-1020 four seconds after the chat created it.</div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Flow</th><th>Starts when</th><th>Does</th></tr></thead><tbody><tr><td>Ticket Created</td><td>A ticket row is created</td><td>Fill team and SLA if missing, log <em>Ticket created</em>, email the customer, alert support for High/Urgent/VIP</td></tr><tr><td>Ticket Status Changed</td><td><code>vin_ticketstatus</code> changes</td><td>Explain the new status, log it, update <em>latest update</em>, email the customer, stamp <em>resolved on</em></td></tr><tr><td>Daily SLA Check</td><td>Every day (recurrence)</td><td>Flag overdue tickets, close stale ones, email the overdue report</td></tr></tbody></table></div>
+
+<h2 id="created"><span class="ico ico-data"></span>Ticket Created, step by step</h2>
+<figure class="shot"><img src="../assets/img/vink/ticketcreated-run.webp" alt="Run of Customer Care - Ticket Created: When a ticket row changes succeeded, Try scope 4 seconds succeeded with 11 actions, Catch scope skipped" width="340" height="345" loading="lazy">
+<figcaption>TKT-1020's run: Try succeeded, so Catch was skipped.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/vink/sla-run.webp" alt="SLA step run results inside Ticket Created: v 949870002, r 4, s 24" width="900" height="504" loading="lazy">
+<figcaption>The same SLA rule as Create Ticket, recalculated from the row's priority: High → 4 h and 24 h.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Ticket Created for TKT-1020</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Step</th><th>Logic</th><th>Result</th></tr></thead><tbody><tr><td>Needs routing?</td><td>No team or no resolve-by on the row?</td><td><span class="chip ">no: already set by Create Ticket</span></td></tr><tr><td>Log created</td><td>New Ticket Update, visible to customer</td><td><span class="chip ok">timeline entry</span></td></tr><tr><td>Confirm to customer</td><td>No courier booking (warranty tickets get an RMA email instead) and an email exists</td><td><span class="chip ok">emailed</span></td></tr><tr><td>Alert if urgent</td><td>High, Urgent or VIP</td><td><span class="chip ok">support mailbox alerted</span></td></tr></tbody></table></div></div>
+<p>Why recalculate SLA if Create Ticket already did? A ticket created by staff in Care Hub skips the agent completely. <code>coalesce(existing value, createdon + hours)</code> keeps values that are already set and fills the ones that are missing.</p>
+
+<h2 id="connect"><span class="ico ico-arrow"></span>How the dots connect: the timeline Alex saw</h2>
+<figure class="shot"><img src="../assets/img/vink/chat-status.webp" alt="Status reply for TKT-1020: Damaged Laptop Delivery, Status Open, Team Logistics, Priority High, Raised 26 Nov 2026, Resolution target 27 Nov 2026 07:27 UTC; Latest update; Timeline: 26 Nov, 07:27 UTC Ticket created" width="440" height="340" loading="lazy">
+<figcaption>When Alex asked for the status, the <em>Ticket created</em> line came from the Ticket Update row this flow wrote.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Three parts, one answer</p><div class="fl"><div class="br"><div><span class="lbl c">Part 6</span><div class="nd">Create Ticket writes the <strong>ticket</strong></div></div><div><span class="lbl c">Part 8</span><div class="nd">Ticket Created writes the <strong>update</strong></div></div><div><span class="lbl c">Part 3</span><div class="nd">Check Ticket Status <strong>reads both</strong></div></div></div></div></div>
+
+<h2 id="status"><span class="ico ico-cond"></span>Ticket Status Changed: one message per status</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Status → what the customer is told</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Status</th><th>Explanation sent</th></tr></thead><tbody><tr><td>Awaiting return</td><td>Please send the product back using the return label we emailed you.</td></tr><tr><td>Scanned at warehouse</td><td>Your product has arrived at our warehouse and is with a technician.</td></tr><tr><td>Repaired</td><td>Your product has been repaired and is on its way back to you.</td></tr><tr><td>Awaiting customer</td><td>We need a reply from you to continue…</td></tr><tr><td>Escalated</td><td>A senior member of the team now owns your ticket…</td></tr></tbody></table></div></div>
+<p>The explanations live in one Compose as an object; <code>outputs('Explanations')?[status label]</code> picks the right one, with a default. The trigger uses <em>Select columns = vin_ticketstatus</em>, so edits to other columns don't send emails. See <a href="../power-automate/status-workflows-approvers.html">Status-driven workflows</a>.</p>
+
+<h2 id="daily"><span class="ico ico-clock"></span>Daily SLA Check</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>Every day</p><div class="fl"><div class="nd act">Newly overdue: open, not flagged, <code>resolveby lt utcNow()</code> → set Overdue = Yes</div><div class="ar"></div><div class="nd act">Awaiting customer for 7+ days → close</div><div class="ar"></div><div class="nd act">Resolved for 7+ days → close</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Any overdue tickets?</div><div class="ar"></div><div class="nd ok">Email an HTML table to the support mailbox</div></div></div>
+<figure class="shot"><img src="../assets/img/vink/care-hub-tickets.webp" alt="Open Tickets view in Vink Care Hub with ticket number, subject, customer, category, priority, ticket status, support team, resolve by and overdue columns; several older tickets show Overdue Yes" width="1340" height="600" loading="lazy">
+<figcaption>The Overdue column in the staff app is set by this flow.</figcaption></figure>
+
+<h2 id="safety"><span class="ico ico-stop"></span>Try/catch and environment variables</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Feature</th><th>How</th><th>Why</th></tr></thead><tbody><tr><td>Try / Catch scopes</td><td>Catch runs only if Try fails: email the support mailbox, then Terminate as Failed</td><td>Failures are noticed, and run history stays honest</td></tr><tr><td><code>vin_CCSupportMailbox</code></td><td>Environment variable for alerts and the daily report</td><td>Different mailbox per environment, no edits to flows</td></tr><tr><td><code>vin_CCCustomerEmailOverride</code></td><td>If set, every customer email goes here instead</td><td>Safe demos and tests; clear it in production</td></tr></tbody></table></div>
+<p>Related: <a href="../power-automate/dataverse-triggers.html">Dataverse triggers</a>, <a href="../power-automate/scopes-try-catch.html">Scopes and try/catch</a>, <a href="../power-automate/environment-variables.html">Environment variables</a>, <a href="../power-automate/reminders-recurrence.html">Recurrence</a>.</p>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Business rules only in the agent flow: staff-created tickets miss them.</li><li>Status triggers without a column filter.</li><li>Hard-coded email addresses.</li><li>No Catch: failures go unnoticed.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/create-update-delete-trigger">Trigger flows when a row is added, modified or deleted</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables">Environment variables overview</a></li></ul>
+      </div>
+      <div class="pager"><a href="knowledge-billing-agent.html">← 7 · Knowledge and the Billing child agent</a><a href="autonomous-trigger.html">9 · The autonomous warehouse trigger →</a></div>
+    </article>
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#root">From the root: why separate flows?</a></li><li><a href="#created">Ticket Created, step by step</a></li><li><a href="#connect">How the dots connect: the timeline Alex saw</a></li><li><a href="#status">Ticket Status Changed: one message per status</a></li><li><a href="#daily">Daily SLA Check</a></li><li><a href="#safety">Try/catch and environment variables</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol></nav>
+      <nav class="side-box" aria-label="All parts"><h2>The deep dive</h2><ol start="0"><li><a href="index.html">Overview</a></li><li><a href="dataverse-model.html">The Dataverse data model</a></li><li><a href="agent-instructions.html">The agent, orchestration and instructions</a></li><li><a href="topics-entities.html">Topics, inputs, variables and entities</a></li><li><a href="identify-customer.html">Verifying the customer</a></li><li><a href="agent-flows-tools.html">Agent flows as tools</a></li><li><a href="ai-triage.html">AI triage, the review card and duplicate checks</a></li><li><a href="knowledge-billing-agent.html">Knowledge and the Billing child agent</a></li><li><a href="background-flows.html" aria-current="page">Background flows: routing, SLA, timeline and email</a></li><li><a href="autonomous-trigger.html">The autonomous warehouse trigger</a></li><li><a href="care-hub-app.html">The Vink Care Hub staff app</a></li><li><a href="alm-packaging.html">Packaging: solution, environment variables and source</a></li></ol></nav>
+      <div class="side-box">
+        <strong>Personal project</strong>
+        <p>Built in my own developer environment. Vink Electronics is fictional and all customers and orders are sample data.</p>
+        <a href="https://github.com/VinayMatsa/vink-customer-care-agent">Solution source on GitHub →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

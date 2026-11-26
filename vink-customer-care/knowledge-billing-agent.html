@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7 · Knowledge and the Billing child agent | Vinay Matsa</title>
+<meta name="description" content="How the agent answers policy questions from a PDF and Dataverse tables, and when it hands money questions to a child agent with its own instructions.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="7 · Knowledge and the Billing child agent">
+<meta property="og:description" content="How the agent answers policy questions from a PDF and Dataverse tables, and when it hands money questions to a child agent with its own instructions.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="../#projects">Projects</a> / <a href="index.html">Vink Customer Care Agent</a></p>
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Project deep dive</li>
+        <li>Vink Customer Care Agent · Part 7 of 11</li>
+      </ul>
+      <h1>7 · Knowledge and the Billing child agent</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-26">26 November 2026</time>
+        <span>4 min read</span>
+      </div>
+      <div class="prose">
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Where this page fits</p><div class="fl"><div class="br"><div><span class="lbl d">Step 1</span><div class="nd mute">Customer chat</div></div><div><span class="lbl c">This page · Step 2</span><div class="nd ok">Agent: instructions, topics, knowledge</div></div><div><span class="lbl d">Step 3</span><div class="nd mute">Agent flows (tools)</div></div></div><div class="ar"></div><div class="br"><div><span class="lbl d">Step 4</span><div class="nd mute">Dataverse tables</div></div><div><span class="lbl d">Step 5</span><div class="nd mute">Background flows</div></div><div><span class="lbl d">Step 6</span><div class="nd mute">Care Hub app</div></div></div></div><p class="viz-note">Highlighted boxes are what this page explains. The chain runs left to right, top row then bottom row.</p></div>
+<div class="cards"><div><strong><span class="ico ico-check"></span>The story so far</strong>Not every message needs a ticket. Some just need an answer from policy, or a specialist for money questions.</div></div>
+
+<h2 id="knowledge"><span class="ico ico-data"></span>Knowledge: answers from Vink's own content</h2>
+<div class="cards"><div><strong>What</strong>Knowledge sources are documents and tables the agent searches to write grounded answers, with citations.</div><div><strong>Why</strong>Policy questions (warranty length, return windows) shouldn't be scripted topic by topic, and shouldn't be guessed.</div><div><strong>Demo</strong><em>How long is the warranty on a laptop?</em> answered from the policy PDF and the product catalogue.</div></div>
+<figure class="shot"><img src="../assets/img/vink/knowledge.webp" alt="Knowledge: Vink_Electronics_Warranty_and_Returns_Policy file, Customer Order Dataverse table, Vink product catalogue Dataverse table, all Ready" width="656" height="170" loading="lazy">
+<figcaption>Three sources: the policy PDF and two Dataverse tables.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Source</th><th>Type</th><th>Answers questions like</th></tr></thead><tbody><tr><td>Warranty and Returns Policy</td><td>PDF file</td><td>Return windows, restocking fee, what warranty covers</td></tr><tr><td>Vink product catalogue</td><td>Dataverse table</td><td>Which products exist, warranty months per product</td></tr><tr><td>Customer Order</td><td>Dataverse table</td><td>Order facts, for the Billing Agent's refund status answers</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>Knowledge or a topic?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Does the request change anything or show account data?</div><div class="ar"></div><div class="br"><div><span class="lbl t">No: a question</span><div class="nd ok">Knowledge answer, with citation</div></div><div><span class="lbl f">Yes</span><div class="nd ok">Topic + verification + flow</div></div></div></div></div>
+<p>See <a href="../articles/knowledge-vs-tools.html">Knowledge vs tools</a> for the general rule.</p>
+
+<h2 id="child"><span class="ico ico-scope"></span>The Billing child agent</h2>
+<div class="cards"><div><strong>What</strong>A child agent is a lightweight agent inside the main agent, with its own description and instructions.</div><div><strong>Why</strong>Refund and payment questions have their own rules and tone. Grouping them in one place keeps the main instructions shorter and safer.</div><div><strong>Demo</strong><em>When will I get my refund?</em> handed to the Billing Agent.</div></div>
+<figure class="shot"><img src="../assets/img/vink/child-agent.webp" alt="Agents page: Billing Agent, relationship Child, trigger By agent, enabled" width="616" height="87" loading="lazy">
+<figcaption>The Billing Agent, triggered <em>by agent</em>: the orchestrator hands over when its description fits.</figcaption></figure>
+<pre><code>Refund rules come from the Warranty and Returns Policy:
+- unused, original packaging: full refund within 30 days of delivery
+- opened: within 14 days, 10% restocking fee
+- opened headphones: cannot be returned
+- refunds reach the original payment method 5 to 7 business days after the return arrives
+Disputed charges, or amounts over 1,000: a billing specialist contacts the customer
+within one business day.</code></pre>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>A money question</p><div class="fl"><div class="nd"><em>I returned my headphones, when is my refund?</em></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Description match: refunds, charges, invoices, payment</div><div class="ar"></div><div class="nd act">Billing Agent answers from its rules; for status it asks for the order number</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Disputed or over 1,000?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd mute">A billing specialist will contact you within one business day</div></div><div><span class="lbl f">No</span><div class="nd ok">Policy-based answer</div></div></div></div></div>
+<h3>Watch out</h3><ul><li>Both agents repeat the hard rule: never ask for or repeat card numbers, bank details, passwords or one-time codes.</li><li>The main instructions say: general refund policy → Billing Agent; anything that changes an account → topics.</li></ul>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Answering policy from the model's general knowledge.</li><li>Huge main instructions instead of a focused child agent.</li><li>Letting a knowledge answer stand in for an account action.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio">Knowledge sources overview</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-agent-child-agent">Add a child agent</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-add-other-agents">Add other agents overview</a></li></ul>
+      </div>
+      <div class="pager"><a href="ai-triage.html">← 6 · AI triage, the review card and duplicate checks</a><a href="background-flows.html">8 · Background flows: routing, SLA, timeline and email →</a></div>
+    </article>
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#knowledge">Knowledge: answers from Vink's own content</a></li><li><a href="#child">The Billing child agent</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol></nav>
+      <nav class="side-box" aria-label="All parts"><h2>The deep dive</h2><ol start="0"><li><a href="index.html">Overview</a></li><li><a href="dataverse-model.html">The Dataverse data model</a></li><li><a href="agent-instructions.html">The agent, orchestration and instructions</a></li><li><a href="topics-entities.html">Topics, inputs, variables and entities</a></li><li><a href="identify-customer.html">Verifying the customer</a></li><li><a href="agent-flows-tools.html">Agent flows as tools</a></li><li><a href="ai-triage.html">AI triage, the review card and duplicate checks</a></li><li><a href="knowledge-billing-agent.html" aria-current="page">Knowledge and the Billing child agent</a></li><li><a href="background-flows.html">Background flows: routing, SLA, timeline and email</a></li><li><a href="autonomous-trigger.html">The autonomous warehouse trigger</a></li><li><a href="care-hub-app.html">The Vink Care Hub staff app</a></li><li><a href="alm-packaging.html">Packaging: solution, environment variables and source</a></li></ol></nav>
+      <div class="side-box">
+        <strong>Personal project</strong>
+        <p>Built in my own developer environment. Vink Electronics is fictional and all customers and orders are sample data.</p>
+        <a href="https://github.com/VinayMatsa/vink-customer-care-agent">Solution source on GitHub →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

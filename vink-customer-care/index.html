@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vink Customer Care Agent: the complete deep dive | Vinay Matsa</title>
+<meta name="description" content="How a Copilot Studio agent, Power Automate flows, Dataverse and a model-driven app work together to handle customer care end to end, explained from the root.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vink Customer Care Agent: the complete deep dive">
+<meta property="og:description" content="How a Copilot Studio agent, Power Automate flows, Dataverse and a model-driven app work together to handle customer care end to end, explained from the root.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="../#projects">Projects</a> / <a href="index.html">Vink Customer Care Agent</a></p>
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Project deep dive</li>
+        <li>Vink Customer Care Agent · Overview</li>
+      </ul>
+      <h1>Vink Customer Care Agent: the complete deep dive</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-26">26 November 2026</time>
+        <span>4 min read</span>
+      </div>
+      <div class="prose">
+<p><strong>Vink Electronics</strong> is a fictional online electronics shop. Its customers chat with an AI agent that can verify who they are, raise and track support tickets, file warranty claims, and pass them to a person when needed. Staff work the same tickets in an app, and flows keep everyone informed. This deep dive takes the solution apart one concept at a time, using one real conversation from the demo environment.</p>
+
+<h2 id="what"><span class="ico ico-scope"></span>What the solution does</h2>
+<div class="cards"><div><strong>What</strong>An AI customer care agent plus the data, automation and staff app behind it, packaged as one Power Platform solution.</div><div><strong>Why</strong>A chat agent alone can only talk. To be useful it must read and write real records, follow business rules and hand work to people. This project shows how the pieces fit together.</div><div><strong>Demo</strong>Alex Kumar (a sample customer) reports that his laptop arrived damaged, and the solution takes it from chat to a routed ticket with an SLA, a timeline and an email.</div></div>
+<figure class="shot"><img src="../assets/img/vink/overview.webp" alt="Copilot Studio overview of the Vink Customer Care Agent with its description: verifies customers, raises support tickets with AI triage, tracks tickets and orders, handles warranty claims and returns, escalates to a person, collects satisfaction ratings, and updates customers automatically when a returned product is scanned and repaired" width="817" height="220" loading="lazy">
+<figcaption>The agent in Copilot Studio, with the description that summarises everything it does.</figcaption></figure>
+
+<h2 id="parts"><span class="ico ico-data"></span>The six building blocks</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Block</th><th>Built with</th><th>Its job</th><th>Explained in</th></tr></thead><tbody><tr><td>Customer chat</td><td>Copilot Studio test chat / channels</td><td>Where the customer types</td><td>Parts 3 to 7</td></tr><tr><td>Agent brain</td><td>Instructions, topics, entities, knowledge, a child agent</td><td>Understands the request and decides what to run</td><td>Parts 2, 3, 6</td></tr><tr><td>Tools</td><td>11 agent flows and 2 prompts</td><td>Read and write data on the agent's behalf</td><td>Parts 4, 5</td></tr><tr><td>Data</td><td>7 Dataverse tables</td><td>The single source of truth</td><td>Part 1</td></tr><tr><td>Background automation</td><td>Dataverse-triggered and scheduled cloud flows</td><td>Route, time, log and email, with no one chatting</td><td>Parts 8, 9</td></tr><tr><td>Staff app</td><td>Vink Care Hub model-driven app</td><td>Where people work the tickets</td><td>Part 10</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Where this page fits</p><div class="fl"><div class="br"><div><span class="lbl c">This page · Step 1</span><div class="nd ok">Customer chat</div></div><div><span class="lbl c">This page · Step 2</span><div class="nd ok">Agent: instructions, topics, knowledge</div></div><div><span class="lbl c">This page · Step 3</span><div class="nd ok">Agent flows (tools)</div></div></div><div class="ar"></div><div class="br"><div><span class="lbl c">This page · Step 4</span><div class="nd ok">Dataverse tables</div></div><div><span class="lbl c">This page · Step 5</span><div class="nd ok">Background flows</div></div><div><span class="lbl c">This page · Step 6</span><div class="nd ok">Care Hub app</div></div></div></div><p class="viz-note">Highlighted boxes are what this page explains. The chain runs left to right, top row then bottom row.</p></div>
+
+<h2 id="journey"><span class="ico ico-arrow"></span>One conversation, followed end to end</h2>
+<p>This is the real run used throughout the deep dive. Each step happens in a different building block, and each one is explained in its own part.</p>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Alex reports a damaged laptop</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>#</th><th>What happened</th><th>Where</th><th>Part</th></tr></thead><tbody><tr><td>1</td><td>Alex types: <em>My laptop from order ORD-10421 arrived with a cracked corner…</em></td><td>Chat</td><td>—</td></tr><tr><td>2</td><td>The orchestrator picks the <strong>New Ticket</strong> topic and fills its input from the message</td><td>Agent</td><td><a href="topics-entities.html">3</a></td></tr><tr><td>3</td><td>New Ticket first runs <strong>Identify Customer</strong>: email, then order number</td><td>Agent + tool</td><td><a href="identify-customer.html">4</a></td></tr><tr><td>4</td><td>The <em>Find Customer</em> flow checks Dataverse: <span class="chip ok">Verified</span>, 3 open tickets</td><td>Tool + data</td><td><a href="agent-flows-tools.html">5</a></td></tr><tr><td>5</td><td>An AI prompt suggests subject, category and priority; Alex reviews them on a card</td><td>Agent + AI</td><td><a href="ai-triage.html">6</a></td></tr><tr><td>6</td><td><em>Create Ticket</em> checks duplicates, sets team and SLA, creates <span class="chip ok">TKT-1020</span></td><td>Tool + data</td><td><a href="ai-triage.html">6</a></td></tr><tr><td>7</td><td><em>Ticket Created</em> fires on the new row: logs the timeline, emails Alex</td><td>Background</td><td><a href="background-flows.html">8</a></td></tr><tr><td>8</td><td>Alex asks for the status; the timeline entry from step 7 is shown</td><td>Agent + data</td><td><a href="background-flows.html">8</a></td></tr><tr><td>9</td><td>Staff see TKT-1020 in Care Hub, with SLA times in local time</td><td>App</td><td><a href="care-hub-app.html">10</a></td></tr></tbody></table></div></div>
+
+<h2 id="order"><span class="ico ico-check"></span>How to read this deep dive</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Part</th><th>Concept</th><th>Level</th></tr></thead><tbody><tr><td><a href="dataverse-model.html">1</a></td><td>The Dataverse data model</td><td>Foundation</td></tr><tr><td><a href="agent-instructions.html">2</a></td><td>The agent, generative orchestration and instructions</td><td>Foundation</td></tr><tr><td><a href="topics-entities.html">3</a></td><td>Topics, inputs, variables and entities</td><td>Core</td></tr><tr><td><a href="identify-customer.html">4</a></td><td>Verifying the customer</td><td>Core</td></tr><tr><td><a href="agent-flows-tools.html">5</a></td><td>Agent flows as tools</td><td>Core</td></tr><tr><td><a href="ai-triage.html">6</a></td><td>AI triage, the review card and duplicate checks</td><td>Advanced</td></tr><tr><td><a href="knowledge-billing-agent.html">7</a></td><td>Knowledge and the Billing child agent</td><td>Advanced</td></tr><tr><td><a href="background-flows.html">8</a></td><td>Background flows: routing, SLA, timeline, email</td><td>Advanced</td></tr><tr><td><a href="autonomous-trigger.html">9</a></td><td>The autonomous warehouse trigger</td><td>Advanced</td></tr><tr><td><a href="care-hub-app.html">10</a></td><td>The Vink Care Hub staff app</td><td>Core</td></tr><tr><td><a href="alm-packaging.html">11</a></td><td>Packaging: solution, environment variables, source</td><td>Advanced</td></tr></tbody></table></div>
+<p>New to Power Automate? The <a href="../power-automate/what-is-power-automate.html">Learning path</a> explains every flow concept used here. Each part links to the matching article.</p>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/fundamentals-what-is-copilot-studio">Copilot Studio overview</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-generative-actions">Orchestrate agent behavior with generative AI</a></li></ul>
+      </div>
+      <div class="pager"><a href="../#projects">← All projects</a><a href="dataverse-model.html">1 · The Dataverse data model →</a></div>
+    </article>
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#what">What the solution does</a></li><li><a href="#parts">The six building blocks</a></li><li><a href="#journey">One conversation, followed end to end</a></li><li><a href="#order">How to read this deep dive</a></li><li><a href="#references">References</a></li></ol></nav>
+      <nav class="side-box" aria-label="All parts"><h2>The deep dive</h2><ol start="0"><li><a href="index.html" aria-current="page">Overview</a></li><li><a href="dataverse-model.html">The Dataverse data model</a></li><li><a href="agent-instructions.html">The agent, orchestration and instructions</a></li><li><a href="topics-entities.html">Topics, inputs, variables and entities</a></li><li><a href="identify-customer.html">Verifying the customer</a></li><li><a href="agent-flows-tools.html">Agent flows as tools</a></li><li><a href="ai-triage.html">AI triage, the review card and duplicate checks</a></li><li><a href="knowledge-billing-agent.html">Knowledge and the Billing child agent</a></li><li><a href="background-flows.html">Background flows: routing, SLA, timeline and email</a></li><li><a href="autonomous-trigger.html">The autonomous warehouse trigger</a></li><li><a href="care-hub-app.html">The Vink Care Hub staff app</a></li><li><a href="alm-packaging.html">Packaging: solution, environment variables and source</a></li></ol></nav>
+      <div class="side-box">
+        <strong>Personal project</strong>
+        <p>Built in my own developer environment. Vink Electronics is fictional and all customers and orders are sample data.</p>
+        <a href="https://github.com/VinayMatsa/vink-customer-care-agent">Solution source on GitHub →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

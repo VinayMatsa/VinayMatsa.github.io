@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3 · Topics, inputs, variables and entities | Vinay Matsa</title>
+<meta name="description" content="How topics are triggered by description, how the orchestrator fills topic inputs, topic vs global variables, and regex entities for order, ticket and serial numbers.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="3 · Topics, inputs, variables and entities">
+<meta property="og:description" content="How topics are triggered by description, how the orchestrator fills topic inputs, topic vs global variables, and regex entities for order, ticket and serial numbers.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="../#projects">Projects</a> / <a href="index.html">Vink Customer Care Agent</a></p>
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Project deep dive</li>
+        <li>Vink Customer Care Agent · Part 3 of 11</li>
+      </ul>
+      <h1>3 · Topics, inputs, variables and entities</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-26">26 November 2026</time>
+        <span>4 min read</span>
+      </div>
+      <div class="prose">
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Where this page fits</p><div class="fl"><div class="br"><div><span class="lbl d">Step 1</span><div class="nd mute">Customer chat</div></div><div><span class="lbl c">This page · Step 2</span><div class="nd ok">Agent: instructions, topics, knowledge</div></div><div><span class="lbl d">Step 3</span><div class="nd mute">Agent flows (tools)</div></div></div><div class="ar"></div><div class="br"><div><span class="lbl d">Step 4</span><div class="nd mute">Dataverse tables</div></div><div><span class="lbl d">Step 5</span><div class="nd mute">Background flows</div></div><div><span class="lbl d">Step 6</span><div class="nd mute">Care Hub app</div></div></div></div><p class="viz-note">Highlighted boxes are what this page explains. The chain runs left to right, top row then bottom row.</p></div>
+<div class="cards"><div><strong><span class="ico ico-check"></span>The story so far</strong>The orchestrator picked the New Ticket topic. What is a topic, and how did it already know Alex's problem?</div></div>
+
+<h2 id="root"><span class="ico ico-scope"></span>From the root: what is a topic?</h2>
+<div class="cards"><div><strong>What</strong>A topic is an authored conversation path: questions, messages, conditions, cards, and calls to flows or prompts, drawn on a canvas.</div><div><strong>Why</strong>Some steps must happen in a fixed order every time (verify, then review, then create). A topic guarantees that order; the AI can't skip a step.</div><div><strong>Demo</strong>New Ticket: verify → describe → AI triage → review card → create.</div></div>
+<figure class="shot"><img src="../assets/img/vink/topics.webp" alt="Custom topics list: Check Ticket Status, Goodbye, Greeting, Identify Customer, Main Menu, New Ticket, Rate a Ticket, Start Over, Thank you, all triggered By agent" width="706" height="442" loading="lazy">
+<figcaption>The custom topics. Every one has the trigger <em>By agent</em>: the orchestrator chooses them by description.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Topic</th><th>Job</th><th>Flows it calls</th></tr></thead><tbody><tr><td>Identify Customer</td><td>Verify by email + order/customer number, or register</td><td>Find Customer, Register Customer</td></tr><tr><td>New Ticket</td><td>AI triage, review card, duplicate check, create</td><td>List Customer Orders, Create Ticket, Add Customer Reply</td></tr><tr><td>Warranty Claim</td><td>Serial, purchase date, fault, technician summary, RMA</td><td>RMA Process</td></tr><tr><td>Check Ticket Status</td><td>Status, SLA, latest update, timeline; reply or escalate</td><td>Get Ticket Details, Add Customer Reply</td></tr><tr><td>Track an Order</td><td>The customer's own orders and tracking</td><td>List Customer Orders</td></tr><tr><td>Rate a Ticket</td><td>1–5 satisfaction score and comment</td><td>Record CSAT</td></tr><tr><td>Escalate</td><td>Hand to a person, safety cases</td><td>Escalate Ticket, Create Ticket</td></tr><tr><td>Main Menu, Greeting, Goodbye, Thank you, Start Over</td><td>Conversation housekeeping</td><td>—</td></tr></tbody></table></div>
+
+<h2 id="trigger"><span class="ico ico-cond"></span>The trigger: “The agent chooses”</h2>
+<figure class="shot"><img src="../assets/img/vink/identify-canvas.webp" alt="Identify Customer topic canvas: Trigger node The agent chooses, with the description Identifies and verifies the customer (email plus…), then a Condition on Global.CustomerVerified is equal to true" width="780" height="445" loading="lazy">
+<figcaption>Identify Customer's trigger is its description; the first node checks whether the customer is already verified.</figcaption></figure>
+<p>The description is written for the orchestrator, like a routing rule: <em>Use when a customer reports a problem they want logged… that is not a warranty repair claim, for example a late, lost or damaged delivery…</em> Naming what a topic is <strong>not</strong> for stops it competing with Warranty Claim.</p>
+
+<h2 id="inputs"><span class="ico ico-data"></span>Topic inputs: filled from the conversation</h2>
+<pre><code>inputs:
+  - kind: AutomaticTaskInput
+    propertyName: IssueDescription
+    description: The customer&#x27;s problem in their own words (what happened, when,
+      and what they want), if they have already described it. Leave empty if they
+      only asked to raise a ticket.
+    shouldPromptUser: false</code></pre>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>How IssueDescription was filled</p><div class="fl"><div class="nd">Alex's first message already describes the problem</div><div class="ar"></div><div class="nd act">The orchestrator reads the input's <strong>description</strong> and extracts the matching text</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Is it blank or under 20 characters?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd mute">Topic asks: <em>Please describe the problem…</em></div></div><div><span class="lbl f">No</span><div class="nd ok">Skip the question; Alex isn't asked twice</div></div></div></div></div>
+<p><code>shouldPromptUser: false</code> means the orchestrator won't ask for it; the topic decides with its own check. This is how one topic handles both <em>“raise a ticket”</em> and a full description in the first message.</p>
+
+<h2 id="variables"><span class="ico ico-expr"></span>Topic variables vs global variables</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Scope</th><th>Lives</th><th>Vink examples</th></tr></thead><tbody><tr><td><code>Topic.</code></td><td>Only while that topic runs</td><td>Topic.Description, Topic.Subject, Topic.Priority, Topic.TicketNumber</td></tr><tr><td><code>Global.</code></td><td>The whole conversation, across topics</td><td>Global.CustomerVerified, Global.ContactId, Global.CustomerEmail, Global.IsVIP</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>Why verification is global</p><div class="fl"><div class="nd">Identify Customer sets <code>Global.CustomerVerified = true</code></div><div class="ar"></div><div class="nd">Later, Alex asks for the status of TKT-1020</div><div class="ar"></div><div class="nd ok">Check Ticket Status runs Identify Customer, which sees the flag and ends at once: no second verification</div></div></div>
+
+<h2 id="entities"><span class="ico ico-check"></span>Entities: recognising ORD-, TKT- and SN- numbers</h2>
+<pre><code>OrderNumber   kind: RegexEntity   pattern: (?i)ORD-\d{5}
+TicketNumber  kind: RegexEntity   pattern: (?i)TKT-\d{4,12}
+SerialNumber  kind: RegexEntity   pattern: (?i)SN-[A-Z]{3}-\d{5}</code></pre>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>What each pattern accepts</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Entity</th><th>Matches</th><th>Doesn't match</th></tr></thead><tbody><tr><td>OrderNumber</td><td><span class="chip ok">ORD-10421</span> <span class="chip ok">ord-10421</span></td><td><span class="chip no">ORD-421</span></td></tr><tr><td>TicketNumber</td><td><span class="chip ok">TKT-1020</span></td><td><span class="chip no">TKT-12</span></td></tr><tr><td>SerialNumber</td><td><span class="chip ok">SN-LTP-48213</span></td><td><span class="chip no">SN-48213</span></td></tr></tbody></table></div><p class="viz-note"><code>(?i)</code> makes them case-insensitive.</p></div>
+<p>Warranty Claim asks for the serial with the <em>SerialNumber</em> entity, so a typo is re-asked by the topic instead of being sent to a flow.</p>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Node</strong>: one step on a topic canvas.</p><p><strong>Entity</strong>: a type of value the agent can recognise in text, like an email or a regex pattern.</p><p><strong>Power Fx</strong>: the formula language used in topics (<code>=Global.CustomerVerified = true</code>).</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Topic descriptions that overlap.</li><li>Global variables for values that belong to one topic.</li><li>Asking again for something the customer already said: use topic inputs.</li><li>Free-text questions for structured IDs: use a regex entity.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-create-edit-topics">Create and edit topics</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-triggers">Set topic triggers</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-entities-slot-filling">Use entities and slot filling</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-variables">Work with variables</a></li></ul>
+      </div>
+      <div class="pager"><a href="agent-instructions.html">← 2 · The agent, orchestration and instructions</a><a href="identify-customer.html">4 · Verifying the customer →</a></div>
+    </article>
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#root">From the root: what is a topic?</a></li><li><a href="#trigger">The trigger: “The agent chooses”</a></li><li><a href="#inputs">Topic inputs: filled from the conversation</a></li><li><a href="#variables">Topic variables vs global variables</a></li><li><a href="#entities">Entities: recognising ORD-, TKT- and SN- numbers</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol></nav>
+      <nav class="side-box" aria-label="All parts"><h2>The deep dive</h2><ol start="0"><li><a href="index.html">Overview</a></li><li><a href="dataverse-model.html">The Dataverse data model</a></li><li><a href="agent-instructions.html">The agent, orchestration and instructions</a></li><li><a href="topics-entities.html" aria-current="page">Topics, inputs, variables and entities</a></li><li><a href="identify-customer.html">Verifying the customer</a></li><li><a href="agent-flows-tools.html">Agent flows as tools</a></li><li><a href="ai-triage.html">AI triage, the review card and duplicate checks</a></li><li><a href="knowledge-billing-agent.html">Knowledge and the Billing child agent</a></li><li><a href="background-flows.html">Background flows: routing, SLA, timeline and email</a></li><li><a href="autonomous-trigger.html">The autonomous warehouse trigger</a></li><li><a href="care-hub-app.html">The Vink Care Hub staff app</a></li><li><a href="alm-packaging.html">Packaging: solution, environment variables and source</a></li></ol></nav>
+      <div class="side-box">
+        <strong>Personal project</strong>
+        <p>Built in my own developer environment. Vink Electronics is fictional and all customers and orders are sample data.</p>
+        <a href="https://github.com/VinayMatsa/vink-customer-care-agent">Solution source on GitHub →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1 · The Dataverse data model | Vinay Matsa</title>
+<meta name="description" content="The seven tables behind the agent, how they relate, and the columns that make SLAs, timelines and verification possible.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="1 · The Dataverse data model">
+<meta property="og:description" content="The seven tables behind the agent, how they relate, and the columns that make SLAs, timelines and verification possible.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="../#projects">Projects</a> / <a href="index.html">Vink Customer Care Agent</a></p>
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Project deep dive</li>
+        <li>Vink Customer Care Agent · Part 1 of 11</li>
+      </ul>
+      <h1>1 · The Dataverse data model</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-26">26 November 2026</time>
+        <span>4 min read</span>
+      </div>
+      <div class="prose">
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Where this page fits</p><div class="fl"><div class="br"><div><span class="lbl d">Step 1</span><div class="nd mute">Customer chat</div></div><div><span class="lbl d">Step 2</span><div class="nd mute">Agent: instructions, topics, knowledge</div></div><div><span class="lbl d">Step 3</span><div class="nd mute">Agent flows (tools)</div></div></div><div class="ar"></div><div class="br"><div><span class="lbl c">This page · Step 4</span><div class="nd ok">Dataverse tables</div></div><div><span class="lbl d">Step 5</span><div class="nd mute">Background flows</div></div><div><span class="lbl d">Step 6</span><div class="nd mute">Care Hub app</div></div></div></div><p class="viz-note">Highlighted boxes are what this page explains. The chain runs left to right, top row then bottom row.</p></div>
+<p>Everything starts with the data. The agent never stores customers or tickets itself; it reads and writes Dataverse through flows. If the tables are right, every other part becomes simpler.</p>
+
+<h2 id="basics"><span class="ico ico-data"></span>From the root: tables, rows, columns</h2>
+<div class="cards"><div><strong>What</strong>A <strong>table</strong> holds one kind of thing (tickets). Each <strong>row</strong> is one item (TKT-1020). Each <strong>column</strong> is one fact about it (priority). A <strong>lookup</strong> column points at a row in another table.</div><div><strong>Why</strong>Lookups let one ticket know its customer, order and team without copying their details.</div><div><strong>Demo</strong>TKT-1020's row and the rows it points at.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>How the seven tables connect</p><div class="fl"><div class="br"><div><span class="lbl c">Who</span><div class="nd"><strong>Contact</strong> (customer)<br>CUST-1001, VIP flag</div></div><div><span class="lbl c">What they bought</span><div class="nd"><strong>Customer Order</strong> → <strong>Product</strong></div></div><div><span class="lbl c">Who works it</span><div class="nd"><strong>Support Team</strong><br>Repairs · Billing · Logistics</div></div></div><div class="ar"></div><div class="nd act"><strong>Service Ticket</strong>: lookups to Contact, Order, Support Team, Warranty Claim</div><div class="ar"></div><div class="br"><div><span class="lbl c">History</span><div class="nd"><strong>Ticket Update</strong> rows (the timeline)</div></div><div><span class="lbl c">Repairs</span><div class="nd"><strong>Warranty Claim</strong> (claim, RMA, in-warranty)</div></div></div></div></div>
+
+<h2 id="tables"><span class="ico ico-data"></span>The tables and their key columns</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Table</th><th>Key columns</th><th>Why they matter</th></tr></thead><tbody><tr><td>Contact (standard)</td><td>Email, <code>vin_CustomerNumber</code> (CUST-{SEQNUM:4}), <code>vin_IsVIP</code></td><td>Verification and VIP priority</td></tr><tr><td>Customer Order</td><td>Order number (ORD-…), status, serial number, tracking, Product lookup</td><td>Proves identity; links tickets to purchases</td></tr><tr><td>Product</td><td>Name, SKU, price, <code>vin_WarrantyMonths</code></td><td>Warranty checks</td></tr><tr><td>Service Ticket</td><td>Ticket number (TKT-{SEQNUM:4}), subject, description, AI summary, category, priority, status, source, respond by, resolve by, overdue, latest update, CSAT</td><td>The centre of everything</td></tr><tr><td>Ticket Update</td><td>Title, text, <code>vin_VisibleToCustomer</code>, updated by, status after</td><td>The timeline; internal notes stay hidden</td></tr><tr><td>Support Team</td><td>Name, team email, categories it handles</td><td>Routing</td></tr><tr><td>Warranty Claim</td><td>Claim number, serial, purchase date, in warranty, fault description, fault summary, RMA number</td><td>Repairs and replacements</td></tr></tbody></table></div>
+
+<h2 id="autonumber"><span class="ico ico-expr"></span>Autonumbers: TKT-1020 without code</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>A new ticket row is saved</p><div class="fl"><div class="nd">Dataverse sees the autonumber column</div><div class="ar"></div><div class="nd">Format <code>TKT-{SEQNUM:4}</code></div><div class="ar"></div><div class="nd ok">Next value: <span class="chip ok">TKT-1020</span></div></div></div>
+<p>Customers can say a number out loud, and the agent's <em>TicketNumber</em> entity can recognise it in a message (Part 3). The real row ID (a GUID) is never shown to a customer.</p>
+
+<h2 id="choices"><span class="ico ico-cond"></span>Choices: labels for people, numbers for flows</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Column</th><th>Values</th></tr></thead><tbody><tr><td>Ticket Status</td><td>Open · Awaiting return · Scanned at warehouse · Repaired · Replaced · Closed · In progress · Awaiting customer · Escalated · Resolved</td></tr><tr><td>Priority</td><td>Low · Medium · High · Urgent</td></tr><tr><td>Category</td><td>Repair · Delivery · Billing · Returns · General</td></tr><tr><td>Source</td><td>Agent chat · Email · Phone · Staff</td></tr></tbody></table></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>The same value, two ways</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Label (what people see)</th><th>Stored value (what flows filter on)</th></tr></thead><tbody><tr><td><span class="chip ">Open</span></td><td><code>949870000</code></td></tr><tr><td><span class="chip ">Scanned at warehouse</span></td><td><code>949870002</code></td></tr><tr><td><span class="chip ">Closed</span></td><td><code>949870005</code></td></tr><tr><td><span class="chip ">Resolved</span></td><td><code>949870009</code></td></tr><tr><td><span class="chip ">High</span> (priority)</td><td><code>949870002</code></td></tr></tbody></table></div></div>
+<p>Flow filters use the numbers, for example <code>vin_ticketstatus ne 949870005</code>. The 94987 prefix comes from the publisher (Part 11). This is why the flows in this deep dive contain long numbers.</p>
+
+<h2 id="sla"><span class="ico ico-clock"></span>SLA columns: promises with a deadline</h2>
+<figure class="shot"><img src="../assets/img/vink/care-hub-sla.webp" alt="TKT-1020 Work and SLA section: status Open, priority High, support team Logistics, respond by 11/26/2026 4:57 PM, resolve by 11/27/2026 12:57 PM, overdue No" width="1312" height="399" loading="lazy">
+<figcaption>TKT-1020's SLA columns in the staff app, shown in the viewer's local time (India).</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>TKT-1020's SLA, in UTC and in India</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Column</th><th>Stored (UTC)</th><th>Shown in India (+5:30)</th><th>Set by</th></tr></thead><tbody><tr><td>Created on</td><td>07:27, 26 Nov</td><td>12:57 PM</td><td>Dataverse</td></tr><tr><td>Respond by</td><td>11:27, 26 Nov</td><td>4:57 PM</td><td>Create Ticket flow: + 4 h (High)</td></tr><tr><td>Resolve by</td><td>07:27, 27 Nov</td><td>12:57 PM, 27 Nov</td><td>Create Ticket flow: + 24 h</td></tr><tr><td>Overdue</td><td>No</td><td>No</td><td>Daily SLA Check flow (Part 8)</td></tr></tbody></table></div></div>
+<p>Dataverse stores time in UTC and the app converts it for each viewer. The chat shows UTC with the label written out, so it's never ambiguous. See <a href="../power-automate/dates-and-time-zones.html">Dates and time zones</a>.</p>
+
+<h2 id="visible"><span class="ico ico-warn"></span>Customer-visible vs internal updates</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>One timeline, two audiences</p><div class="fl"><div class="nd act">A flow or a person adds a <strong>Ticket Update</strong> row</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span><code>vin_VisibleToCustomer</code> = Yes?</div><div class="ar"></div><div class="br"><div><span class="lbl t">Yes</span><div class="nd ok">Shown in chat timeline and emails</div></div><div><span class="lbl f">No</span><div class="nd mute">Staff only: internal notes</div></div></div></div></div>
+
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Dataverse</strong>: the database behind Power Platform, with security, relationships and auditing built in.</p><p><strong>GUID</strong>: the long unique ID every row has.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Showing GUIDs to customers instead of a readable autonumber.</li><li>Filtering on choice labels instead of their stored values.</li><li>Storing local time instead of UTC.</li><li>One notes field instead of a separate updates table: you lose who, when and visibility.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/autonumber-fields">Autonumber columns</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/create-edit-entities-portal">Create and edit tables</a></li></ul>
+      </div>
+      <div class="pager"><a href="index.html">← Vink Customer Care Agent: the complete deep dive</a><a href="agent-instructions.html">2 · The agent, orchestration and instructions →</a></div>
+    </article>
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#basics">From the root: tables, rows, columns</a></li><li><a href="#tables">The tables and their key columns</a></li><li><a href="#autonumber">Autonumbers: TKT-1020 without code</a></li><li><a href="#choices">Choices: labels for people, numbers for flows</a></li><li><a href="#sla">SLA columns: promises with a deadline</a></li><li><a href="#visible">Customer-visible vs internal updates</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol></nav>
+      <nav class="side-box" aria-label="All parts"><h2>The deep dive</h2><ol start="0"><li><a href="index.html">Overview</a></li><li><a href="dataverse-model.html" aria-current="page">The Dataverse data model</a></li><li><a href="agent-instructions.html">The agent, orchestration and instructions</a></li><li><a href="topics-entities.html">Topics, inputs, variables and entities</a></li><li><a href="identify-customer.html">Verifying the customer</a></li><li><a href="agent-flows-tools.html">Agent flows as tools</a></li><li><a href="ai-triage.html">AI triage, the review card and duplicate checks</a></li><li><a href="knowledge-billing-agent.html">Knowledge and the Billing child agent</a></li><li><a href="background-flows.html">Background flows: routing, SLA, timeline and email</a></li><li><a href="autonomous-trigger.html">The autonomous warehouse trigger</a></li><li><a href="care-hub-app.html">The Vink Care Hub staff app</a></li><li><a href="alm-packaging.html">Packaging: solution, environment variables and source</a></li></ol></nav>
+      <div class="side-box">
+        <strong>Personal project</strong>
+        <p>Built in my own developer environment. Vink Electronics is fictional and all customers and orders are sample data.</p>
+        <a href="https://github.com/VinayMatsa/vink-customer-care-agent">Solution source on GitHub →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

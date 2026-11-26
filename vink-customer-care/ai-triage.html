@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6 · AI triage, the review card and duplicate checks | Vinay Matsa</title>
+<meta name="description" content="How an AI prompt drafts the ticket, why its output is parsed defensively, how the customer confirms it on a card, and how Create Ticket prevents duplicates and sets team and SLA.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="6 · AI triage, the review card and duplicate checks">
+<meta property="og:description" content="How an AI prompt drafts the ticket, why its output is parsed defensively, how the customer confirms it on a card, and how Create Ticket prevents duplicates and sets team and SLA.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="../#projects">Projects</a> / <a href="index.html">Vink Customer Care Agent</a></p>
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Project deep dive</li>
+        <li>Vink Customer Care Agent · Part 6 of 11</li>
+      </ul>
+      <h1>6 · AI triage, the review card and duplicate checks</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-26">26 November 2026</time>
+        <span>4 min read</span>
+      </div>
+      <div class="prose">
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Where this page fits</p><div class="fl"><div class="br"><div><span class="lbl d">Step 1</span><div class="nd mute">Customer chat</div></div><div><span class="lbl c">This page · Step 2</span><div class="nd ok">Agent: instructions, topics, knowledge</div></div><div><span class="lbl c">This page · Step 3</span><div class="nd ok">Agent flows (tools)</div></div></div><div class="ar"></div><div class="br"><div><span class="lbl c">This page · Step 4</span><div class="nd ok">Dataverse tables</div></div><div><span class="lbl d">Step 5</span><div class="nd mute">Background flows</div></div><div><span class="lbl d">Step 6</span><div class="nd mute">Care Hub app</div></div></div></div><p class="viz-note">Highlighted boxes are what this page explains. The chain runs left to right, top row then bottom row.</p></div>
+<div class="cards"><div><strong><span class="ico ico-check"></span>The story so far</strong>Alex is verified and his description is known. Now the agent drafts the ticket for him instead of asking five questions.</div></div>
+
+<h2 id="why"><span class="ico ico-scope"></span>Why AI triage plus a human check</h2>
+<div class="cards"><div><strong>What</strong>A prompt reads the description and suggests subject, category, priority and a staff summary. The customer confirms or changes them on a card.</div><div><strong>Why</strong>Customers don't know internal categories or priorities, but they know if something's wrong. AI drafts; the person decides.</div><div><strong>Demo</strong><em>Laptop … arrived with a cracked corner … box was crushed</em> → Damaged Laptop Delivery · Delivery · High.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-cond"></span>New Ticket, after verification</p><div class="fl"><div class="nd act">AI prompt: description → JSON suggestion</div><div class="ar"></div><div class="nd">Clean and parse the JSON, with fallbacks</div><div class="ar"></div><div class="nd"><strong>List Customer Orders</strong> → order choices</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Review card: Create ticket or Cancel?</div><div class="ar"></div><div class="br"><div><span class="lbl f">Cancel</span><div class="nd mute">Nothing created</div></div><div><span class="lbl t">Create</span><div class="nd act"><strong>Create Ticket</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Result?</div></div></div><div class="ar"></div><div class="br"><div><span class="lbl t">Created</span><div class="nd ok">Confirm number, team, SLA</div></div><div><span class="lbl c">Duplicate</span><div class="nd">Card: add to existing, or open a separate one</div></div></div></div></div>
+
+<h2 id="parse"><span class="ico ico-expr"></span>Parsing AI output safely</h2>
+<p>A prompt returns text. Models sometimes wrap JSON in <code>```json</code> fences or add line breaks, so the topic cleans it first, then reads each field with a fallback:</p>
+<pre><code>Topic.TriageText = Substitute(Substitute(Substitute(Topic.TriageResult.text,
+                     &quot;```json&quot;, &quot;&quot;), &quot;```&quot;, &quot;&quot;), Char(10), &quot; &quot;)
+Topic.Subject  = IfError(Text(ParseJSON(Topic.TriageText).subject),  Left(Topic.Description, 60))
+Topic.Category = IfError(Text(ParseJSON(Topic.TriageText).category), &quot;General&quot;)
+Topic.Priority = IfError(Text(ParseJSON(Topic.TriageText).priority), &quot;Medium&quot;)
+Topic.Summary  = IfError(Text(ParseJSON(Topic.TriageText).summary),  Topic.Description)</code></pre>
+<div class="viz"><p class="viz-title"><span class="ico ico-expr"></span>What happens if the AI misbehaves</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Field</th><th>Good output</th><th>If parsing fails</th></tr></thead><tbody><tr><td>Subject</td><td><span class="chip ok">Damaged Laptop Delivery</span></td><td>First 60 characters of the description</td></tr><tr><td>Category</td><td><span class="chip ok">Delivery</span></td><td><span class="chip ">General</span></td></tr><tr><td>Priority</td><td><span class="chip ok">High</span></td><td><span class="chip ">Medium</span></td></tr><tr><td>Summary</td><td>Laptop from order ORD-10421 arrived with a cracked screen corner…</td><td>The description itself</td></tr></tbody></table></div></div>
+<p>The ticket can always be created, even if the AI step returns something unexpected. See <a href="../power-automate/ai-prompts-clean-json.html">Clean JSON from AI prompts</a>.</p>
+
+<h2 id="card"><span class="ico ico-check"></span>The review card</h2>
+<figure class="shot"><img src="../assets/img/vink/triage-card.webp" alt="Adaptive card Here&#x27;s your ticket: Subject Damaged Laptop Delivery, Category Delivery, Priority High, Which order is it about? Not about a specific order, Summary for our team, Create ticket and Cancel buttons" width="430" height="495" loading="lazy">
+<figcaption>Prefilled by the AI. Every field is editable.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/vink/order-choice.webp" alt="The order dropdown open with ORD-10421 Vink ProBook 14 Laptop 14 Mar 2026 Delivered, ORD-10398 Vink 65W USB-C Charger 01 Feb 2026 Delivered, and Not about a specific order" width="430" height="340" loading="lazy">
+<figcaption>The order list comes from List Customer Orders: only Alex's own orders. Alex picked ORD-10421.</figcaption></figure>
+<p>Choices are built in the flow as <code>id~label|id~label</code> text and split in the card with <code>ForAll(Split(…))</code>. Simple text crosses the flow-to-topic boundary reliably.</p>
+
+<h2 id="create"><span class="ico ico-data"></span>Inside Create Ticket</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Create Ticket for TKT-1020</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Step</th><th>Rule</th><th>Result</th></tr></thead><tbody><tr><td>Category</td><td>Must be one of Repair, Delivery, Billing, Returns, General</td><td><span class="chip ">Delivery</span></td></tr><tr><td>Team</td><td>Repair/Returns → Repairs · Billing → Billing · else Logistics</td><td><span class="chip ">Logistics</span></td></tr><tr><td>Priority</td><td>VIP customers: Low/Medium become High</td><td><span class="chip ">High</span> (not VIP, kept)</td></tr><tr><td>SLA</td><td>High: reply in 4 h, resolve in 24 h</td><td>11:27 / 07:27 next day (UTC)</td></tr><tr><td>Order</td><td>ORD-10421 must belong to this customer</td><td><span class="chip ok">linked</span></td></tr><tr><td>Duplicate?</td><td>Open ticket, same customer and category?</td><td><span class="chip ok">no</span></td></tr><tr><td>Create</td><td>Ticket row with source Agent chat</td><td><span class="chip ok">TKT-1020</span></td></tr></tbody></table></div></div>
+<pre><code>@json(if(equals(outputs(&#x27;Priority&#x27;),&#x27;Low&#x27;),    &#x27;{&quot;v&quot;:949870000,&quot;r&quot;:24,&quot;s&quot;:120}&#x27;,
+       if(equals(outputs(&#x27;Priority&#x27;),&#x27;Medium&#x27;), &#x27;{&quot;v&quot;:949870001,&quot;r&quot;:8,&quot;s&quot;:72}&#x27;,
+       if(equals(outputs(&#x27;Priority&#x27;),&#x27;High&#x27;),   &#x27;{&quot;v&quot;:949870002,&quot;r&quot;:4,&quot;s&quot;:24}&#x27;,
+                                                &#x27;{&quot;v&quot;:949870003,&quot;r&quot;:1,&quot;s&quot;:8}&#x27;))))</code></pre>
+<p>One expression turns the priority into the stored choice value (<code>v</code>), reply hours (<code>r</code>) and resolve hours (<code>s</code>). <a href="../power-automate/parse-json.html">json()</a> turns the text into an object, so later steps read <code>outputs('SLA')?['r']</code>.</p>
+
+<h2 id="dup"><span class="ico ico-warn"></span>The duplicate check</h2>
+<pre><code>_vin_customer_value eq &lt;contact id&gt;
+and vin_category eq &lt;category value&gt;
+and vin_ticketstatus ne 949870005      (Closed)
+and vin_ticketstatus ne 949870009      (Resolved)</code></pre>
+<div class="viz"><p class="viz-title"><span class="ico ico-warn"></span>When a duplicate is found</p><div class="fl"><div class="nd">Flow returns <code>result = Duplicate</code> and the existing ticket number</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Card: add to TKT-xxxx, or open a separate ticket?</div><div class="ar"></div><div class="br"><div><span class="lbl c">Add</span><div class="nd"><strong>Add Customer Reply</strong> on the existing ticket</div></div><div><span class="lbl c">Separate</span><div class="nd">Create Ticket again with <code>ForceNew = yes</code></div></div></div></div></div>
+<p>Alex already had an open <em>Billing</em> ticket, but this one is <em>Delivery</em>, so it was created. See <a href="../power-automate/upsert-duplicates.html">Upserts and duplicate checks</a>.</p>
+<figure class="shot"><img src="../assets/img/vink/chat-created.webp" alt="Done. Your ticket is TKT-1020. Team: Logistics, Priority: High, First reply by: 26 Nov 2026, 11:27 UTC, Resolution target: 27 Nov 2026, 07:27 UTC. I&#x27;ve emailed you a confirmation." width="440" height="190" loading="lazy">
+<figcaption>The topic's confirmation, built from the flow's outputs.</figcaption></figure>
+<figure class="shot"><img src="../assets/img/vink/execution-summary.webp" alt="Execution summary: the topic description and The topic execution completed with status Completed" width="790" height="220" loading="lazy">
+<figcaption>The activity map closes the New Ticket run.</figcaption></figure>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Trusting AI output without parsing fallbacks.</li><li>Creating the ticket without a confirmation step.</li><li>Showing every order in the system in a dropdown.</li><li>No duplicate check: one problem, five tickets.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-create-edit-topics">Create and edit topics</a></li><li><a href="https://learn.microsoft.com/en-us/training/paths/design-agent-conversations-responses-topics-copilot-studio/">Design agent conversations and responses using topics (training)</a></li></ul>
+      </div>
+      <div class="pager"><a href="agent-flows-tools.html">← 5 · Agent flows as tools</a><a href="knowledge-billing-agent.html">7 · Knowledge and the Billing child agent →</a></div>
+    </article>
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#why">Why AI triage plus a human check</a></li><li><a href="#parse">Parsing AI output safely</a></li><li><a href="#card">The review card</a></li><li><a href="#create">Inside Create Ticket</a></li><li><a href="#dup">The duplicate check</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol></nav>
+      <nav class="side-box" aria-label="All parts"><h2>The deep dive</h2><ol start="0"><li><a href="index.html">Overview</a></li><li><a href="dataverse-model.html">The Dataverse data model</a></li><li><a href="agent-instructions.html">The agent, orchestration and instructions</a></li><li><a href="topics-entities.html">Topics, inputs, variables and entities</a></li><li><a href="identify-customer.html">Verifying the customer</a></li><li><a href="agent-flows-tools.html">Agent flows as tools</a></li><li><a href="ai-triage.html" aria-current="page">AI triage, the review card and duplicate checks</a></li><li><a href="knowledge-billing-agent.html">Knowledge and the Billing child agent</a></li><li><a href="background-flows.html">Background flows: routing, SLA, timeline and email</a></li><li><a href="autonomous-trigger.html">The autonomous warehouse trigger</a></li><li><a href="care-hub-app.html">The Vink Care Hub staff app</a></li><li><a href="alm-packaging.html">Packaging: solution, environment variables and source</a></li></ol></nav>
+      <div class="side-box">
+        <strong>Personal project</strong>
+        <p>Built in my own developer environment. Vink Electronics is fictional and all customers and orders are sample data.</p>
+        <a href="https://github.com/VinayMatsa/vink-customer-care-agent">Solution source on GitHub →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

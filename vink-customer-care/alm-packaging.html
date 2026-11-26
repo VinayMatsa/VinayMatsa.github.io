@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11 · Packaging: solution, environment variables and source | Vinay Matsa</title>
+<meta name="description" content="How the whole system ships as one solution, what makes it portable between environments, and how the unpacked source makes it reviewable on GitHub.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="11 · Packaging: solution, environment variables and source">
+<meta property="og:description" content="How the whole system ships as one solution, what makes it portable between environments, and how the unpacked source makes it reviewable on GitHub.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="../#projects">Projects</a> / <a href="index.html">Vink Customer Care Agent</a></p>
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Project deep dive</li>
+        <li>Vink Customer Care Agent · Part 11 of 11</li>
+      </ul>
+      <h1>11 · Packaging: solution, environment variables and source</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-26">26 November 2026</time>
+        <span>4 min read</span>
+      </div>
+      <div class="prose">
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Where this page fits</p><div class="fl"><div class="br"><div><span class="lbl c">This page · Step 1</span><div class="nd ok">Customer chat</div></div><div><span class="lbl c">This page · Step 2</span><div class="nd ok">Agent: instructions, topics, knowledge</div></div><div><span class="lbl c">This page · Step 3</span><div class="nd ok">Agent flows (tools)</div></div></div><div class="ar"></div><div class="br"><div><span class="lbl c">This page · Step 4</span><div class="nd ok">Dataverse tables</div></div><div><span class="lbl c">This page · Step 5</span><div class="nd ok">Background flows</div></div><div><span class="lbl c">This page · Step 6</span><div class="nd ok">Care Hub app</div></div></div></div><p class="viz-note">Highlighted boxes are what this page explains. The chain runs left to right, top row then bottom row.</p></div>
+<div class="cards"><div><strong><span class="ico ico-check"></span>The story so far</strong>Every part so far lives in one solution. This part is about moving it safely.</div></div>
+
+<h2 id="solution"><span class="ico ico-scope"></span>One solution, every component</h2>
+<div class="cards"><div><strong>What</strong>A solution is a container that carries tables, the app, flows, the agent, prompts, environment variables and connection references together.</div><div><strong>Why</strong>Moving parts one by one breaks the links between them. A solution moves them as a set.</div><div><strong>Demo</strong><code>CustomerCareAgent_1_0_0_1.zip</code>, imported with Solutions → Import.</div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Component type</th><th>In this solution</th></tr></thead><tbody><tr><td>Tables</td><td>7 (Contact extended + 6 custom), choices, views, forms</td></tr><tr><td>Model-driven app</td><td>Vink Care Hub, dashboard, charts</td></tr><tr><td>Agent</td><td>Vink Customer Care Agent: topics, entities, child agent, knowledge, trigger</td></tr><tr><td>Cloud flows</td><td>11 agent flows + Ticket Created, Status Changed, Daily SLA Check, Warehouse scan</td></tr><tr><td>Prompts</td><td>Ticket triage, Fault Summary for Technicians</td></tr><tr><td>Environment variables</td><td>vin_CCSupportMailbox, vin_CCCustomerEmailOverride</td></tr></tbody></table></div>
+
+<h2 id="portable"><span class="ico ico-data"></span>What makes it portable</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Problem</th><th>Vink's answer</th></tr></thead><tbody><tr><td>Mailboxes differ per environment</td><td>Environment variables, asked for at import</td></tr><tr><td>Connections belong to people</td><td>Connection references, chosen at import</td></tr><tr><td>Customer emails during testing</td><td><code>vin_CCCustomerEmailOverride</code> redirects them</td></tr><tr><td>Names clashing with other solutions</td><td>Publisher prefix <code>vin_</code> on every component</td></tr></tbody></table></div>
+<p>See <a href="../power-automate/solutions.html">Solutions</a>, <a href="../power-automate/environment-variables.html">Environment variables</a> and <a href="../power-automate/connection-references.html">Connection references</a>.</p>
+
+<h2 id="source"><span class="ico ico-expr"></span>Readable source on GitHub</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Folder</th><th>Contains</th></tr></thead><tbody><tr><td><code>src/botcomponents/</code></td><td>Agent instructions, topics (YAML), entities, child agent, tools</td></tr><tr><td><code>src/Workflows/</code></td><td>Every flow definition as JSON</td></tr><tr><td><code>src/customizations.xml</code></td><td>Tables, columns, forms, views, the app</td></tr><tr><td><code>src/environmentvariabledefinitions/</code></td><td>The two variables</td></tr></tbody></table></div>
+<p>The <code>src</code> folder is the unpacked solution, so every snippet in this deep dive can be checked against the source. See Level 10's <a href="../power-automate/source-control-cli.html">Source control with Git and the CLI</a>.</p>
+
+<h2 id="responsible"><span class="ico ico-stop"></span>Responsible AI, recapped</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Safeguard</th><th>Where</th><th>Part</th></tr></thead><tbody><tr><td>Verification before any account data</td><td>Identify Customer guard in every account topic</td><td><a href="identify-customer.html">4</a></td></tr><tr><td>Never ask for card numbers, passwords or one-time codes</td><td>Main and Billing instructions</td><td><a href="agent-instructions.html">2</a></td></tr><tr><td>AI suggests, customer confirms</td><td>Review card</td><td><a href="ai-triage.html">6</a></td></tr><tr><td>Answers grounded in Vink content, web search off</td><td>Knowledge</td><td><a href="knowledge-billing-agent.html">7</a></td></tr><tr><td>A human when needed</td><td>Escalate topic; specialist handover for disputes</td><td><a href="topics-entities.html">3</a></td></tr><tr><td>Safety first</td><td>Stop using and unplug for swollen batteries or smoke</td><td><a href="agent-instructions.html">2</a></td></tr></tbody></table></div>
+<p>Explore the source: <a href="https://github.com/VinayMatsa/vink-customer-care-agent">vink-customer-care-agent on GitHub</a>.</p>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/solution-concepts-alm">Solution concepts</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables">Environment variables overview</a></li></ul>
+      </div>
+      <div class="pager"><a href="care-hub-app.html">← 10 · The Vink Care Hub staff app</a><a href="index.html">Back to the overview →</a></div>
+    </article>
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#solution">One solution, every component</a></li><li><a href="#portable">What makes it portable</a></li><li><a href="#source">Readable source on GitHub</a></li><li><a href="#responsible">Responsible AI, recapped</a></li><li><a href="#references">References</a></li></ol></nav>
+      <nav class="side-box" aria-label="All parts"><h2>The deep dive</h2><ol start="0"><li><a href="index.html">Overview</a></li><li><a href="dataverse-model.html">The Dataverse data model</a></li><li><a href="agent-instructions.html">The agent, orchestration and instructions</a></li><li><a href="topics-entities.html">Topics, inputs, variables and entities</a></li><li><a href="identify-customer.html">Verifying the customer</a></li><li><a href="agent-flows-tools.html">Agent flows as tools</a></li><li><a href="ai-triage.html">AI triage, the review card and duplicate checks</a></li><li><a href="knowledge-billing-agent.html">Knowledge and the Billing child agent</a></li><li><a href="background-flows.html">Background flows: routing, SLA, timeline and email</a></li><li><a href="autonomous-trigger.html">The autonomous warehouse trigger</a></li><li><a href="care-hub-app.html">The Vink Care Hub staff app</a></li><li><a href="alm-packaging.html" aria-current="page">Packaging: solution, environment variables and source</a></li></ol></nav>
+      <div class="side-box">
+        <strong>Personal project</strong>
+        <p>Built in my own developer environment. Vink Electronics is fictional and all customers and orders are sample data.</p>
+        <a href="https://github.com/VinayMatsa/vink-customer-care-agent">Solution source on GitHub →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

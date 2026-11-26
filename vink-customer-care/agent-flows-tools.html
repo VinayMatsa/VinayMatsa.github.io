@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5 · Agent flows as tools | Vinay Matsa</title>
+<meta name="description" content="How the agent reads and writes Dataverse through Power Automate agent flows: the trigger, inputs and outputs, the 100-second limit, try/catch and status outputs.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="5 · Agent flows as tools">
+<meta property="og:description" content="How the agent reads and writes Dataverse through Power Automate agent flows: the trigger, inputs and outputs, the 100-second limit, try/catch and status outputs.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="../">Vinay Matsa</a>
+    <div class="nav-links">
+      <a href="../#about">About</a>
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../power-automate/">Learn</a>
+      <a href="../#articles">Articles</a>
+      <a href="../#certifications">Certifications</a>
+      <a class="btn btn-primary" href="../#contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <p class="wrap crumbs"><a href="../">Home</a> / <a href="../#projects">Projects</a> / <a href="index.html">Vink Customer Care Agent</a></p>
+  <div class="wrap article-layout">
+    <article class="article">
+      <ul class="series">
+        <li class="dark">Project deep dive</li>
+        <li>Vink Customer Care Agent · Part 5 of 11</li>
+      </ul>
+      <h1>5 · Agent flows as tools</h1>
+      <div class="byline">
+        <span class="mini" aria-hidden="true">VM</span>
+        <strong>Vinay Matsa</strong>
+        <time datetime="2026-11-26">26 November 2026</time>
+        <span>4 min read</span>
+      </div>
+      <div class="prose">
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Where this page fits</p><div class="fl"><div class="br"><div><span class="lbl d">Step 1</span><div class="nd mute">Customer chat</div></div><div><span class="lbl d">Step 2</span><div class="nd mute">Agent: instructions, topics, knowledge</div></div><div><span class="lbl c">This page · Step 3</span><div class="nd ok">Agent flows (tools)</div></div></div><div class="ar"></div><div class="br"><div><span class="lbl c">This page · Step 4</span><div class="nd ok">Dataverse tables</div></div><div><span class="lbl d">Step 5</span><div class="nd mute">Background flows</div></div><div><span class="lbl d">Step 6</span><div class="nd mute">Care Hub app</div></div></div></div><p class="viz-note">Highlighted boxes are what this page explains. The chain runs left to right, top row then bottom row.</p></div>
+<div class="cards"><div><strong><span class="ico ico-check"></span>The story so far</strong>Verification needed data the agent doesn't have. It got it by calling a flow. Every read and write in Vink works this way.</div></div>
+
+<h2 id="root"><span class="ico ico-scope"></span>From the root: why flows?</h2>
+<div class="cards"><div><strong>What</strong>An <strong>agent flow</strong> is a Power Automate flow the agent can call like a function: inputs in, outputs back.</div><div><strong>Why</strong>Flows do what the AI shouldn't improvise: exact queries, rules, record creation, emails. The result is the same every time.</div><div><strong>Demo</strong>Find Customer, Create Ticket, Get Ticket Details and eight more.</div></div>
+<figure class="shot"><img src="../assets/img/vink/tools.webp" alt="Tools list: Customer Care Add Customer Reply, Create Ticket, Escalate Ticket, Find Customer, Get Ticket Details, List Customer Orders, List Customer Tickets, Record CSAT, Register Customer, all of type Flow and available to Vink Customer Care Agent" width="906" height="497" loading="lazy">
+<figcaption>The agent's tools: 11 flows and 2 prompts.</figcaption></figure>
+
+<h2 id="contract"><span class="ico ico-data"></span>The contract: trigger in, response out</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>Every Vink agent flow</p><div class="fl"><div class="nd act"><strong>When an agent calls the flow</strong>: typed inputs (ContactId, OrderNumber, Category…)</div><div class="ar"></div><div class="nd">Initialize every output variable with a safe default</div><div class="ar"></div><div class="br"><div><span class="lbl t">Try</span><div class="nd">Dataverse queries and writes</div><div class="ar"></div><div class="nd">Set output variables</div></div><div><span class="lbl f">Catch</span><div class="nd mute">Set result to an error status</div></div></div><div class="ar"></div><div class="nd ok"><strong>Respond to the agent</strong>: always runs, returns the variables</div></div></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Create Ticket</th><th>Name</th><th>Example from TKT-1020</th></tr></thead><tbody><tr><td>Inputs</td><td>ContactId, OrderNumber, Category, Subject, Description, AISummary, Priority, ForceNew, CustomerEmail</td><td>Delivery · High · ORD-10421 · ForceNew = no</td></tr><tr><td>Outputs</td><td>result, duplicate, ticketnumber, status, respondby, resolveby, team, priority</td><td>Created · TKT-1020 · Logistics · High</td></tr></tbody></table></div>
+<p>The topic binds its variables to these inputs and outputs (Part 6 shows the call). Because the flow always reaches <em>Respond</em>, the topic always gets a <code>result</code> it can branch on: Created, Duplicate, or an error.</p>
+
+<h2 id="limit"><span class="ico ico-clock"></span>The 100-second rule</h2>
+<div class="cards"><div><strong>What</strong>An agent flow must respond within 100 seconds; work after the Respond step can keep running.</div><div><strong>Why</strong>The customer is waiting in the chat. A slow flow times out and the topic gets no answer.</div><div><strong>Demo</strong>Find Customer queries by email and order with <code>$top=1</code> and selected columns only.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-clock"></span>Keeping flows fast</p><div class="fl"><div class="nd">Filter in Dataverse (OData), not in loops</div><div class="ar"></div><div class="nd"><code>$select</code> only needed columns, <code>$top</code> where one row is expected</div><div class="ar"></div><div class="nd">Put slow follow-up work (emails, logs) in background flows (Part 8)</div><div class="ar"></div><div class="nd ok">Respond in a few seconds</div></div></div>
+
+<h2 id="inline"><span class="ico ico-expr"></span>Calling flows from topics vs letting the agent choose</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Way</th><th>How</th><th>Used in Vink for</th></tr></thead><tbody><tr><td>Inside a topic</td><td>A flow node with fixed input bindings</td><td>All account flows, so verification and order are guaranteed</td></tr><tr><td>As an agent-level tool</td><td>The orchestrator decides from the tool's description</td><td>Repair Update, when the warehouse trigger fires (Part 9)</td></tr></tbody></table></div>
+<figure class="shot"><img src="../assets/img/vink/newticket-canvas.webp" alt="New Ticket topic canvas showing a Customer Care - List Customer Orders flow node with outputs ordercount, orderchoices and orderlist bound to topic variables" width="570" height="490" loading="lazy">
+<figcaption>A flow called inside New Ticket: its outputs land in topic variables the card uses next.</figcaption></figure>
+<h3>Watch out</h3><ul><li>Tool descriptions say <em>Used by topics only</em> where the orchestrator shouldn't call them directly.</li><li>Text inputs arrive as text: flows trim and convert them (<code>trim()</code>, <code>toUpper()</code>).</li><li>Return small text values, not whole records.</li></ul>
+<details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
+<div class="layer-body"><p><strong>Agent flow</strong>: a flow with the <em>When an agent calls the flow</em> trigger and a <em>Respond to the agent</em> action.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>A flow that can end without responding.</li><li>Returning raw JSON for the agent to interpret.</li><li>Slow loops inside an agent flow.</li><li>Letting the orchestrator call write-tools without verification.</li></ul>
+<p>Related: <a href="../power-automate/copilot-studio-agent-flows.html">Copilot Studio agent flows</a>, <a href="../power-automate/scopes-try-catch.html">Scopes and try/catch</a>, <a href="../articles/flowactiontimedout-agent-flows.html">FlowActionTimedOut in agent flows</a>.</p>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-flow-create">Create an agent flow as a tool</a></li><li><a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/flow-agent">Add an agent flow as a tool to an agent</a></li></ul>
+      </div>
+      <div class="pager"><a href="identify-customer.html">← 4 · Verifying the customer</a><a href="ai-triage.html">6 · AI triage, the review card and duplicate checks →</a></div>
+    </article>
+    <aside class="sidebar">
+      <nav class="side-box" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#root">From the root: why flows?</a></li><li><a href="#contract">The contract: trigger in, response out</a></li><li><a href="#limit">The 100-second rule</a></li><li><a href="#inline">Calling flows from topics vs letting the agent choose</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol></nav>
+      <nav class="side-box" aria-label="All parts"><h2>The deep dive</h2><ol start="0"><li><a href="index.html">Overview</a></li><li><a href="dataverse-model.html">The Dataverse data model</a></li><li><a href="agent-instructions.html">The agent, orchestration and instructions</a></li><li><a href="topics-entities.html">Topics, inputs, variables and entities</a></li><li><a href="identify-customer.html">Verifying the customer</a></li><li><a href="agent-flows-tools.html" aria-current="page">Agent flows as tools</a></li><li><a href="ai-triage.html">AI triage, the review card and duplicate checks</a></li><li><a href="knowledge-billing-agent.html">Knowledge and the Billing child agent</a></li><li><a href="background-flows.html">Background flows: routing, SLA, timeline and email</a></li><li><a href="autonomous-trigger.html">The autonomous warehouse trigger</a></li><li><a href="care-hub-app.html">The Vink Care Hub staff app</a></li><li><a href="alm-packaging.html">Packaging: solution, environment variables and source</a></li></ol></nav>
+      <div class="side-box">
+        <strong>Personal project</strong>
+        <p>Built in my own developer environment. Vink Electronics is fictional and all customers and orders are sample data.</p>
+        <a href="https://github.com/VinayMatsa/vink-customer-care-agent">Solution source on GitHub →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© 2026 Vinay Matsa · Examples use made-up data (Contoso, Alex) from a demo environment.</span>
+    <nav aria-label="Social">
+      <a href="https://www.linkedin.com/in/vinay-matsa-6b579716b">LinkedIn</a>
+      <a href="https://github.com/VinayMatsa">GitHub</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -49,54 +49,31 @@
       </div>
 
       <div class="prose">
-<p>Level 6 covered putting flows in a solution. In an enterprise you then move that solution from development to test to production many times. Doing that well depends on three ideas: <strong>managed vs unmanaged</strong>, <strong>layers</strong>, and <strong>upgrades</strong>.</p>
+<p>Moving a solution from Dev to Test to Prod many times depends on three ideas: <strong>managed vs unmanaged</strong>, <strong>layers</strong>, and <strong>upgrades</strong>.</p>
 
-<h2 id="types">Managed vs unmanaged</h2>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th>Unmanaged</th><th>Managed</th></tr></thead><tbody>
-<tr><td>Where</td><td>Development environments and source control</td><td>Test and production</td></tr>
-<tr><td>Can you edit its objects?</td><td>Yes</td><td>Only what the solution's managed properties allow</td></tr>
-<tr><td>Deleting the solution</td><td>Removes the container; the objects stay</td><td>Removes the solution and everything in it</td></tr>
-<tr><td>Export</td><td>Yes</td><td>No: you always export from the unmanaged source</td></tr>
-</tbody></table></div>
-<p>The export panel says the same thing in one line each:</p>
+<h2 id="types"><span class="ico ico-scope"></span>Managed vs unmanaged</h2>
+<div class="cards"><div><strong>What</strong>Unmanaged is the editable source; managed is the locked package you deploy.</div><div><strong>Why</strong>Deploying unmanaged to Prod makes changes untraceable and hard to remove.</div><div><strong>Demo</strong>The export panel's choice for the demo solution.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-scope"></span>Which export?</p><div class="fl"><div class="nd dec"><span class="ico ico-cond"></span>Where is it going?</div><div class="ar"></div><div class="br"><div><span class="lbl c">Another Dev environment or source control</span><div class="nd ok">Unmanaged</div></div><div><span class="lbl c">Test or Production</span><div class="nd ok">Managed (recommended)</div></div></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l10-export-managed.webp" alt="Export this solution panel: version number 1.0.0.1, Export as Managed (recommended) for test or production, or Unmanaged for another development environment or source control, and Run solution checker on export ticked" width="336" height="506" loading="lazy">
-<figcaption>Pick managed for test and production, and raise the version every time.</figcaption></figure>
+<figcaption>Pick managed for Test and Prod, and raise the version every time.</figcaption></figure>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th></th><th>Unmanaged</th><th>Managed</th></tr></thead><tbody><tr><td>Where</td><td>Dev and source control</td><td>Test and Prod</td></tr><tr><td>Edit objects?</td><td>Yes</td><td>Only what managed properties allow</td></tr><tr><td>Deleting it</td><td>Removes the container; objects stay</td><td>Removes the solution and everything in it</td></tr><tr><td>Export</td><td>Yes</td><td>No: export from the unmanaged source</td></tr></tbody></table></div>
 
-<h2 id="layers">Layers</h2>
-<p>Every object (a flow, a table, an environment variable) can be touched by several solutions. Dataverse keeps each change as a <strong>layer</strong>. Managed solutions stack in the order they were installed, and one <strong>unmanaged layer</strong> sits on top. The top layer is what runs.</p>
+<h2 id="layers"><span class="ico ico-data"></span>Layers: what actually runs</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The layer stack for one flow (top wins)</p><div class="fl"><div class="nd ok"><strong>Unmanaged layer</strong> (Active): someone edited in this environment</div><div class="ar"></div><div class="nd">Managed layer: solution v1.0.0.2</div><div class="ar"></div><div class="nd">Managed layer: solution v1.0.0.1</div></div><p class="viz-note">In Prod, an unmanaged layer on top hides every later managed upgrade.</p></div>
 <figure class="shot"><img src="../assets/img/pa/l10-layers-menu.webp" alt="Solution object menu: Advanced, with Add required objects, Show dependencies, See solution layers, Managed properties, Remove active customizations and Add to solution" width="420" height="360" loading="lazy">
-<figcaption>Advanced, then See solution layers, on any object in a solution.</figcaption></figure>
+<figcaption>Advanced → See solution layers.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l10-solution-layers.webp" alt="Solution Layers view: one row, order 1, Unmanaged layer, Default Publisher for the organisation, layer status Active" width="1184" height="85" loading="lazy">
-<figcaption>In development, a flow has only its unmanaged (Active) layer.</figcaption></figure>
-<p>In production, the same view should show only managed layers. If someone edits a flow directly in production, an unmanaged layer appears on top, and your next managed upgrade is <em>hidden</em> under it: you deploy a fix and nothing changes. <strong>Remove active customizations</strong> deletes that unmanaged layer so the managed version shows again.</p>
+<figcaption>In Dev, a flow has only its unmanaged (Active) layer.</figcaption></figure>
+<p>If a deployed fix doesn't take effect, check the layers; <strong>Remove active customizations</strong> deletes the unmanaged layer so the managed version shows.</p>
 
-<h2 id="upgrades">Shipping new versions</h2>
-<ul>
-<li><strong>Update</strong> (the default import): replaces the solution's layer with the new version. Objects you removed from the solution are left behind.</li>
-<li><strong>Upgrade</strong>: also deletes objects that are no longer in the new version. Use it when you've removed flows or columns.</li>
-<li><strong>Stage for upgrade</strong>: imports the new version alongside the old one, so you can migrate data before applying the upgrade.</li>
-<li><strong>Patches</strong>: small partial solutions. Microsoft's guidance is to prefer full-solution updates; patches complicate the layer stack.</li>
-</ul>
-<p>Version numbers are <code>major.minor.build.revision</code>. Raise one on every export, so anyone can tell which build is installed.</p>
+<h2 id="upgrades"><span class="ico ico-arrow"></span>Shipping new versions</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-arrow"></span>Import option</th><th>What it does</th><th>Use when</th></tr></thead><tbody><tr><td>Update (default)</td><td>Replaces the layer; removed objects stay behind</td><td>You only added or changed things</td></tr><tr><td>Upgrade</td><td>Also deletes objects no longer in the solution</td><td>You removed flows or columns</td></tr><tr><td>Stage for upgrade</td><td>Imports alongside the old one, then apply</td><td>Data must be migrated first</td></tr><tr><td>Patch</td><td>A partial solution</td><td>Prefer full updates; patches complicate layers</td></tr></tbody></table></div>
+<p>Versions are <code>major.minor.build.revision</code>; raise one on every export.</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Solution</strong>: a package that holds your flows, apps, tables and settings so they can move between environments together.</p>
-<p><strong>Environment</strong>: a separate space with its own data and apps, such as Dev, Test or Prod.</p>
-<p><strong>Layer</strong>: one solution's version of an object. Layers stack, and the top one wins.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Build only in an unmanaged solution in a development environment, with your own publisher prefix.</li><li>Before each release, raise the version and export as <strong>Managed</strong>.</li><li>Import into test with the upgrade option if you removed anything.</li><li>In test and production, never edit objects directly. Check <em>See solution layers</em> if a deployed change seems not to take effect.</li><li>Keep the unmanaged export (or better, source control) as your master copy.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Importing unmanaged solutions into production. The objects become editable there and can't be removed cleanly.</li>
-<li>Hot-fixing a flow in production, which creates an unmanaged layer that blocks future deployments.</li>
-<li>Exporting with the same version number every time.</li>
-<li>Using the default publisher (prefix <code>new_</code> or <code>cr123_</code>) for real work.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/solution-concepts-alm">Solution concepts</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/solution-layers-alm">Solution layers and merge behavior</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/update-solutions-alm">Create and update custom solutions for ALM</a></li></ul>
+<div class="layer-body"><p><strong>Layer</strong>: one solution's version of an object; layers stack and the top one wins.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Unmanaged imports into Prod.</li><li>Hot-fixing in Prod, creating an unmanaged layer.</li><li>The same version number every export.</li><li>The default publisher.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/solution-concepts-alm">Solution concepts</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/solution-layers-alm">Solution layers and merge behavior</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/update-solutions-alm">Create and update custom solutions for ALM</a></li></ul>
       </div>
 
       <div class="pager"><a href="./">← All Power Automate topics</a><a href="solution-flow-checker.html">Solution checker and flow checker →</a></div>
@@ -105,7 +82,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#types">Managed vs unmanaged</a></li><li><a href="#layers">Layers</a></li><li><a href="#upgrades">Shipping new versions</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#types">Managed vs unmanaged</a></li><li><a href="#layers">Layers: what actually runs</a></li><li><a href="#upgrades">Shipping new versions</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

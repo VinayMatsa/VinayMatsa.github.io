@@ -49,35 +49,28 @@
       </div>
 
       <div class="prose">
-<p>The run history page shows one flow at a time. Admins need the opposite view: every run in an environment, failures across all flows, the slowest ones. For solution flows, Dataverse already stores this in the <strong>FlowRun</strong> table, and a flow can read it like any other table.</p>
+<p>Run history shows one flow at a time. Admins need every run in an environment: failures across all flows, the slowest ones. For solution flows, Dataverse stores this in the <strong>FlowRun</strong> table, and a flow can read it.</p>
 
-<h2 id="demo">A weekly health summary, built with a flow</h2>
+<h2 id="demo"><span class="ico ico-data"></span>A weekly health summary, built with a flow</h2>
+<div class="cards"><div><strong>What</strong>List rows on the <em>flowruns</em> table, then filter and count.</div><div><strong>Why</strong>One report for every flow, without opening run histories.</div><div><strong>Demo</strong>The last 7 days in the demo environment.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The demo flow</p><div class="fl"><div class="nd act"><strong>List flow runs</strong>: <code>starttime ge addDays(utcNow(),-7)</code></div><div class="ar"></div><div class="br"><div><span class="lbl c">Failed runs</span><div class="nd">Filter <code>status = Failed</code></div></div><div><span class="lbl c">Durations</span><div class="nd">Select <code>duration</code></div></div><div><span class="lbl c">Flows with failures</span><div class="nd">Select <code>_workflow_value</code></div></div></div><div class="ar"></div><div class="nd ok"><strong>Run summary</strong></div></div></div>
 <figure class="shot"><img src="../assets/img/pa/l10-runs-canvas.webp" alt="Flow canvas: Manually trigger a flow, List flow runs, Failed runs, Durations, Flows with failures, Run summary" width="220" height="514" loading="lazy">
-<figcaption>One Dataverse call, then data operations.</figcaption></figure>
+<figcaption>The flow.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l10-runs-code.webp" alt="Code view of List flow runs: ListRecords on entityName flowruns, $select status, starttime, duration, triggertype, _workflow_value, $filter starttime ge addDays(utcNow(),-7), $orderby starttime desc, $top 5000" width="600" height="178" loading="lazy">
-<figcaption>List rows on the flowruns table for the last seven days.</figcaption></figure>
+<figcaption>List rows on flowruns.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-data"></span>The summary</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Measure</th><th>Value</th><th class="hide-sm"></th></tr></thead><tbody><tr><td>Runs in last 7 days</td><td><span class="chip ">70</span></td><td class="hide-sm"><div class="bar"><i style="width:100%"></i></div></td></tr><tr><td>Failed</td><td><span class="chip warn">7</span></td><td class="hide-sm"><div class="bar"><i style="width:10%"></i></div></td></tr><tr><td>Flows with at least one failure</td><td><span class="chip ">6</span></td><td class="hide-sm"></td></tr><tr><td>Success rate</td><td><span class="chip ok">90%</span></td><td class="hide-sm"><div class="bar done"><i style="width:90%"></i></div></td></tr><tr><td>Longest run</td><td><span class="chip ">797,523 ms ≈ 13 min</span></td><td class="hide-sm"></td></tr></tbody></table></div></div>
 <figure class="shot"><img src="../assets/img/pa/l10-runs-summary.webp" alt="Run summary output: Runs in last 7 days 70, Failed 7, Flows with at least one failure 6, Success rate 90, Longest run 797523 ms" width="618" height="200" loading="lazy">
-<figcaption>70 runs, 90% success, and the longest run took about 13 minutes.</figcaption></figure>
+<figcaption>The summary.</figcaption></figure>
 <pre><code>length(union(body(&#x27;Flows_with_failures&#x27;), body(&#x27;Flows_with_failures&#x27;)))</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>Flows_with_failures</code></td><td>A Select that keeps only <code>_workflow_value</code> (the flow's ID) from each failed run.</td></tr><tr><td><code>union(x, x)</code></td><td>Removes duplicate IDs.</td></tr><tr><td><code>length(...)</code></td><td>How many different flows failed at least once.</td></tr></tbody></table></div>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>union(x, x)</code></td><td>Removes duplicate flow IDs.</td></tr><tr><td><code>length(...)</code></td><td>How many different flows failed.</td></tr></tbody></table></div>
 <pre><code>div(mul(100, sub(total, failed)), total)</code></pre>
-<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>sub(total, failed)</code></td><td>Runs that didn't fail.</td></tr><tr><td><code>mul(100, ...)</code></td><td>Multiply first, so integer division doesn't round to zero.</td></tr><tr><td><code>div(..., total)</code></td><td>The success rate as a whole percentage. The demo wraps it in an <code>if()</code> to avoid dividing by zero.</td></tr></tbody></table></div>
-<p>Add a Recurrence trigger and a Teams post, and this becomes a weekly health report. Useful columns on each run: <code>status</code>, <code>starttime</code>, <code>endtime</code>, <code>duration</code> (milliseconds), <code>triggertype</code>, <code>errorcode</code>, <code>errormessage</code>, and <code>_workflow_value</code> to link to the flow.</p>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th>Piece</th><th>What it does</th></tr></thead><tbody><tr><td><code>mul(100, …) first</code></td><td>So integer division doesn't round to zero.</td></tr><tr><td><code>div(…, total)</code></td><td>Success rate as a whole percentage.</td></tr></tbody></table></div>
 
-<h2 id="facts">What to know about FlowRun</h2>
-<ul>
-<li>Only <strong>solution</strong> flows get their runs stored here.</li>
-<li>Records are kept for <strong>28 days</strong> by default, set by <code>FlowRunTimeToLiveInSeconds</code> on the Organization table. They use Dataverse database storage.</li>
-<li>It's an elastic table, built for volume; normal Dataverse security roles control who can read it.</li>
-</ul>
+<h2 id="facts"><span class="ico ico-clock"></span>What to know about FlowRun</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-clock"></span>Fact</th><th>Detail</th></tr></thead><tbody><tr><td>Which flows</td><td>Only <strong>solution</strong> flows</td></tr><tr><td>Retention</td><td>28 days by default (<code>FlowRunTimeToLiveInSeconds</code> on Organization)</td></tr><tr><td>Storage</td><td>Uses Dataverse database capacity</td></tr><tr><td>Table type</td><td>Elastic table; normal security roles apply</td></tr></tbody></table></div>
 
-<h2 id="tenant">Across the tenant</h2>
-<ul>
-<li><strong>Automation center</strong> (Level 6): failures and recommendations for the flows you can see.</li>
-<li><strong>Power Platform admin center analytics</strong>: usage and error trends per environment.</li>
-<li><strong>CoE Starter Kit</strong>: a free set of solutions that inventories every flow, app and maker into Dataverse, with dashboards and clean-up processes.</li>
-<li><strong>PowerShell admin cmdlets</strong>: list, disable or reassign flows in bulk:</li>
-</ul>
+<h2 id="tenant"><span class="ico ico-scope"></span>Across the tenant</h2>
+<div class="cards"><div><strong><span class="ico ico-data"></span>Automation center</strong>Failures and recommendations for flows you can see (Level 6).</div><div><strong><span class="ico ico-check"></span>Admin center analytics</strong>Usage and error trends per environment.</div><div><strong><span class="ico ico-scope"></span>CoE Starter Kit</strong>Inventories every flow, app and maker, with dashboards.</div><div><strong><span class="ico ico-expr"></span>PowerShell</strong>List, disable or reassign flows in bulk.</div></div>
 <pre><code># Admin module: Install-Module Microsoft.PowerApps.Administration.PowerShell
 Add-PowerAppsAccount
 
@@ -89,21 +82,9 @@ Get-AdminFlow -EnvironmentName &lt;environment id&gt; |
 Disable-AdminFlow -EnvironmentName &lt;environment id&gt; -FlowName &lt;flow id&gt;</code></pre>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Elastic table</strong>: a Dataverse table type for very large, fast-growing data such as logs.</p>
-<p><strong>Inventory</strong>: a complete list of what exists, with owners, so nothing is forgotten.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Make sure the flows you care about are in solutions.</li><li>Build a flow with <strong>List rows</strong> on <em>Flow Runs</em>, filtered to the last 7 days.</li><li>Filter failures, count them, and compute a success rate and the longest duration.</li><li>Post the summary to a Teams channel on a weekly Recurrence.</li><li>For tenant-wide inventory, install the CoE Starter Kit in a dedicated environment.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Expecting non-solution flows in FlowRun.</li>
-<li>Raising the retention a lot without checking storage capacity.</li>
-<li>Reporting only failures. A flow that silently stopped running has no failures at all: also check flows with no runs.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/cloud-flow-run-metadata">Manage cloud flow run history in Dataverse</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/analytics-flow">View analytics for cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/guidance/coe/starter-kit">Center of Excellence (CoE) Starter Kit</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/powerapps-powershell">PowerShell support for Power Apps and Power Automate</a></li></ul>
+<div class="layer-body"><p><strong>Elastic table</strong>: a Dataverse table type for large, fast-growing data such as logs.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Expecting non-solution flows in FlowRun.</li><li>Raising retention without checking storage.</li><li>Reporting only failures: also check flows with no runs.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/dataverse/cloud-flow-run-metadata">Manage cloud flow run history in Dataverse</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/analytics-flow">View analytics for cloud flows</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/guidance/coe/starter-kit">Center of Excellence (CoE) Starter Kit</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/admin/powerapps-powershell">PowerShell support for Power Apps and Power Automate</a></li></ul>
       </div>
 
       <div class="pager"><a href="environment-strategy-managed.html">← Environment strategy and Managed Environments</a><a href="./">Back to all topics →</a></div>

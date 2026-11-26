@@ -49,44 +49,33 @@
       </div>
 
       <div class="prose">
-<p>Two checkers look at your work before it goes anywhere. <strong>Flow checker</strong> runs inside the designer and checks one flow. <strong>Solution checker</strong> runs a static analysis over a whole solution, including the solution's own metadata. Both are free and quick; run them before every export.</p>
+<p>Two free checkers look at your work before it goes anywhere: <strong>flow checker</strong> for one flow in the designer, and <strong>solution checker</strong> for a whole solution, including its metadata.</p>
 
-<h2 id="flow">Flow checker</h2>
-<p>The stethoscope icon in the designer's toolbar opens it. It lists <strong>errors</strong> (the flow can't be saved or will fail) and <strong>warnings</strong> (it works, but there's a better way). To show it, the demo removed the <em>From</em> value of a Filter array without saving:</p>
+<h2 id="which"><span class="ico ico-check"></span>Two checkers, two scopes</h2>
+<div class="cards"><div><strong>What</strong>Static analysis: errors and warnings found without running anything.</div><div><strong>Why</strong>A missing dependency found in Dev costs minutes; found at import, it costs a failed deployment.</div><div><strong>Demo</strong>A removed value in one flow, and a connection reference missing from the solution.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>Before every export</p><div class="fl"><div class="nd act">Each changed flow: <strong>Flow checker</strong> → fix errors</div><div class="ar"></div><div class="nd">Solution: <strong>Solution checker → Run</strong></div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Critical/High issues or missing dependencies?</div><div class="ar"></div><div class="br"><div><span class="lbl f">Yes</span><div class="nd mute">Fix, run again</div></div><div><span class="lbl t">No</span><div class="nd ok">Export (with “Run solution checker on export”)</div></div></div></div></div>
+
+<h2 id="flow"><span class="ico ico-warn"></span>Flow checker</h2>
 <figure class="shot"><img src="../assets/img/pa/l10-flow-checker.webp" alt="Flow checker panel: Errors 1, Operation errors, Failed runs, Parameter errors: &#x27;From&#x27; is required. The Failed runs card on the canvas shows Invalid parameters" width="875" height="320" loading="lazy">
-<figcaption>Each finding links straight to the action with Open operation.</figcaption></figure>
-<p>Warnings typically cover things like an action in a loop that could be outside it, or a deprecated action version. Fix errors before saving; treat warnings as a checklist.</p>
+<figcaption>Removing a required value (not saved) shows an error with Open operation.</figcaption></figure>
+<p><strong>Errors</strong> stop the flow saving or working; <strong>warnings</strong> are better-practice hints.</p>
 
-<h2 id="solution">Solution checker</h2>
-<p>In <strong>Solutions</strong>, select the solution, then <strong>Solution checker &gt; Run</strong>. It takes a few minutes. The demo ran it on the website's demo solution:</p>
+<h2 id="solution"><span class="ico ico-data"></span>Solution checker</h2>
 <figure class="shot"><img src="../assets/img/pa/l10-checker-results.webp" alt="Solution checker results: four Medium issues in category Design, type Configuration, reference meta-include-missingunmanageddependencies. The solution.xml contains an unmanaged dependency" width="1425" height="320" loading="lazy">
-<figcaption>Four findings, all the same rule.</figcaption></figure>
-<p>The full message says the solution depends on a <strong>connection reference that isn't in the solution</strong>, and that it <em>will fail to import</em> in another environment. Three demo flows used a Dataverse connection reference created outside the solution. Export catches the same problem:</p>
+<figcaption>Four findings, one rule.</figcaption></figure>
+<div class="viz"><p class="viz-title"><span class="ico ico-check"></span>What it found and what export said</p><div class="table-wrap"><table class="breakdown trace"><thead><tr><th>Where</th><th>Finding</th></tr></thead><tbody><tr><td>Solution checker</td><td><span class="chip warn">Medium</span> unmanaged dependency on a connection reference not in the solution</td></tr><tr><td>Export wizard</td><td>Missing required component: a Dataverse connection reference</td></tr><tr><td>Fix</td><td>Add existing → Connection reference (or Add required objects), run again</td></tr></tbody></table></div></div>
 <figure class="shot"><img src="../assets/img/pa/l10-export-missing.webp" alt="Missing required unmanaged components: Microsoft Dataverse connection reference, used by Demo – Dataverse row trigger, with Add to solution and Skip step buttons" width="644" height="245" loading="lazy">
-<figcaption>The export wizard offers to add the missing component.</figcaption></figure>
+<figcaption>Export catches the same problem.</figcaption></figure>
 <figure class="shot"><img src="../assets/img/pa/l10-export-dependencies.webp" alt="Managed solution dependencies: Power Automate Online, MicrosoftFlowExtensionsOnline 1.10.24.1. Import will fail if these managed solutions do not exist in the target" width="644" height="220" loading="lazy">
-<figcaption>It also lists managed solutions the target environment must already have.</figcaption></figure>
-<p>The fix is <strong>Add existing &gt; Connection reference</strong> (or <em>Add required objects</em> on the flow), then run the checker again.</p>
+<figcaption>Managed solutions the target must already have.</figcaption></figure>
 
-<h2 id="enforce">Making it mandatory</h2>
-<p>In a <strong>Managed Environment</strong>, admins can set solution checker enforcement to <em>Warn</em> or <em>Block</em>, so imports with critical issues are flagged or refused. In pipelines, the build tools include a checker task that can fail the build.</p>
+<h2 id="enforce"><span class="ico ico-stop"></span>Making it mandatory</h2>
+<p>In a <strong>Managed Environment</strong>, admins can set solution checker enforcement to Warn or Block on import. Pipelines' checker task can fail a build.</p>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>Static analysis</strong>: checking something without running it, by reading its definition against a set of rules.</p>
-<p><strong>Dependency</strong>: something an object needs to work, such as a connection reference a flow uses.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Open each flow you changed and run <strong>Flow checker</strong>. Fix every error.</li><li>In Solutions, run <strong>Solution checker</strong> on the solution and open the results.</li><li>Sort by severity. Fix Critical and High first; read each rule's reference link.</li><li>Add any missing dependencies to the solution, then run the checker again.</li><li>Export with <em>Run solution checker on export</em> left on.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Skipping the "missing components" step in the export wizard. The import into test fails later, with a less helpful message.</li>
-<li>Creating connection references from the designer outside a solution. Create them inside the solution.</li>
-<li>Treating "no flow checker errors" as "the flow is right". It checks structure, not your business logic.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-automate/error-checker">Find and fix errors with flow checker</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/use-powerapps-checker">Use solution checker</a></li></ul>
+<div class="layer-body"><p><strong>Dependency</strong>: something an object needs to work.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>Skipping the missing-components step.</li><li>Connection references created outside the solution.</li><li>Treating no errors as “the logic is right”.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-automate/error-checker">Find and fix errors with flow checker</a></li><li><a href="https://learn.microsoft.com/en-us/power-apps/maker/data-platform/use-powerapps-checker">Use solution checker</a></li></ul>
       </div>
 
       <div class="pager"><a href="managed-unmanaged-layers.html">← Managed and unmanaged solutions, layers and upgrades</a><a href="source-control-cli.html">Source control with Git and the Power Platform CLI →</a></div>
@@ -95,7 +84,7 @@
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#flow">Flow checker</a></li><li><a href="#solution">Solution checker</a></li><li><a href="#enforce">Making it mandatory</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#which">Two checkers, two scopes</a></li><li><a href="#flow">Flow checker</a></li><li><a href="#solution">Solution checker</a></li><li><a href="#enforce">Making it mandatory</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>

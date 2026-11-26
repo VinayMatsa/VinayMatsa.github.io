@@ -49,19 +49,16 @@
       </div>
 
       <div class="prose">
-<p>Power Platform pipelines (Level 6) give makers one-click deployments. When IT wants deployments that run from a repository, with approvals, tests and audit trails like the rest of their software, they use <strong>Azure DevOps</strong> or <strong>GitHub Actions</strong> with Microsoft's Power Platform build tools. The tasks call the same operations as <code>pac</code>.</p>
+<p>When IT wants deployments that run from a repository, with approvals, checks and audit trails, they use <strong>Azure DevOps</strong> or <strong>GitHub Actions</strong> with the Power Platform build tools.</p>
 
-<h2 id="shape">The usual shape</h2>
-<ol>
-<li><strong>Export</strong> the unmanaged solution from development and unpack it into the repository (a commit others can review).</li>
-<li><strong>Build</strong>: pack a managed zip from the repository and run solution checker on it.</li>
-<li><strong>Release</strong>: import the managed zip into test with that environment's deployment settings; after approval, the same zip into production.</li>
-</ol>
+<h2 id="shape"><span class="ico ico-arrow"></span>The pipeline shape</h2>
+<div class="cards"><div><strong>What</strong>Pipelines that export, check, pack and deploy solutions using a service principal.</div><div><strong>Why</strong>The same tested artifact reaches Prod, every time, with a record of who approved it.</div><div><strong>Demo</strong>Export to Git, build a managed zip, deploy to Test then Prod.</div></div>
+<div class="viz"><p class="viz-title"><span class="ico ico-arrow"></span>Export → build → release</p><div class="fl"><div class="nd act"><strong>Export</strong> unmanaged from Dev → unpack → commit</div><div class="ar"></div><div class="nd"><strong>Build</strong>: pack managed zip + solution checker</div><div class="ar"></div><div class="nd"><strong>Release to Test</strong> with test settings</div><div class="ar"></div><div class="nd dec"><span class="ico ico-cond"></span>Approved?</div><div class="ar"></div><div class="nd ok"><strong>Release to Prod</strong>: the same zip</div></div></div>
 
-<h2 id="auth">Signing in without a person</h2>
-<p>Pipelines sign in with an <strong>app registration</strong> (service principal) in Microsoft Entra ID, added as an <em>application user</em> in each environment with a security role that can import solutions. In Azure DevOps that becomes a <em>service connection</em>; in GitHub, variables and a secret. Prefer workload identity federation (no stored secret) where your tools support it.</p>
+<h2 id="auth"><span class="ico ico-stop"></span>Signing in without a person</h2>
+<div class="viz"><p class="viz-title"><span class="ico ico-stop"></span>Pipeline identity</p><div class="fl"><div class="nd">App registration (service principal) in Entra ID</div><div class="ar"></div><div class="nd">Application user in each environment, minimal role</div><div class="ar"></div><div class="nd ok">Azure DevOps service connection / GitHub variables + secret</div></div><p class="viz-note">Prefer workload identity federation (no stored secret) where supported.</p></div>
 
-<h2 id="ado">Azure DevOps</h2>
+<h2 id="ado"><span class="ico ico-scope"></span>Azure DevOps</h2>
 <pre><code># azure-pipelines.yml: export, check and store a solution
 trigger: none
 pool:
@@ -83,8 +80,7 @@ steps:
   inputs:
     targetPath: $(Build.ArtifactStagingDirectory)
     artifact: solution</code></pre>
-
-<h2 id="github">GitHub Actions</h2>
+<h2 id="github"><span class="ico ico-scope"></span>GitHub Actions</h2>
 <pre><code># .github/workflows/export-solution.yml
 name: Export solution to Git
 on: workflow_dispatch
@@ -108,32 +104,15 @@ jobs:
         solution-folder: src/ContosoRequests
         solution-type: Unmanaged
         overwrite-files: true</code></pre>
-<p>The <code>${{ }}</code> parts read repository variables and secrets, so no credentials sit in the file.</p>
+<p>The <code>${{ … }}</code> parts read repository variables and secrets, so no credentials sit in the file.</p>
 
-<h2 id="flows">Flow-specific points</h2>
-<ul>
-<li>Flows import <strong>off</strong> if their connection references have no connection. Deployment settings fix that, or a post-import step turns them on.</li>
-<li>The account that owns imported flows is the pipeline's identity unless you change it. Plan who should own production flows (Level 6, service accounts).</li>
-<li>Run a smoke test after release: trigger a test flow and check its run succeeded.</li>
-</ul>
+<h2 id="flows"><span class="ico ico-warn"></span>Flow-specific points</h2>
+<div class="table-wrap"><table class="breakdown"><thead><tr><th><span class="ico ico-warn"></span>Point</th><th>Do</th></tr></thead><tbody><tr><td>Flows import off without connections</td><td>Use deployment settings, or turn them on after import</td></tr><tr><td>Imported flows are owned by the pipeline identity</td><td>Plan production ownership (Level 6)</td></tr><tr><td>Smoke test</td><td>Trigger a test flow and check the run succeeded</td></tr></tbody></table></div>
 
 <details class="layer basics"><summary>New to this? Start from the basics <span>optional</span></summary>
-<div class="layer-body"><p><strong>CI/CD</strong>: continuous integration and delivery. Every change is built, checked and deployed by an automated pipeline instead of by hand.</p>
-<p><strong>YAML</strong>: the text format used to describe pipeline steps.</p>
-<p><strong>Service principal</strong>: an identity for an app or pipeline, not a person.</p></div></details>
-
-<details class="layer"><summary>Build it step by step <span>optional</span></summary>
-<div class="layer-body"><ol><li>Create an app registration and add it as an application user in dev, test and prod.</li><li>Create the service connection (Azure DevOps) or variables and secret (GitHub).</li><li>Start with an export pipeline that unpacks into the repository. Run it manually.</li><li>Add a build pipeline that packs a managed zip and runs the checker.</li><li>Add release stages for test and production, with an approval before production.</li></ol></div></details>
-
-<h2 id="mistakes">Common mistakes</h2>
-<ul class="mistakes">
-<li>Giving the service principal System Administrator everywhere because it's easier.</li>
-<li>Building a different zip for production than the one that was tested. Promote the same artifact.</li>
-<li>Forgetting that flows can arrive turned off.</li>
-</ul>
-
-<h2 id="references">References</h2>
-<ul><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/devops-build-tools">Power Platform Build Tools for Azure DevOps</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/devops-github-actions">GitHub Actions for Power Platform</a></li></ul>
+<div class="layer-body"><p><strong>CI/CD</strong>: every change built, checked and deployed automatically.</p><p><strong>Service principal</strong>: an identity for an app or pipeline.</p></div></details>
+<h2 id="mistakes">Common mistakes</h2><ul class="mistakes"><li>System Administrator for the service principal everywhere.</li><li>Building a different zip for Prod than the one tested.</li><li>Forgetting flows can arrive turned off.</li></ul>
+<h2 id="references">References</h2><ul><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/devops-build-tools">Power Platform Build Tools for Azure DevOps</a></li><li><a href="https://learn.microsoft.com/en-us/power-platform/alm/devops-github-actions">GitHub Actions for Power Platform</a></li></ul>
       </div>
 
       <div class="pager"><a href="source-control-cli.html">← Source control with Git and the Power Platform CLI</a><a href="environment-strategy-managed.html">Environment strategy and Managed Environments →</a></div>
@@ -142,7 +121,7 @@ jobs:
     <aside class="sidebar">
       <nav class="side-box" aria-label="On this page">
         <h2>On this page</h2>
-        <ol><li><a href="#shape">The usual shape</a></li><li><a href="#auth">Signing in without a person</a></li><li><a href="#ado">Azure DevOps</a></li><li><a href="#github">GitHub Actions</a></li><li><a href="#flows">Flow-specific points</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
+        <ol><li><a href="#shape">The pipeline shape</a></li><li><a href="#auth">Signing in without a person</a></li><li><a href="#ado">Azure DevOps</a></li><li><a href="#github">GitHub Actions</a></li><li><a href="#flows">Flow-specific points</a></li><li><a href="#mistakes">Common mistakes</a></li><li><a href="#references">References</a></li></ol>
       </nav>
       <div class="side-box">
         <strong>How to read these</strong>
